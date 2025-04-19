@@ -1,0 +1,107 @@
+.dashboard-container {
+    padding: 30px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    /* z-index: -1; */
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 3rem; /* Increased font size */
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  .dashboard-header p {
+    font-size: 1.3rem; /* Increased font size */
+    color: #666;
+  }
+  
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* Ensure 4 cards per row */
+    gap: 25px;
+    margin-top: 40px;
+  }
+  
+  .dashboard-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .dashboard-card i {
+    font-size: 2rem; /* Increased icon size */
+    color: #722f7f;
+    margin-bottom: 15px;
+  }
+  
+  .dashboard-card h3 {
+    font-size: 1.0rem; /* Increased font size */
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  
+  .dashboard-card p {
+    font-size: 10px; /* Increased font size */
+    color: #777;
+  }
+  
+  .dashboard-card p:last-child {
+    font-size: 1rem; /* Increased font size */
+    font-weight: 500;
+    color: #555;
+    margin: 0;
+  }
+  
+  .dashboard-card p:hover {
+    color: #EC008C;
+    cursor: pointer;
+  }
+  
+  .dashboard-card a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  @media (max-width: 1024px) {
+    .dashboard-cards {
+      grid-template-columns: repeat(4, 1fr); /* 4 cards per row on medium screens */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-cards {
+      grid-template-columns: repeat(2, 1fr); /* 2 cards per row on smaller screens */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .dashboard-header h1 {
+      font-size: 2.2rem; /* Increased font size for small screens */
+    }
+  
+    .dashboard-header p {
+      font-size: 1.1rem; /* Increased font size for small screens */
+    }
+  
+    .dashboard-cards {
+      grid-template-columns: 1fr; /* 1 card per row on very small screens */
+    }
+  }
+  
