@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require("../../middleware/multer")
-const { createProduct, getAllProducts, typeProducts, changeStatus, getProductByID, updateProductByID, deleteProductByID, changeStockStatus, getAllProductsByType } = require('./products-controller');
+const { createProduct, getAllProducts, typeProducts, changeStatus, getProductByID, updateProductByID, deleteProductByID, changeStockStatus, getAllProductsByType ,searchProduct} = require('./products-controller');
 // const multer = require('multer')
 // const fs = require("fs")
 
@@ -39,7 +39,7 @@ router.post("/delete-product/:id", deleteProductByID);
 
 router.post("/get-all-products-by-type/:term", getAllProductsByType);
 
-
+router.get("/search-product/:term", searchProduct);
 
 // router.get("/get-all-products-for-store", getAllProductsForStore);
 
@@ -47,6 +47,6 @@ router.post("/get-all-products-by-type/:term", getAllProductsByType);
 
 // router.post("/get-product-for-cart", getProductForCart);
 
-// router.get("/search-product/:term", searchProduct);
+
 
 module.exports = router;

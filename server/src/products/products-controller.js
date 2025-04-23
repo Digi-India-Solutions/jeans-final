@@ -4,6 +4,9 @@ const ErrorHandler = require("../../utils/ErrorHandler");
 const fs = require('fs');
 const path = require("path");
 const Product = require("./products-model.js");
+const Category = require("../categorys/categorys-model.js")
+const Color = require("../colors/colors-model.js");
+const Size = require("../sizes/sizes-model.js");
 const { deleteImage, uploadImage } = require("../../middleware/Uploads.js");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder.js");
 
@@ -29,7 +32,7 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
         const parsedTypes = typeof type === "string" ? JSON.parse(type) : type;
         const parsedCategoryId = typeof categoryId === "string" ? JSON.parse(categoryId) : categoryId;
 
-        const newProduct = await Product.create({ productName, productDescription, categoryId: parsedCategoryId, Variant: parsedVariants, type: parsedTypes, images:imageUrls, });
+        const newProduct = await Product.create({ productName, productDescription, categoryId: parsedCategoryId, Variant: parsedVariants, type: parsedTypes, images: imageUrls, });
 
         res.status(200).json({ success: true, data: newProduct });
     } catch (error) {
@@ -101,7 +104,7 @@ exports.updateProductByID = catchAsyncErrors(async (req, res, next) => {
     const parsedTypes = typeof type === "string" ? JSON.parse(type) : type;
     const parsedCategoryId = typeof categoryId === "string" ? JSON.parse(categoryId) : categoryId;
 
-   
+
     const existingProduct = await Product.findById(productID);
     if (!existingProduct) {
         return next(new ErrorHandler("Product not found!", 404));
@@ -144,7 +147,7 @@ exports.deleteProductByID = catchAsyncErrors(async (req, res, next) => {
             for (let oldImage of productData.images) {
                 await deleteImage(oldImage);
             }
-    
+
         }
         const product = await Product.deleteOne({ _id: productID });
         res.status(200).json({ message: "Product deleted successfully", success: true, data: product });
@@ -176,6 +179,54 @@ exports.getAllProductsByType = catchAsyncErrors(async (req, res, next) => {
         res.status(500).json({ success: false, message: "Failed to fetch products by type", });
     }
 });
+
+exports.searchProduct = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { term } = req.params;
+
+        // Match category names
+        const matchingCategories = await Category.find({
+            name: { $regex: term, $options: 'i' }
+        }).select('_id');
+        const matchingCategoryIds = matchingCategories.map(cat => cat._id);
+
+        // Match color names
+        const matchingColors = await Color.find({
+            colorName: { $regex: term, $options: 'i' }
+        }).select('_id');
+        const matchingColorIds = matchingColors.map(c => c._id);
+
+        // Match size names
+        const matchingSizes = await Size.find({
+            size: { $regex: term, $options: 'i' }
+        }).select('_id');
+        const matchingSizeIds = matchingSizes.map(s => s._id);
+
+        // Build the search query
+        const query = {
+            $or: [
+                { productName: { $regex: term, $options: 'i' } },
+                { type: { $regex: term, $options: 'i' } },
+                { "Variant.finalPrice": !isNaN(term) ? Number(term) : undefined },
+                { categoryId: { $in: matchingCategoryIds } },
+                { "Variant.color": { $in: matchingColorIds } },
+                { "Variant.sizes": { $in: matchingSizeIds } },
+            ].filter(Boolean)
+        };
+
+        // Find and populate related fields
+        const products = await Product.find(query)
+            .populate("categoryId")
+            .populate("Variant.color")
+            .populate("Variant.sizes");
+
+        console.log("products:-------s", products.length)
+        sendResponse(res, 200, "Product Fetched Successfully", { products });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
 
 // exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
 //     try {
@@ -210,34 +261,3 @@ exports.getAllProductsByType = catchAsyncErrors(async (req, res, next) => {
 //     }
 // })
 
-// exports.searchProduct = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { term } = req.params;
-//         const { pageNumber } = req.query;
-//         const query = {
-//             $or: [
-//                 { name: { $regex: term, $options: 'i' } },
-//                 { uniqueProductId: { $regex: term, $options: 'i' } },
-//                 { price: { $regex: term, $options: 'i' } },
-//                 { imeiNo: { $regex: term, $options: 'i' } },
-//             ]
-//         }
-
-//         const totalProducts = await Product.countDocuments(query)
-
-//         const products = await Product.find(query)
-//             .sort({ createdAt: -1 })
-//             .skip((pageNumber - 1) * 15)
-//             .limit(15)
-//             .populate("accessories");
-
-
-//         sendResponse(res, 200, "Product Fetched Successfully", {
-//             products,
-//             totalProducts,
-//             totalPage: Math.ceil(totalProducts / 15)
-//         });
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })

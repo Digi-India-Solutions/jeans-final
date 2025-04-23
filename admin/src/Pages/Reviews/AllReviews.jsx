@@ -18,7 +18,8 @@ const AllReviews = () => {
         const fetchReviews = async () => {
             setIsLoading(true);
             try {
-                const response = await getData("api/products/get-all-reviews");
+                const response = await getData("api/review/get-all-review");
+                // console.log("SSSSSSXXXXXXXSSSSSSS:--", response);
                 if (response.success === true) {
                     setReviews(response?.reviews || []);
                 }
@@ -33,8 +34,11 @@ const AllReviews = () => {
         fetchReviews();
     }, []);
 
+    console.log("SSSSSSXXXXXXXSSSSSSS:--", reviews);
+
     // Handle review deletion
     const handleDelete = async (reviewId) => {
+        const id = reviewId;
         const confirm = await Swal.fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
@@ -46,7 +50,7 @@ const AllReviews = () => {
 
         if (confirm.isConfirmed) {
             try {
-                const data = await getData(`api/products/delete-reviews/${reviewId}`);
+                const data = await getData(`api/review/delete-reviews/${id}`);
                 if (data.success === true) {
                     setReviews(reviews.filter(review => review._id !== reviewId));
                     toast.success("Review deleted successfully!");
@@ -63,7 +67,7 @@ const AllReviews = () => {
         const updatedStatus = e.target.checked;
 
         try {
-            const response = await postData('api/products/change-review-status', { reviewId: reviewId, status: updatedStatus });
+            const response = await postData('api/review/change-review-status', { reviewId: reviewId, status: updatedStatus });
 
             if (response.success === true) {
                 const updatedReviews = reviews.map(review => {
@@ -83,9 +87,9 @@ const AllReviews = () => {
     };
 
     // Filter reviews based on search query
-    const filteredReviews = reviews?.filter((review) =>
-        review?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-    );
+    // const filteredReviews = reviews?.filter((review) =>
+    //     review?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+    // );
 
     return (
         <>
@@ -116,6 +120,7 @@ const AllReviews = () => {
                             <th>S No.</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Product Name</th>
                             <th>Profile Image</th>
                             <th>Description</th>
                             <th>Show on HomePage</th>
@@ -131,24 +136,29 @@ const AllReviews = () => {
                                     Loading...
                                 </td>
                             </tr>
-                        ) : filteredReviews.length === 0 ? (
+                        ) : reviews.length === 0 ? (
                             <tr>
                                 <td colSpan="8" className="text-center">
                                     No Reviews found.
                                 </td>
                             </tr>
                         ) : (
-                            filteredReviews?.map((review, index) => (
+                            reviews?.map((review, index) => (
                                 <tr key={review._id}>
                                     <td>{index + 1}</td>
-                                    <td>{review?.name}</td>
-                                    <td>{review?.email}</td>
+                                    <td>{review?.userId?.name}</td>
+                                    <td>{review?.userId?.email}</td>
+                                    <td>{review.productId?.productName}</td>
                                     <td>
-                                        <img
-                                            src={review?.profileImage ? `${review.profileImage}` : 'default-profile.jpg'}
-                                            alt="Review"
-                                            style={{ width: "50px", height: "50px", objectFit: "cover", marginRight: "5px" }}
-                                        />
+
+                                        {review.images?.slice(0, 4).map((img, i) => (
+                                            <img
+                                                key={i}
+                                                src={`${ img } `}
+                                                alt="Prod."
+                                                style={{ width: "50px", height: "50px", objectFit: "cover", marginRight: "5px" }}
+                                            />
+                                        ))}
                                     </td>
                                     <td>{review?.reviewText}</td>
                                     <td>

@@ -5,8 +5,8 @@ import Header from '../Header/Header'
 import Dashboard from '../../Pages/Dashboard/Dashboard'
 import AllProduct from '../../Pages/Products/AllProduct'
 import AddProduct from '../../Pages/Products/AddProduct'
-import AllVoucher from '../../Pages/Vouchers/AllVoucher'
-import CreateVoucher from '../../Pages/Vouchers/AddVoucher'
+import AllFaq from '../../Pages/Faq/AllFaq'
+import AddFaq from '../../Pages/Faq/AddFaq'
 import AllOrder from '../../Pages/Orders/AllOrder'
 import EditOrder from '../../Pages/Orders/EditOrder'
 import AllUsers from '../../Pages/Users/AllUsers'
@@ -31,7 +31,7 @@ import AddCoupen from '../../Pages/Coupen/AddCoupen'
 import AllCoupen from '../../Pages/Coupen/AllCoupen'
 import EditCoupen from '../../Pages/Coupen/EditCoupen'
 import AllReviews from '../../Pages/Reviews/AllReviews'
-import AllCart from '../../Pages/Cart/AllCart'
+import AllCard from '../../Pages/Card/AllCard'
 import ResetPassword from '../auth/ResetPassword'
 import { elements } from 'chart.js'
 import AllWishList from '../../Pages/WishList/AllWishList'
@@ -40,6 +40,8 @@ import ViewDetails from '../../Pages/RewardPoints/ViewDetails'
 import AllVideios from '../../Pages/VideoUrl/AllVideios'
 import AddVideos from '../../Pages/VideoUrl/AddVideios'
 import EditVideios from '../../Pages/VideoUrl/EditVideios'
+import ShowDetails from '../../Pages/Card/ShowDetails'
+import EditFaq from '../../Pages/Faq/EditFaq'
 
 const Home = () => {
 
@@ -84,9 +86,10 @@ const Home = () => {
                 {/* --- Orders --- */}
                 <Route path={"/all-users"} element={<AllUsers />} />
 
-                {/* --- Vouchers --- */}
-                <Route path={"/all-voucher"} element={<AllVoucher />} />   {/* // All Vouchers */}
-                <Route path={"/add-voucher"} element={<CreateVoucher />} />
+                {/* --- faq --- */}
+                <Route path={"/all-faq"} element={<AllFaq />} />   {/* // All Vouchers */}
+                <Route path={"/add-faq"} element={<AddFaq />} />
+                <Route path={"/edit-faq/:id"} element={<EditFaq />} />
 
 
 
@@ -105,9 +108,10 @@ const Home = () => {
 
                 {/* all-Reviews */}
                 <Route path={'all-reviews'} element={<AllReviews />} />
-                <Route path={'All-carts'} element={<AllCart />} />
+                <Route path={'all-cards'} element={<AllCard />} />
+                <Route path={'/show-detail'} element={<ShowDetails />} />
 
-                <Route path={"all-wishlist"} element={<AllWishList />} />
+                <Route path={"/all-wishlist"} element={<AllWishList />} />
                 <Route path={"all-rewardPoint"} element={<AllRewardPoint />} />
                 <Route path={"View-Details"} element={<ViewDetails />} />
                 {/* all-HomePage-Videos-Url */}

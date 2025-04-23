@@ -34,6 +34,11 @@ const userSchema = new Schema({
         trim: true,
         default: ""
     },
+    photo:{
+        type: String,
+        trim: true,
+        default: ""
+    },
     isActive: {
         type: Boolean,
         default: true,

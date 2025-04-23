@@ -26,6 +26,9 @@ const couponRoutes = require("./src/coupons/coupons-routes")
 const rewardPointsRoutes = require("./src/rewordsPoints/rewordsPoints-routes")
 const videosUrlRoutes = require("./src/videosUrl/videosUrl-routes")
 const orderRoutes = require("./src/orders/orders-routes");
+const cardRoutes = require("./src/addToCard/card-routers")
+const faqRoutes = require("./src/faq/faq-routes")
+const reviewRoutes = require("./src/Reviews/review-routes")
 
 app.use("/api/admin", superAdminRoutes);
 app.use("/api/banner", bannerRoutes);
@@ -37,8 +40,11 @@ app.use("/api/wishlist", wishListRoutes);
 app.use("/api/user", usersRoutes);
 app.use("/api/coupon", couponRoutes)
 app.use("/api/reward", rewardPointsRoutes)
-app.use("/api/video",videosUrlRoutes)
+app.use("/api/video", videosUrlRoutes)
 app.use("/api/order", orderRoutes);
+app.use("/api/card", cardRoutes)
+app.use("/api/faq", faqRoutes)
+app.use("/api/review", reviewRoutes)
 
 const connectDatabase = require("./db/database");
 

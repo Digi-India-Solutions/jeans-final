@@ -19,6 +19,7 @@ const Header = () => {
   const navItems = [
     { to: "/", label: "Dashboard", icon: "fa-solid fa-gauge" },
     { to: "/all-orders", label: "Manage Orders", icon: "fa-solid fa-truck" },
+    { to: "/all-cards", label: "All Cards", icon: "fa-solid fa-star" },
     { to: "/all-dieses", label: "All Category", icon: "fa-solid fa-virus" },
     { to: "/all-products", label: "All Products", icon: "fa-solid fa-boxes" },
     { to: "/all-banners", label: "Manage Banners", icon: "fa-solid fa-images" },
@@ -29,10 +30,9 @@ const Header = () => {
     { to: "/all-wishlist", label: "manage user wishlist", icon: "fa-solid fa-brain" },
     { to: "/all-rewardPoint", label: "Manage Reward Point", icon: "fa-solid fa-coins" },
     { to: "/all-videos", label: "Manage Videos", icon: "fa-solid fa-video" },
+    { to: "/all-faq", label: "Manage Faq", icon: "fa-solid fa-pen" },
+    { to: "/all-reviews", label: "All Reviews", icon: "fa-solid fa-star" },
 
-
-    // { to: "/all-reviews", label: "All Reviews", icon: "fa-solid fa-star" },
-    // { to: "/all-blogs", label: "All Blogs", icon: "fa-solid fa-pen" },
     // { to: "/news-letter", label: "News Letter", icon: "fa-solid fa-newspaper" },
   ];
 

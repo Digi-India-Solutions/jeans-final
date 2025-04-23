@@ -7,7 +7,9 @@ const Otp = require("../otp/otp-model");
 const sendToken = require("../../utils/jwtToken");
 const { sendOtpForUserSignup, sendResetPassword } = require("../../utils/mail");
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { uploadImage } = require("../../middleware/Uploads");
+const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
 
 exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -214,8 +216,78 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
     }
 })
 
+exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const { name, email, street, city, state, zipCode, country, phone } = req.body
+
+        let imageUrl = "";
+        if (req.file) {
+            imageUrl = await uploadImage(req.file.path);
+
+            deleteLocalFile(req.file.path);
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
+
+        if (!updatedUser) {
+            return next(new ErrorHandler("User Not Found", 404));
+        }
+
+        sendResponse(res, 200, "User Updated Successfully", updatedUser);
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
+
+exports.changePassword = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return next(new ErrorHandler("Current and new passwords are required", 400));
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return next(new ErrorHandler("User not found!", 404));
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return sendResponse(res, 401, "Incorrect current password");
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        sendResponse(res, 200, "Password changed successfully");
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+exports.updateUser = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const { name, email, street, city, state, zipCode, country, phone } = req.body
 
 
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, address: { street, city, state, zipCode, country, }, });
+
+        if (!updatedUser) {
+            return next(new ErrorHandler("User Not Found", 404));
+        }
+
+        sendResponse(res, 200, "User Updated Successfully", updatedUser);
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
 
 exports.searchUser = catchAsyncErrors(async (req, res, next) => {
     try {
