@@ -62,30 +62,30 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
     try {
         const { id } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ success: false, message: 'Invalid user ID' });
-        }
+        // if (!mongoose.Types.ObjectId.isValid(id)) {
+        //     return res.status(400).json({ success: false, message: 'Invalid user ID' });
+        // }
         let card = await Card.findOne({ user: id })
             .populate({ path: 'items.product', select: 'name images price finalPrice stock variant' })
             .populate({ path: 'user', select: 'name email' });
 
         console.log("XXXXXXXXXXX2", card)
-        if (!card) {
-            card = new Card({ user: id, items: [], totalAmount: 0, });
-            await card.save();
-        }
+        // if (!card) {
+        //     card = new Card({ user: id, items: [], totalAmount: 0, });
+        //     await card.save();
+        // }
 
-        // Filter out invalid or mismatched products/variants
-        card.items = card.items.filter(item => {
-            if (!item.product || !item.product.variant) return false;
+        // // Filter out invalid or mismatched products/variants
+        // card.items = card.items.filter(item => {
+        //     if (!item.product || !item.product.variant) return false;
 
-            return item.product.variant.some(variant => variant?.finalPrice === item?.price);
-        });
+        //     return item.product.variant.some(variant => variant?.finalPrice === item?.price);
+        // });
 
-        // Optional: update totalAmount based on filtered items
-        card.totalAmount = card.items.reduce((total, item) => total + item.price * item.quantity, 0);
+        // // Optional: update totalAmount based on filtered items
+        // card.totalAmount = card.items.reduce((total, item) => total + item.price * item.quantity, 0);
 
-        await card.save();
+        // await card.save();
 
         res.status(200).json({ success: true, card, });
     } catch (error) {
@@ -96,41 +96,52 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
 
 exports.updateCard = catchAsyncErrors(async (req, res) => {
     try {
-        const { userId, itemId, quantity } = req.body;
+        const { userId, itemId, action } = req.body;
 
         // Validate ObjectIds
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(itemId)) {
-            return res.status(400).json({ success: false, message: 'Invalid userId or itemId' });
+            return res.status(200).json({ success: false, message: 'Invalid userId or itemId' });
         }
 
-        // Fetch the user's cart
-        const cart = await Card.findOne({ user: userId });
+        // Fetch user's cart
+        const cart = await Card.findOne({ user: userId, items: { $elemMatch: { _id: itemId } } });
 
         if (!cart) {
-            return res.status(404).json({ success: false, message: 'Cart not found' });
+            return res.status(204).json({ success: false, message: 'Cart not found' });
         }
 
-        // Find the item in the cart
+        // Find item index
         const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
 
         if (itemIndex === -1) {
-            return res.status(404).json({ success: false, message: 'Item not found in cart' });
+            return res.status(204).json({ success: false, message: 'Item not found in cart' });
         }
+
+        const item = cart.items[itemIndex];
 
         // Fetch product to check stock
-        const product = await Product.findById(cart.items[itemIndex].product);
+        const product = await Product.findById(item.product);
 
         if (!product) {
-            return res.status(404).json({ success: false, message: 'Product not found' });
+            return res.status(204).json({ success: false, message: 'Product not found' });
         }
 
-        if (product.stock < quantity) {
-            return res.status(400).json({ success: false, message: `Not enough stock. Available: ${product.stock}` });
+        // Update quantity based on action
+        if (action === "increase") {
+            if (item.quantity + 1 > product.stock) {
+                return res.status(200).json({ success: false, message: `Cannot exceed stock. Available: ${product.stock}` });
+            }
+            item.quantity += 1;
+        } else if (action === "decrease") {
+            if (item.quantity === 1) {
+                return res.status(200).json({ success: false, message: 'Quantity cannot be less than 1' });
+            }
+            item.quantity -= 1;
+        } else {
+            return res.status(200).json({ success: false, message: 'Invalid action. Use "increase" or "decrease"' });
         }
 
-        // Update item quantity
-        cart.items[itemIndex].quantity = quantity;
-        cart.items[itemIndex].status = "pending";
+        item.status = "pending";
 
         // Recalculate total amount
         cart.totalAmount = cart.items.reduce(

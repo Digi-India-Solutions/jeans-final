@@ -8,7 +8,7 @@ router.post("/add-to-cart", AddToCard)
 
 router.get("/get-card-by-user-id/:id", getCardById)
 
-router.post("/update-card/:id", updateCard)
+router.post("/update-card", updateCard)
 
 router.post("/delete-from-cart", deleteFromCart)
 
