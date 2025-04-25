@@ -8,7 +8,7 @@ exports.AddToCard = catchAsyncErrors(async (req, res) => {
     try {
         const { user, items, totalAmount, appliedCoupon } = req.body;
 
-        // console.log("Received Card Payload:", req.body);
+        console.log("Received Card Payload:", items[0].product);
 
         // Validate main fields
         if (!user || !Array.isArray(items) || items.length === 0 || !totalAmount) {
@@ -51,7 +51,10 @@ exports.AddToCard = catchAsyncErrors(async (req, res) => {
         }
         await card.save();
         await card.populate({ path: 'items.product', select: 'name images price finalPrice stock' });
-        res.status(200).json({ success: true, message: 'Card updated successfully', card });
+        console.log("XXXXXXXXXXX", card)
+        const updatedCard = card?.items?.filter(item => item?.product?._id == items[0]?.product)
+        console.log("updatedCard", updatedCard)
+        res.status(200).json({ success: true, message: 'Card updated successfully', card: updatedCard });
     } catch (error) {
         console.error('Add to card error:', error);
         res.status(500).json({ success: false, message: 'Failed to update card', error: error.message });
