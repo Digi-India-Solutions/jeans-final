@@ -17,6 +17,7 @@ app.use("/Public", express.static(path.join(__dirname + "/Public")));
 const superAdminRoutes = require("./src/super-admin/super-admin-routes");
 const bannerRoutes = require("./src/banners/banners-routes");
 const productRoutes = require("./src/products/products-routes");
+const subProductRoutes = require("./src/subProducts/subProducts-routes");
 const categoryRoutes = require("./src/categorys/categorys.routes");
 const sizeRoutes = require("./src/sizes/sizes-routes");
 const colorRoutes = require("./src/colors/colors-routes");
@@ -33,6 +34,7 @@ const reviewRoutes = require("./src/Reviews/review-routes")
 app.use("/api/admin", superAdminRoutes);
 app.use("/api/banner", bannerRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/subProduct", subProductRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/size", sizeRoutes);
 app.use("/api/color", colorRoutes);

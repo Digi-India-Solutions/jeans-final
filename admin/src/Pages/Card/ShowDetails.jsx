@@ -62,11 +62,11 @@ const ShowDetails = () => {
                             className="border rounded-xl p-5 shadow hover:shadow-md transition duration-200 bg-white"
                         >
                             <div className="flex gap-4">
-                                <img src={item.product?.images?.[0]} alt="Product" style={{ width: 200, height: 200 }} className="w-28 h-28 object-cover rounded-lg border" />
+                                <img src={item.subProduct?.subProductImages?.[0]} alt="Product" style={{ width: 200, height: 200 }} className="w-28 h-28 object-cover rounded-lg border" />
 
                                 <div className="flex flex-col justify-between text-sm space-y-1">
-                                    <p><strong>Product ID:</strong> {item.product?._id}</p>
-                                    <p><strong>Product Name:</strong> {item.product?.productName}</p>
+                                    <p><strong>Product ID:</strong> {item.subProduct?._id}</p>
+                                    <p><strong>Product Name:</strong> {item.subProduct?.productId.productName}</p>
                                     <p><strong>Quantity:</strong> {item.quantity}</p>
                                     <p><strong>Price:</strong> ₹{item.price}</p>
                                     <p>

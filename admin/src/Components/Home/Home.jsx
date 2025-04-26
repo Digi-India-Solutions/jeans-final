@@ -42,6 +42,9 @@ import AddVideos from '../../Pages/VideoUrl/AddVideios'
 import EditVideios from '../../Pages/VideoUrl/EditVideios'
 import ShowDetails from '../../Pages/Card/ShowDetails'
 import EditFaq from '../../Pages/Faq/EditFaq'
+import AllSubProduct from '../../Pages/SubProduct/AllSubProduct'
+import AddSubProduct from '../../Pages/SubProduct/AddSubProduct'
+import EditSubProduct from '../../Pages/SubProduct/EditSubProduct'
 
 const Home = () => {
 
@@ -77,6 +80,11 @@ const Home = () => {
                 <Route path={"/all-products"} element={<AllProduct />} />
                 <Route path={"/add-product"} element={<AddProduct />} />
                 <Route path={"/edit-product/:id"} element={<EditProduct />} />
+
+                {/* Sub Product --  */}
+                <Route path={"/all-Sub-products"} element={<AllSubProduct />} />
+                <Route path={"/add-Sub-products"} element={<AddSubProduct />} />
+                <Route path={"/edit-Sub-products/:id"} element={<EditSubProduct />} />
 
                 {/* Category --  */}
                 <Route path={"/all-dieses"} element={<AllDieses />} />

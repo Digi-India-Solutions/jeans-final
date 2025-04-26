@@ -6,19 +6,21 @@ import 'react-toastify/dist/ReactToastify.css';
 import { getData, postData, serverURL } from '../../services/FetchNodeServices';
 import { Parser } from 'html-to-react';
 
-const AllProduct = () => {
+const AllSubProduct = () => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage] = useState(1);
-
+    console.log("responseresponseresponse", products);
     useEffect(() => {
         const fetchProducts = async () => {
             setIsLoading(true);
             try {
-                const response = await getData(`api/product/get-all-products-with-pagination?pageNumber=${currentPage}`);
+                const response = await getData(`api/subProduct/get-all-sub-products`);
+
                 if (response.success) {
                     setProducts(response.data || []);
+
                 }
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -43,7 +45,7 @@ const AllProduct = () => {
 
         if (confirm.isConfirmed) {
             try {
-                const data = await postData(`api/product/delete-product/${productId}`);
+                const data = await postData(`api/subProduct/delete-product/${productId}`);
                 if (data.success) {
                     setProducts(products.filter(product => product._id !== productId));
                     toast.success("Product deleted successfully!");
@@ -57,7 +59,6 @@ const AllProduct = () => {
 
     const handleTypeChange = async (e, productId) => {
         const Type = e.target.value;
-
         try {
             const response = await postData('api/product/change-type', {
                 productId,
@@ -81,7 +82,7 @@ const AllProduct = () => {
         const updatedStatus = e.target.checked;
 
         try {
-            const response = await postData('api/product/change-status', {
+            const response = await postData('api/subProduct/change-sub-status', {
                 productId,
                 status: updatedStatus
             });
@@ -102,7 +103,7 @@ const AllProduct = () => {
         const updatedStatus = e.target.checked;
 
         try {
-            const response = await postData('api/product/change-Stock-status', {
+            const response = await postData('api/subProduct/change-Stock-status', {
                 productId,
                 isActive: updatedStatus
             });
@@ -120,8 +121,8 @@ const AllProduct = () => {
         }
     };
 
-    const filteredProducts = products.filter(product =>
-        product.productName.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredProducts = products?.filter(product =>
+        product?.productId?.productName?.toLowerCase()?.includes(searchQuery?.toLowerCase())
     );
 
     const typeOptions = [
@@ -139,7 +140,7 @@ const AllProduct = () => {
                     <h4>All Product List</h4>
                 </div>
                 <div className="links">
-                    <Link to="/add-product" className="add-new">
+                    <Link to="/add-sub-products" className="add-new">
                         Add New <i className="fa-solid fa-plus"></i>
                     </Link>
                 </div>
@@ -153,10 +154,15 @@ const AllProduct = () => {
                             <th>Product Name</th>
                             <th>Category Name</th>
                             <th>Product Image</th>
-                            <th>Show on HomePage</th>
+                            <th>Product Description</th>
+                            {/* <th>Show on HomePage</th> */}
                             <th>In Stock</th>
                             <th>Type</th>
+                            <th>Color</th>
+                            <th>Size</th>
                             <th>Price</th>
+                            <th>Set</th>
+                            <th>Final Price</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -173,10 +179,10 @@ const AllProduct = () => {
                             filteredProducts.map((product, index) => (
                                 <tr key={product._id}>
                                     <td>{index + 1}</td>
-                                    <td>{product.productName}</td>
-                                    <td>{product?.categoryId?.map((n) => <div>{n?.name}</div>)}</td>
+                                    <td>{product.productId.productName}</td>
+                                    <td>{product?.productId?.categoryId?.map((n) => <div>{n?.name}</div>)}</td>
                                     <td>
-                                        {product.images?.slice(0, 4).map((img, i) => (
+                                        {product.subProductImages?.slice(0, 4).map((img, i) => (
                                             <img
                                                 key={i}
                                                 src={`${img}`}
@@ -185,13 +191,14 @@ const AllProduct = () => {
                                             />
                                         ))}
                                     </td>
-                                    <td>
+                                    <td>{Parser().parse(product?.productDescription)}</td>
+                                    {/* <td>
                                         <input
                                             type="checkbox"
                                             checked={product?.status}
                                             onChange={(e) => handleCheckboxChange(e, product._id)}
                                         />
-                                    </td>
+                                    </td> */}
                                     <td>
                                         <input
                                             type="checkbox"
@@ -199,14 +206,15 @@ const AllProduct = () => {
                                             onChange={(e) => handleCheckboxActiveChange(e, product?._id)}
                                         />
                                     </td>
-                                    <td>
-
-                                        {product?.type?.map((t) => <div>{t} ,</div>)}
-                                    </td>
+                                    <td>{product?.productId?.type?.map((t) => <div>{t} ,</div>)}</td>
+                                    <td>{product?.color}</td>
+                                    <td>{product?.sizes?.map((v, i) => <div key={i}>{v.size + " ,"}</div>)}</td>
                                     <td>{product?.price}</td>
+                                    <td>{product?.set}</td>
+                                    <td>{product?.finalPrice}</td>
 
                                     <td>
-                                        <Link to={`/edit-product/${product._id}`} className="bt edit">
+                                        <Link to={`/edit-sub-products/${product._id}`} className="bt edit">
                                             Edit <i className="fa-solid fa-pen-to-square"></i>
                                         </Link>
                                         &nbsp;
@@ -224,4 +232,4 @@ const AllProduct = () => {
     );
 };
 
-export default AllProduct;
+export default AllSubProduct;

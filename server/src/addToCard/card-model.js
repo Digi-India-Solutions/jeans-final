@@ -7,9 +7,9 @@ const cardSchema = new mongoose.Schema({
         required: true
     },
     items: [{
-        product: {
+        subProduct: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
+            ref: 'SubProduct',
             required: true
         },
         quantity: {
@@ -31,9 +31,13 @@ const cardSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    appliedCoupon: {
-        code: { type: String },
-        discount: { type: Number }
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
 }, { timestamps: true });
 

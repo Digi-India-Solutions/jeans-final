@@ -102,8 +102,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Welcome to Manovaidya Admin Panel</h1>
-        <p>Manage your Manovaidya store data from here!</p>
+        <h1>Welcome to Anibhavi Creation Admin Panel</h1>
+        <p>Manage your Anibhavi Creation store data from here!</p>
       </div>
 
       <div className="dashboard-cards">

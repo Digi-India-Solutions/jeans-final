@@ -1,27 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const upload = require("../../middleware/multer")
-const { createProduct, getAllProducts, typeProducts, changeStatus, getProductByID, updateProductByID, deleteProductByID, changeStockStatus, getAllProductsByType ,searchProduct} = require('./products-controller');
-// const multer = require('multer')
-// const fs = require("fs")
+const { createSubProduct, getAllProducts, typeProducts, changeStatus, getProductByID, updateProductByID, deleteProductByID, changeStockStatus, getAllProductsByType ,searchProduct} = require('./products-controller');
 
-// const dir = '../../Public'
-
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         if (!fs.existsSync(dir)) {
-//             fs.mkdirSync(dir, { recursive: true })
-//         }
-//         cb(null, dir)
-//     },
-//     filename: function (req, file, cb) {
-//         cb(null, Date.now() + file.originalname)
-//     }
-// })
-
-// const upload = multer({ storage: storage })
-
-router.post("/create-product", upload.array('productImages'), createProduct);
+router.post("/create-product", upload.array( 'productImages'), createSubProduct);
 
 router.get("/get-all-products-with-pagination", getAllProducts);
 
@@ -33,7 +15,7 @@ router.post("/change-Stock-status", changeStockStatus)
 
 router.get("/get_product_by_id/:id", getProductByID);
 
-router.post("/update-product/:id", upload.array('productImages'), updateProductByID);
+router.post("/update-product/:id", upload.array( 'productImages'), updateProductByID);
 
 router.post("/delete-product/:id", deleteProductByID);
 
