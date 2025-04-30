@@ -268,17 +268,17 @@ exports.deleteFromCart = catchAsyncErrors(async (req, res) => {
         const { userId, itemId } = req.body;
         // Validate ObjectIds
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(itemId)) {
-            return res.status(400).json({ success: false, message: 'Invalid userId or itemId' });
+            return res.status(200).json({ success: false, message: 'Invalid userId or itemId' });
         }
         // Find the user's cart
         const cart = await Card.findOne({ user: userId });
         if (!cart) {
-            return res.status(404).json({ success: false, message: 'Cart not found' });
+            return res.status(204).json({ success: false, message: 'Cart not found' });
         }
         // Check if item exists
-        const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
+        const itemIndex = cart.items.findIndex(item => item.subProduct.toString() === itemId);
         if (itemIndex === -1) {
-            return res.status(404).json({ success: false, message: 'Item not found in cart' });
+            return res.status(204).json({ success: false, message: 'Item not found in cart' });
         }
         // Remove the item
         cart.items.splice(itemIndex, 1);
