@@ -14,23 +14,23 @@ const orderSchema = new Schema({
     },
     products: [
         {
-            productId: {
+            productId: [{
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Product",
                 required: true,
-            },
-            productName: {
+            }],
+            productName: [{
                 type: String,
                 required: true,
-            },
-            price: {
+            }],
+            price: [{
                 type: Number,
                 required: true,
-            },
-            quantity: {
+            }],
+            quantity: [{
                 type: Number,
                 required: true,
-            },
+            }],
         },
     ],
     shippingAddress: {
