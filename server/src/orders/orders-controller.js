@@ -205,12 +205,13 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
             .populate("subProduct", )
            
 
-        sendResponse(res, 200, "Orders Fetched Successfully", {
-            totalOrders,
-            totalPages: Math.ceil(totalOrders / 15),
-            currentPage: parseInt(pageNumber, 10),
-            orders
-        });
+        // sendResponse(res, 200, "Orders Fetched Successfully", {
+        //     totalOrders,
+        //     totalPages: Math.ceil(totalOrders / 15),
+        //     currentPage: parseInt(pageNumber, 10),
+        //     orders
+        // });
+        res.status(200).json({ success: true, message: "Orders Fetched Successfully", totalOrders, orders, });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
