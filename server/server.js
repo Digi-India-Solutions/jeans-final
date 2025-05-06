@@ -53,6 +53,9 @@ const connectDatabase = require("./db/database");
 //connect db
 connectDatabase();
 // sendBillingToClient();
+app.use("/",(req,res)=>{
+ return res.send("app is running")
+})
 
 //create server//
 const server = app.listen(process.env.PORT || 8000, () => {
