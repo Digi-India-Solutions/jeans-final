@@ -83,7 +83,6 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     try {
         const totalOrders = await Order.countDocuments();
@@ -96,7 +95,6 @@ exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 })
-
 
 exports.getOrderByID = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -139,6 +137,28 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const userID = req.params.id;
+        const ExistingUser = await User.findById(userID);
+
+        if (!ExistingUser) {
+            return next(new ErrorHandler("User not found!", 400));
+        }
+
+        const orders = await Order.find({ userId: userID })
+            .sort({ createdAt: -1 })
+            .populate("userId", "name email")
+            .populate("products.subProduct")
+
+        // sendResponse(res, 200, "Orders Fetched Successfully", { orders });
+        res.status(200).json({ status: true, message: "Orders Fetched Successfully", orders });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
+
 
 // exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
 //     try {
@@ -171,33 +191,6 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 //         }
 
 //         sendResponse(res, 200, "Order deleted successfully", orderData);
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
-
-// exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { pageNumber } = req.query;
-//         const userID = req.params.id;
-
-//         const totalOrders = await Order.countDocuments({ userId: userID });
-
-//         const orders = await Order.find({ userId: userID })
-//             .sort({ createdAt: -1 })
-//             .skip((pageNumber - 1) * 15)
-//             .limit(15)
-//             .populate("userId", "name email")
-//             .populate("productId", "name price")
-//             .populate("accessoryId", "titel description price images");
-
-//         sendResponse(res, 200, "Orders Fetched Successfully", {
-//             totalOrders,
-//             totalPages: Math.ceil(totalOrders / 15),
-//             currentPage: parseInt(pageNumber, 10),
-//             orders
-//         });
 
 //     } catch (error) {
 //         return next(new ErrorHandler(error.message, 500));

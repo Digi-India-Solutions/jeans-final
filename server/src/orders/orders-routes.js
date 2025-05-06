@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { createOrder, getAllOrders, getOrderByID, changeStatus } = require("./orders-controller");
+const { createOrder, getAllOrders, getOrderByID, changeStatus,getAllOrdersByUser } = require("./orders-controller");
 
 
 router.post("/create-order", createOrder);
@@ -16,7 +16,7 @@ router.post("/change-status/:id", changeStatus)
 
 // router.post("/delete-order/:id", deleteOrderByID);
 
-// router.get("/get-all-orders-by-user/:id", getAllOrdersByUser);
+router.get("/get-all-orders-by-user/:id", getAllOrdersByUser);
 
 // router.get("/search-orders/:term", searchOrders);
 
