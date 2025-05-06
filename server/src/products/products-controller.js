@@ -197,27 +197,32 @@ exports.getAllProductsByType = catchAsyncErrors(async (req, res, next) => {
 
 exports.searchProduct = catchAsyncErrors(async (req, res, next) => {
     const { term } = req.params;
+
     try {
-        // Search matching categories
+        // Find matching categories by name
         const matchingCategories = await Category.find({
             name: { $regex: term, $options: 'i' }
         }).select('_id');
 
         const matchingCategoryIds = matchingCategories.map(cat => cat._id);
+
         const searchConditions = [
             { productName: { $regex: term, $options: 'i' } },
-            { type: { $regex: term, $options: 'i' } },
-            { price: { $regex: term, $options: 'i' } },
+            { type: { $regex: term, $options: 'i' } }
         ];
 
-        if (!isNaN(term)) {
+        // If term is a number, search for exact price match
+        if (!isNaN(Number(term))) {
             searchConditions.push({ price: Number(term) });
         }
 
+        // If categories match, include categoryId condition
         if (matchingCategoryIds.length > 0) {
             searchConditions.push({ categoryId: { $in: matchingCategoryIds } });
         }
+
         const products = await Product.find({ $or: searchConditions }).populate("categoryId");
+
         sendResponse(res, 200, "Product Fetched Successfully", { products });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
