@@ -195,23 +195,12 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
         const { pageNumber } = req.query;
         const userID = req.params.id;
 
-        const totalOrders = await Order.countDocuments({ userId: userID });
-
         const orders = await Order.find({ userId: userID })
             .sort({ createdAt: -1 })
-            .skip((pageNumber - 1) * 15)
-            .limit(15)
             .populate("userId", "name email")
-            .populate("subProduct", )
-           
-
-        // sendResponse(res, 200, "Orders Fetched Successfully", {
-        //     totalOrders,
-        //     totalPages: Math.ceil(totalOrders / 15),
-        //     currentPage: parseInt(pageNumber, 10),
-        //     orders
-        // });
-        res.status(200).json({ success: true, message: "Orders Fetched Successfully", totalOrders, orders, });
+            .populate("products.subProduct" )
+  
+        res.status(200).json({ success: true, message: "Orders Fetched Successfully",  orders, });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
