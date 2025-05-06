@@ -7,229 +7,214 @@ const ErrorHandler = require("../../utils/ErrorHandler");
 const Cart = require("../addToCard/card-model");
 
 exports.createOrder = catchAsyncErrors(async (req, res, next) => {
-  try {
-    const {
-      userId,
-      products,
-      shippingAddress,
-      paymentMethod,
-      totalAmount,
-      shippingCost,
-      discountCupan,
-      cupanCode = null,
-      rewardPointsUsed,
-      paymentInfo = {},
-      orderStatus = "Pending",
-      paymentStatus = "Successfull",
-      orderDate = new Date(),
-    } = req.body;
-
-    // Validate products
-    // if (!Array.isArray(products) || products.length === 0) {
-    //     return next(new ErrorHandler('No products provided in the order.', 400));
-    // }
-
-    // Validate user
-    const cart = await Cart.findOne({ user: userId });
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return next(new ErrorHandler("User not found.", 404));
-    }
-    if (!cart.items || cart.items.length === 0) {
-      return res.status(400).json({
-        message: "Your Cart is empty",
-        success:false
-      });
-    }
-    // Update user's address and phone
-    await User.updateOne(
-      { _id: userId },
-      {
-        $set: {
-          phone: shippingAddress.phone,
-          address: {
-            street: shippingAddress.address,
-            city: shippingAddress.city,
-            state: shippingAddress.state,
-            country: shippingAddress.country,
-            zipCode: shippingAddress.postalCode,
-          },
-        },
-      }
-    );
-
-    // Generate Order Unique ID and Invoice Number
-    const uid = new ShortUniqueId({ length: 4, dictionary: "number" });
-    const uniqueId = uid.rnd();
-    const dateObj = new Date(orderDate);
-    const formattedDate = `${String(dateObj.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}${String(dateObj.getDate()).padStart(2, "0")}${dateObj.getFullYear()}`;
-
-    const orderUniqueId = `OD${uniqueId}`;
-    const invoiceNumber = `OGS${formattedDate}${uniqueId}`;
-
-    // Create new Order
-    const order = await Order.create({
-      userId,
-      products: cart.items,
-      shippingAddress,
-      paymentMethod,
-      paymentInfo,
-      totalAmount,
-      shippingCost,
-      discountCupan,
-      cupanCode,
-      rewardPointsUsed,
-      orderStatus,
-      paymentStatus,
-      orderDate: dateObj,
-      orderUniqueId,
-      invoiceNumber,
-    });
-    cart.items = [];
-    cart.totalAmount = 0;
-    await cart.save();
-    // Handle Reward Points Logic
-    let userPoints = await RewardPoints.findOne({ userId });
-    if (order) {
-      if (rewardPointsUsed > 0) {
-        // Deducting reward points
-        if (!userPoints || userPoints.points < rewardPointsUsed) {
-          return res
-            .status(400)
-            .json({ success: false, message: "Insufficient reward points." });
-        }
-
-        userPoints.points -= rewardPointsUsed;
-        userPoints.history.push({
-          type: "redeemed",
-          amount: rewardPointsUsed,
-          description: `Points redeemed for Order ${orderUniqueId}`,
-        });
-      } else {
-        // Earn reward points if not used
-        const earnedPoints = Math.floor((totalAmount * 5) / 100); // 5% of total
-        if (!userPoints) {
-          userPoints = new RewardPoints({
+    try {
+        const {
             userId,
-            points: earnedPoints,
-            history: [
-              {
-                type: "earned",
-                amount: earnedPoints,
-                description: `Points earned for Order ${orderUniqueId}`,
-              },
-            ],
-          });
-        } else {
-          userPoints.points += earnedPoints;
-          userPoints.history.push({
-            type: "earned",
-            amount: earnedPoints,
-            description: `Points earned for Order ${orderUniqueId}`,
-          });
+            products,
+            shippingAddress,
+            paymentMethod,
+            totalAmount,
+            shippingCost,
+            discountCupan,
+            cupanCode = null,
+            rewardPointsUsed,
+            paymentInfo = {},
+            orderStatus = "Pending",
+            paymentStatus = "Successfull",
+            orderDate = new Date(),
+        } = req.body;
+
+        // Validate products
+        // if (!Array.isArray(products) || products.length === 0) {
+        //     return next(new ErrorHandler('No products provided in the order.', 400));
+        // }
+
+        // Validate user
+        const cart = await Cart.findOne({ user: userId });
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return next(new ErrorHandler("User not found.", 404));
         }
-      }
-      await userPoints.save();
-      // Final response
-      res
-        .status(201)
-        .json({
-          success: true,
-          message: "Order created successfully.",
-          order: { _id: order._id, orderUniqueId, invoiceNumber },
+        if (!cart.items || cart.items.length === 0) {
+            return res.status(400).json({
+                message: "Your Cart is empty",
+                success: false
+            });
+        }
+        // Update user's address and phone
+        await User.updateOne(
+            { _id: userId },
+            {
+                $set: {
+                    phone: shippingAddress.phone,
+                    address: {
+                        street: shippingAddress.address,
+                        city: shippingAddress.city,
+                        state: shippingAddress.state,
+                        country: shippingAddress.country,
+                        zipCode: shippingAddress.postalCode,
+                    },
+                },
+            }
+        );
+
+        // Generate Order Unique ID and Invoice Number
+        const uid = new ShortUniqueId({ length: 4, dictionary: "number" });
+        const uniqueId = uid.rnd();
+        const dateObj = new Date(orderDate);
+        const formattedDate = `${String(dateObj.getMonth() + 1).padStart(
+            2,
+            "0"
+        )}${String(dateObj.getDate()).padStart(2, "0")}${dateObj.getFullYear()}`;
+
+        const orderUniqueId = `OD${uniqueId}`;
+        const invoiceNumber = `OGS${formattedDate}${uniqueId}`;
+
+        // Create new Order
+        const order = await Order.create({
+            userId, products: cart.items, shippingAddress, paymentMethod,
+            paymentInfo, totalAmount, shippingCost, discountCupan, cupanCode, rewardPointsUsed,
+            orderStatus, paymentStatus, orderDate: dateObj, orderUniqueId, invoiceNumber,
         });
+        cart.items = [];
+        cart.totalAmount = 0;
+        await cart.save();
+        // Handle Reward Points Logic
+        let userPoints = await RewardPoints.findOne({ userId });
+        if (order) {
+            if (rewardPointsUsed > 0) {
+                // Deducting reward points
+                if (!userPoints || userPoints.points < rewardPointsUsed) {
+                    return res.status(400).json({ success: false, message: "Insufficient reward points." });
+                }
+
+                userPoints.points -= rewardPointsUsed;
+                userPoints.history.push({
+                    type: "redeemed",
+                    amount: rewardPointsUsed,
+                    description: `Points redeemed for Order ${orderUniqueId}`,
+                });
+            } else {
+                // Earn reward points if not used
+                const earnedPoints = Math.floor((totalAmount * 5) / 100); // 5% of total
+                if (!userPoints) {
+                    userPoints = new RewardPoints({
+                        userId,
+                        points: earnedPoints,
+                        history: [
+                            {
+                                type: "earned",
+                                amount: earnedPoints,
+                                description: `Points earned for Order ${orderUniqueId}`,
+                            },
+                        ],
+                    });
+                } else {
+                    userPoints.points += earnedPoints;
+                    userPoints.history.push({
+                        type: "earned",
+                        amount: earnedPoints,
+                        description: `Points earned for Order ${orderUniqueId}`,
+                    });
+                }
+            }
+            await userPoints.save();
+            // Final response
+            res.status(201).json({ success: true, message: "Order created successfully.", order: { _id: order._id, orderUniqueId, invoiceNumber }, });
+        }
+    } catch (error) {
+        return next(
+            new ErrorHandler(error.message || "Failed to create order.", 500)
+        );
     }
-  } catch (error) {
-    return next(
-      new ErrorHandler(error.message || "Failed to create order.", 500)
-    );
-  }
 });
 
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
-  try {
-    const totalOrders = await Order.countDocuments();
+    try {
+        const totalOrders = await Order.countDocuments();
 
-    const orders = await Order.find({})
-      .sort({ createdAt: -1 })
-      .populate("products.productId")
-      .populate("userId", "name email , phone");
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Orders Fetched Successfully",
-        totalOrders,
-        orders,
-      });
-    // sendResponse(res, 200, "Order Fetched Successfully", { totalOrders, orders });
-  } catch (error) {
-    return next(new ErrorHandler(error.message, 500));
-  }
+        const orders = await Order.find({})
+            .sort({ createdAt: -1 })
+            .populate("products.subProduct")
+            .populate("userId", "name email , phone");
+        res.status(200).json({ success: true, message: "Orders Fetched Successfully", totalOrders, orders, });
+        // sendResponse(res, 200, "Order Fetched Successfully", { totalOrders, orders });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
 });
 
 exports.getOrderByID = catchAsyncErrors(async (req, res, next) => {
-  try {
-    const orderID = req.params.id;
+    try {
+        const orderID = req.params.id;
 
-    const order = await Order.findById(orderID)
-      .populate("products.productId")
-      .populate("userId", "name email , phone");
-
-    res
-      .status(200)
-      .json({ success: true, message: "Order Fetched Successfully", order });
-    // sendResponse(res, 200, "Order Fetched Successfully", order);
-  } catch (error) {
-    return next(new ErrorHandler(error.message, 500));
-  }
+        const order = await Order.findById(orderID)
+        .populate({
+            path: "products.subProduct",
+            populate: {
+              path: "productId",
+            }
+          })
+            .populate("userId", "name email , phone");
+        console.log(order);
+        res.status(200).json({ success: true, message: "Order Fetched Successfully", order });
+        // sendResponse(res, 200, "Order Fetched Successfully", order);
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
 });
 
 exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
-  try {
-    const orderId = req.params.id;
-    const { orderStatus, paymentStatus } = req.body;
-    console.log("XXXXXXXXX", req.body);
+    try {
+        const orderId = req.params.id;
+        const { orderStatus, paymentStatus } = req.body;
+        console.log("XXXXXXXXX", req.body);
 
-    if (!orderId) {
-      return res
-        .status(200)
-        .json({ success: false, message: "Order ID is required" });
+        if (!orderId) {
+            return res.status(200).json({ success: false, message: "Order ID is required" });
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        if (orderStatus) order.orderStatus = orderStatus;
+        if (paymentStatus) order.paymentStatus = paymentStatus;
+
+        await order.save();
+
+        res.status(200).json({ success: true, message: "status updated successfully", updatedOrder: order, });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Something went wrong while updating order", error: error.message, });
     }
-
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
-    }
-    if (orderStatus) order.orderStatus = orderStatus;
-    if (paymentStatus) order.paymentStatus = paymentStatus;
-
-    await order.save();
-
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "status updated successfully",
-        updatedOrder: order,
-      });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Something went wrong while updating order",
-        error: error.message,
-      });
-  }
 });
 
+exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { pageNumber } = req.query;
+        const userID = req.params.id;
+
+        const totalOrders = await Order.countDocuments({ userId: userID });
+
+        const orders = await Order.find({ userId: userID })
+            .sort({ createdAt: -1 })
+            .skip((pageNumber - 1) * 15)
+            .limit(15)
+            .populate("userId", "name email")
+            .populate("subProduct", )
+           
+
+        sendResponse(res, 200, "Orders Fetched Successfully", {
+            totalOrders,
+            totalPages: Math.ceil(totalOrders / 15),
+            currentPage: parseInt(pageNumber, 10),
+            orders
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
 // exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
 //     try {
 //         const orderID = req.params.id;
@@ -266,27 +251,7 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 //     }
 // })
 
-// exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { pageNumber } = req.query;
-//         const userID = req.params.id;
 
-//         const totalOrders = await Order.countDocuments({ userId: userID });
-
-//         const orders = await Order.find({ userId: userID })
-//             .sort({ createdAt: -1 })
-//             .skip((pageNumber - 1) * 15)
-//             .limit(15)
-//             .populate("userId", "name email")
-//             .populate("productId", "name price")
-//             .populate("accessoryId", "titel description price images");
-
-//         sendResponse(res, 200, "Orders Fetched Successfully", {
-//             totalOrders,
-//             totalPages: Math.ceil(totalOrders / 15),
-//             currentPage: parseInt(pageNumber, 10),
-//             orders
-//         });
 
 //     } catch (error) {
 //         return next(new ErrorHandler(error.message, 500));

@@ -6,7 +6,7 @@ import { getData, postData, serverURL } from '../../services/FetchNodeServices';
 
 const EditOrder = () => {
     const { id } = useParams();
-    const [orderData, setOrderData] = useState({});
+    const [orderData, setOrderData] = useState([]);
     const [orderStatus, setOrderStatus] = useState("");
     const [paymentStatus, setPaymentStatus] = useState("");
     const [step, setStep] = useState(1);
@@ -215,10 +215,10 @@ const EditOrder = () => {
                                         <div className="card-body">
                                             {orderData?.products?.map((item, index) => (
                                                 <div key={index} className="mb-3">
-                                                    <strong>{item?.productId?.productName}</strong><br />
+                                                    <strong>{item?.subProduct[0]?.productId?.productName}</strong><br />
                                                     <img
-                                                        src={`${item?.productId?.images[0]}`}
-                                                        alt={item?.productId?.productName}
+                                                        src={`${item?.subProduct[0]?.subProductImages[0]}`}
+                                                        // alt={item?.productId?.productName}
                                                         style={{ width: "100px", height: "100px", marginTop: "10px" }}
                                                     />
                                                     <p className="mb-1">Price: ₹{item?.productId?.Variant?.[0]?.finalPrice || item?.price}</p>
@@ -273,7 +273,7 @@ const EditOrder = () => {
                                 type="number"
                                 name="length"
                                 className="form-control"
-                                value={orderData.length}
+                                value={orderData?.length}
                                 onChange={(e) => setOrderData(prev => ({ ...prev, length: e.target.value }))}
                                 required
                             />
@@ -284,7 +284,7 @@ const EditOrder = () => {
                                 type="number"
                                 name="breadth"
                                 className="form-control"
-                                value={orderData.breadth}
+                                value={orderData?.breadth}
                                 onChange={(e) => setOrderData(prev => ({ ...prev, breadth: e.target.value }))}
                                 required
                             />
@@ -295,7 +295,7 @@ const EditOrder = () => {
                                 type="number"
                                 name="height"
                                 className="form-control"
-                                value={orderData.height}
+                                value={orderData?.height}
                                 onChange={(e) => setOrderData(prev => ({ ...prev, height: e.target.value }))}
                                 required
                             />
@@ -306,7 +306,7 @@ const EditOrder = () => {
                                 type="number"
                                 name="weight"
                                 className="form-control"
-                                value={orderData.weight}
+                                value={orderData?.weight}
                                 onChange={(e) => setOrderData(prev => ({ ...prev, weight: e.target.value }))}
                                 required
                             />
