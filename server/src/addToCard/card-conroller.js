@@ -313,7 +313,7 @@ exports.deleteCard = catchAsyncErrors(async (req, res) => {
 exports.getAllCard = catchAsyncErrors(async (req, res) => {
     try {
         const cards = await Card.find()
-            .populate({ path: 'items.subProduct' , populate: { path: 'productId' , select: 'productName' } })
+            .populate({ path: 'items.subProduct', populate: { path: 'productId', select: 'productName' } })
             .populate({ path: 'user', select: 'name email phone' });
         console.log("XXXXXXXXXXXXXXXXXX:XXXXX:XXXXXXXXX:XXXX:---", cards)
         res.status(200).json({ success: true, count: cards.length, cards });
@@ -345,3 +345,26 @@ exports.applyCoupon = catchAsyncErrors(async (req, res) => {
     }
 });
 
+
+exports.getCardBySubProductId = catchAsyncErrors(async (req, res) => {
+    try {
+        const { userId, subProductId } = req.body;
+
+        const card = await Card.findOne({ user: userId, "items.subProduct": subProductId });
+
+        if (!card) {
+            return res.status(404).json({ success: false, message: 'Card not found' });
+        }
+
+        const matchedItem = card.items.find(item => item.subProduct.toString() === subProductId);
+
+        if (!matchedItem) {
+            return res.status(404).json({ success: false, message: 'Item not found in card' });
+        }
+
+        res.status(200).json({ success: true, message: 'Card item fetched successfully', item: matchedItem, cardId: card._id });
+    } catch (error) {
+        console.error('Get card by subProduct ID error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch card item by subProduct ID', error: error.message });
+    }
+});
