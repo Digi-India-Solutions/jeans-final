@@ -326,3 +326,22 @@ exports.searchUser = catchAsyncErrors(async (req, res, next) => {
     }
 
 })
+
+exports.sendMessageWhatsapp = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { message, phone } = req.body;
+        console.log("URL:-", message, phone);
+        // await sendWhatsAppMessage(message);
+        const phones = phone; // user phone
+        const messages = encodeURIComponent(`${message}✅ You have successfully logged in to Bizzify!`);
+        const url = `https://wa.me/${phones}?text=${messages}`;
+
+        // Redirect user to WhatsApp
+        console.log("URL:-", url);
+        res.status(200).json({ success: true, whatsappLink: url });
+
+        // sendResponse(res, 200, "Message sent successfully");
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})

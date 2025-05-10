@@ -33,6 +33,7 @@ const Header = () => {
     { to: "/all-videos", label: "Manage Videos", icon: "fa-solid fa-video" },
     { to: "/all-faq", label: "Manage Faq", icon: "fa-solid fa-pen" },
     { to: "/all-reviews", label: "All Reviews", icon: "fa-solid fa-star" },
+    // { to: "/all-whatsapp", label: "WhatsApp", icon: "fa-solid fa-star" },
 
     // { to: "/news-letter", label: "News Letter", icon: "fa-solid fa-newspaper" },
   ];

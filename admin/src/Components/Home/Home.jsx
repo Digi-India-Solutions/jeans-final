@@ -45,6 +45,7 @@ import EditFaq from '../../Pages/Faq/EditFaq'
 import AllSubProduct from '../../Pages/SubProduct/AllSubProduct'
 import AddSubProduct from '../../Pages/SubProduct/AddSubProduct'
 import EditSubProduct from '../../Pages/SubProduct/EditSubProduct'
+import WhatsApps from '../../Pages/WhatsappMess/WhatsApps'
 
 const Home = () => {
 
@@ -126,6 +127,9 @@ const Home = () => {
                 <Route path={"add-videos"} element={<AddVideos />} />
                 <Route path={"all-videos"} element={<AllVideios />} />
                 <Route path={"edit-videos/:id"} element={<EditVideios />} />
+
+                {/* all-whatsapp */}
+                <Route path={"all-whatsapp"} element={<WhatsApps />} />
               </Routes>
             </div>
           </>
