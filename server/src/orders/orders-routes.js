@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const { createOrder, getAllOrders, getOrderByID, changeStatus,getAllOrdersByUser } = require("./orders-controller");
+const { createOrder, getAllOrders, getOrderByID, changeStatus,getAllOrdersByUser, verifyPayment } = require("./orders-controller");
 
 
 router.post("/create-order", createOrder);
+
+router.post("/verify-payment", verifyPayment);
 
 router.get("/get-all-orders", getAllOrders);
 

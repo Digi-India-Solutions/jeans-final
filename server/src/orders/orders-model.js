@@ -99,6 +99,17 @@ const orderSchema = new Schema({
         type: Number,
         required: true,
     },
+
+    pendingAmount: {
+        type: Number,
+        trim: true,
+        default: 0
+    },
+    recivedAmount: {
+        type: Number,
+        trim: true,
+        default: 0
+    },
     shippingCost: {
         type: Number,
         default: 0,

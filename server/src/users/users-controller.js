@@ -5,11 +5,14 @@ const ShortUniqueId = require("short-unique-id");
 const User = require("./users-model");
 const Otp = require("../otp/otp-model");
 const sendToken = require("../../utils/jwtToken");
-const { sendOtpForUserSignup, sendResetPassword } = require("../../utils/mail");
+const { sendOtpForUserSignup, sendResetPassword, sendEmailByUserForRequastActiveAccount, sendEmailByAdminForRequastActiveAccount, sendEmailActiveUserAccount, sendOrderNotification } = require("../../utils/mail");
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const { uploadImage } = require("../../middleware/Uploads");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
+const Order = require("../orders/orders-model");
+const dayjs = require("dayjs");
+const sendWhatsappByUserForRequastActiveAccount = require("../../utils/whatsAppCampaigns");
 
 exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -38,7 +41,7 @@ exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 
 exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
-        console.log("DDDDDDD", req.body)
+        // console.log("DDDDDDD", req.body)
         const { fullName, mobile, email, otp, password } = req.body;
 
         if (!email || !otp || !password) {
@@ -65,6 +68,9 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
         const hash = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, });
+        sendEmailByUserForRequastActiveAccount({ email, fullName });
+        sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
+        // sendWhatsappByUserForRequastActiveAccount({ phone: mobile, fullName });
 
         sendToken(newUser, 200, res, "User Created Successfully");
 
@@ -345,3 +351,55 @@ exports.sendMessageWhatsapp = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 })
+
+exports.toggleStatusUserId = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        user.isActive = !user.isActive;
+        await user.save();
+        // console.log("hhhhhhh", user.email);
+        const email = user.email
+        const fullName = user.name
+        const isActive = user.isActive
+        sendEmailActiveUserAccount({ email, fullName, isActive });
+        res.json({ success: true, message: "Status updated successfully" });
+    } catch (err) {
+        console.log("ERROR:-", err);
+        res.json({ success: false, message: "Failed to update status" });
+    }
+})
+
+
+exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { minDays = 60, maxDays = 80 } = req.body;
+
+        // Calculate date range
+        const fromDate = dayjs().subtract(maxDays, "day").toDate();
+        const toDate = dayjs().subtract(minDays, "day").toDate();
+
+        // Find users who placed orders in the range
+        const recentOrderUsers = await Order.distinct("userId", {
+            createdAt: { $gte: fromDate, $lte: toDate }
+        });
+
+        // Find users who DID NOT place any order in last X days
+        const allUsers = await User.find({ isActive: true });
+        const inactiveUsers = allUsers.filter(
+            (user) => !recentOrderUsers.includes(user._id.toString())
+        );
+
+        // Send notification logic (you can replace this with email/SMS/etc)
+        for (const user of inactiveUsers) {
+            console.log("user", user);
+            await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `${inactiveUsers.length} user(s) notified who haven't ordered in last ${minDays}-${maxDays} days.`,
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});

@@ -351,785 +351,307 @@ exports.sendResetPassword = async (data) => {
     const subject = "Reset your Password";
     return await sendMail({ to: email, subject, html: body });
 };
-// exports.sendVerificationEmailUser = async (data) => {
-//     const { username, otp } = data;
 
-//     const body = `
-//   <!DOCTYPE html>
-// <html lang="en">
-
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Verify your recovery email</title>
-//     <style>
-//         body {
-//             margin: 0 auto;
-//             padding: 0;
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             height: 100vh;
-//         }
-
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             background-color: #fff;
-//             border: 1px solid gainsboro;
-//             padding: 20px;
-//             border-radius: 8px;
-//             text-align: center;
-//         }
-
-//         .logo {
-//             margin-bottom: 20px;
-//         }
-
-//         .title {
-//             font-size: 24px;
-//             color: black;
-//             font-weight: 500;
-//             margin-top: 5%;
-//             margin-bottom: 5%;
-//         }
-
-//         .message {
-//             font-size: 16px;
-//             color: #272727;
-//             margin-bottom: 20px;
-//             line-height: 1.5;
-//             text-align: left;
-//         }
-
-//         .code {
-//             font-size: 36px;
-//             color: black;
-//             font-weight: 700;
-//             margin-bottom: 20px;
-//             letter-spacing: 2px;
-//         }
-
-//         .note {
-//             font-size: 14px;
-//             color: #272727;
-//             text-align: left;
-//             margin-top: 20px;
-//             margin-bottom: 5%;
-//             line-height: 1.5;
-//         }
-
-//         .footer{
-//             color: #4a4a4a;
-//             font-size: 12px;
-//             max-width: 600px;
-//             text-align: center;
-//         }
-//     </style>
-// </head>
-
-// <body>
-//     <div style="margin: 0 auto">
-//         <div class="container">
-//             <div class="logo">
-//                 <img src="https://localhost:3000/images/logo.avif" style="width: 180px;"
-//                     alt="Oredo GPS Logo">
-//             </div>
-//             <div class="title">Verify your Email</div>
-//             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//             <div class="message">
-//                 Oredo GPS received a request to verify <strong>${username}</strong> as a verification process.
-
-//                 <br><br>
-//                 Use this code to safely verify your email:
-//             </div>
-//             <div class="code">${otp}</div>
-//            <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//         </div>
-//     </div>
-// </body>
-
-// </html>
-//   `
-
-//     const subject = "Email Verification";
-//     return await sendMail({ to: username, subject, html: body });
-// };
-
-
-// exports.sendEmailUpdateOtp = async (data) => {
-//     const { name, otp, email } = data;
-
-//     const body = `
-//   <!DOCTYPE html>
-// <html lang="en">
-
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Verify your recovery email</title>
-//     <style>
-//         body {
-//             margin: 0 auto;
-//             padding: 0;
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             height: 100vh;
-//         }
-
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             background-color: #fff;
-//             border: 1px solid gainsboro;
-//             padding: 20px;
-//             border-radius: 8px;
-//             text-align: center;
-//         }
-
-//         .logo {
-//             margin-bottom: 20px;
-//         }
-
-//         .title {
-//             font-size: 24px;
-//             color: black;
-//             font-weight: 500;
-//             margin-top: 5%;
-//             margin-bottom: 5%;
-//         }
-
-//         .message {
-//             font-size: 16px;
-//             color: #272727;
-//             margin-bottom: 20px;
-//             line-height: 1.5;
-//             text-align: left;
-//         }
-
-//         .code {
-//             font-size: 36px;
-//             color: black;
-//             font-weight: 700;
-//             margin-bottom: 20px;
-//             letter-spacing: 2px;
-//         }
-
-//         .note {
-//             font-size: 14px;
-//             color: #272727;
-//             text-align: left;
-//             margin-top: 20px;
-//             margin-bottom: 5%;
-//             line-height: 1.5;
-//         }
-
-//         .footer{
-//             color: #4a4a4a;
-//             font-size: 12px;
-//             max-width: 600px;
-//             text-align: center;
-//         }
-//     </style>
-// </head>
-
-// <body>
-//     <div style="margin: 0 auto">
-//         <div class="container">
-//             <div class="logo">
-//                 <img src="https://localhost:3000/images/logo.avif" style="width: 180px;"
-//                     alt="Oredo GPS Logo">
-//             </div>
-//             <div class="title">Verify your New Email</div>
-//             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//             <div class="message">
-//                 Oredo GPS received a request to <strong>Change email</strong>.
-//                 <br><br>
-//                 Use this code to safely verify your new email:
-//             </div>
-//             <div class="code">${otp}</div>
-
-//            <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//         </div>
-//     </div>
-// </body>
-
-// </html>
-//   `
-
-//     const subject = "Verify your Email";
-//     return await sendMail({ to: email, subject, html: body });
-// };
-
-
-
-// exports.sendSubAdminLogin = async (data) => {
-
-//     const { name, password, email } = data;
-
-//     const body = `
-//   <!DOCTYPE html>
-// <html lang="en">
-
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Verify your recovery email</title>
-//     <style>
-//         body {
-//             margin: 0 auto;
-//             padding: 0;
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             height: 100vh;
-//         }
-
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             background-color: #fff;
-//             border: 1px solid gainsboro;
-//             padding: 20px;
-//             border-radius: 8px;
-//             text-align: center;
-//         }
-
-//         .logo {
-//             margin-bottom: 20px;
-//         }
-
-//         .title {
-//             font-size: 24px;
-//             color: black;
-//             font-weight: 500;
-//             margin-top: 5%;
-//             margin-bottom: 5%;
-//         }
-
-//         .message {
-//             font-size: 16px;
-//             color: #272727;
-//             margin-bottom: 20px;
-//             line-height: 1.5;
-//             text-align: left;
-//         }
-
-//         .code {
-//             font-size: 36px;
-//             color: black;
-//             font-weight: 700;
-//             margin-bottom: 20px;
-//             letter-spacing: 2px;
-//         }
-
-//         .note {
-//             font-size: 14px;
-//             color: #272727;
-//             text-align: left;
-//             margin-top: 20px;
-//             margin-bottom: 5%;
-//             line-height: 1.5;
-//         }
-
-//         .footer{
-//             color: #4a4a4a;
-//             font-size: 12px;
-//             max-width: 600px;
-//             text-align: center;
-//         }
-//     </style>
-// </head>
-
-// <body>
-//     <div style="margin: 0 auto">
-//         <div class="container">
-//             <div class="logo">
-//                 <img src="http://localhost:3000/images/logo.avif" style="width: 180px;"
-//                     alt="Oredo GPS Logo">
-//             </div>
-//             <div class="title">Hello, ${name}</div>
-//             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//             <div class="message">
-//                 You have been given a Sub Admin role at Oredo GPS.
-//                 </strong>.
-//                 <br><br>
-//                 Email: ${email}
-//                 <br>
-//                 Password: ${password}
-//                 <br>
-//                 Login URL: http://localhost:3000/login
-//                 <br>
-//             </div>
-//             <div class="note">
-//                 Please login in securely to Oredo GPS Admin Dashboard.
-//             </div>
-//            <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//         </div>
-//     </div>
-// </body>
-
-// </html>
-//   `
-
-//     const subject = "You have been given a Sub Admin Role";
-//     return await sendMail({ to: email, subject, html: body });
-// };
-
-// exports.sendSubAdminPasswordUpdate = async (data) => {
-
-//     const { name, password, email } = data;
-
-//     const body = `
-//   <!DOCTYPE html>
-// <html lang="en">
-
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Verify your recovery email</title>
-//     <style>
-//         body {
-//             margin: 0 auto;
-//             padding: 0;
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             height: 100vh;
-//         }
-
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             background-color: #fff;
-//             border: 1px solid gainsboro;
-//             padding: 20px;
-//             border-radius: 8px;
-//             text-align: center;
-//         }
-
-//         .logo {
-//             margin-bottom: 20px;
-//         }
-
-//         .title {
-//             font-size: 24px;
-//             color: black;
-//             font-weight: 500;
-//             margin-top: 5%;
-//             margin-bottom: 5%;
-//         }
-
-//         .message {
-//             font-size: 16px;
-//             color: #272727;
-//             margin-bottom: 20px;
-//             line-height: 1.5;
-//             text-align: left;
-//         }
-
-//         .code {
-//             font-size: 36px;
-//             color: black;
-//             font-weight: 700;
-//             margin-bottom: 20px;
-//             letter-spacing: 2px;
-//         }
-
-//         .note {
-//             font-size: 14px;
-//             color: #272727;
-//             text-align: left;
-//             margin-top: 20px;
-//             margin-bottom: 5%;
-//             line-height: 1.5;
-//         }
-
-//         .footer{
-//             color: #4a4a4a;
-//             font-size: 12px;
-//             max-width: 600px;
-//             text-align: center;
-//         }
-//     </style>
-// </head>
-
-// <body>
-//     <div style="margin: 0 auto">
-//         <div class="container">
-//             <div class="logo">
-//                 <img src="http://localhost:3000/images/logo.avif" style="width: 180px;"
-//                     alt="Oredo GPS Logo">
-//             </div>
-//             <div class="title">Hello, ${name}</div>
-//             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//             <div class="message">
-//                 Your password has been changed by Admin at Oredo GPS.
-//                 </strong>.
-//                 <br><br>
-//                 Your Email: ${email}
-//                 <br>
-//                 New Password: ${password}
-//                 <br>
-//                 Login URL: https://localhost:3000/login
-//                 <br>
-//             </div>
-//             <div class="note">
-//                 Please login in securely to Oredo GPS Dashboard.
-//             </div>
-//            <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//         </div>
-//     </div>
-// </body>
-
-// </html>
-//   `
-
-//     const subject = "Your password has been changed by Admin";
-//     return await sendMail({ to: email, subject, html: body });
-// };
-
-// exports.sendOtpPartnerSignUp = async (data) => {
-//     const { email, otp } = data;
-//     console.log('email', email, 'otp', otp)
-//     const body = `
-//   <!DOCTYPE html>
-// <html lang="en">
-
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Verify your recovery email</title>
-//     <style>
-//         body {
-//             margin: 0 auto;
-//             padding: 0;
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             height: 100vh;
-//         }
-
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             background-color: #fff;
-//             border: 1px solid gainsboro;
-//             padding: 20px;
-//             border-radius: 8px;
-//             text-align: center;
-//         }
-
-//         .logo {
-//             margin-bottom: 20px;
-//         }
-
-//         .title {
-//             font-size: 24px;
-//             color: black;
-//             font-weight: 500;
-//             margin-top: 5%;
-//             margin-bottom: 5%;
-//         }
-
-//         .message {
-//             font-size: 16px;
-//             color: #272727;
-//             margin-bottom: 20px;
-//             line-height: 1.5;
-//             text-align: left;
-//         }
-
-//         .code {
-//             font-size: 36px;
-//             color: black;
-//             font-weight: 700;
-//             margin-bottom: 20px;
-//             letter-spacing: 2px;
-//         }
-
-//         .note {
-//             font-size: 14px;
-//             color: #272727;
-//             text-align: left;
-//             margin-top: 20px;
-//             margin-bottom: 5%;
-//             line-height: 1.5;
-//         }
-
-//         .footer{
-//             color: #4a4a4a;
-//             font-size: 12px;
-//             max-width: 600px;
-//             text-align: center;
-//         }
-//     </style>
-// </head>
-
-// <body>
-//     <div style="margin: 0 auto">
-//         <div class="container">
-//             <div class="logo">
-//                <img src="https://localhost:3000/images/logo.avif" style="width: 180px;"
-//                     alt="Oredo GPS Logo">
-//             </div>
-//             <div class="title">Verify your Email</div>
-//             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//             <div class="message">
-//                 Oredo GPS received a request to verify <strong>${email}</strong> as an onboarding process.
-//                 <br><br>
-//                 Use this code to safely verify your email:
-//             </div>
-//             <div class="code">${otp}</div>
-//           <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//         </div>
-//     </div>
-// </body>
-
-// </html>
-//   `
-
-//     const subject = "Verify your Email";
-//     return await sendMail({ to: email, subject, html: body });
-// };
-
-// exports.sendContactMail = async (data) => {
-
-//     const adminEmail = await getSuperAdminEmail();
-
-//     const body = `
-//   <!DOCTYPE html>
-// <html lang="en">
-
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Verify your recovery email</title>
-//     <style>
-//         body {
-//             margin: 0 auto;
-//             padding: 0;
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             height: 100vh;
-//         }
-
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             background-color: #fff;
-//             border: 1px solid gainsboro;
-//             padding: 20px;
-//             border-radius: 8px;
-//             text-align: center;
-//         }
-
-//         .logo {
-//             margin-bottom: 20px;
-//         }
-
-//         .title {
-//             font-size: 24px;
-//             color: black;
-//             font-weight: 500;
-//             margin-top: 5%;
-//             margin-bottom: 5%;
-//         }
-
-//         .message {
-//             font-size: 16px;
-//             color: #272727;
-//             margin-bottom: 20px;
-//             line-height: 1.5;
-//             text-align: left;
-//         }
-
-//         .code {
-//             font-size: 36px;
-//             color: black;
-//             font-weight: 700;
-//             margin-bottom: 20px;
-//             letter-spacing: 2px;
-//         }
-
-//         .note {
-//             font-size: 14px;
-//             color: #272727;
-//             text-align: left;
-//             margin-top: 20px;
-//             margin-bottom: 5%;
-//             line-height: 1.5;
-//         }
-
-//         .footer{
-//             color: #4a4a4a;
-//             font-size: 12px;
-//             max-width: 600px;
-//             text-align: center;
-//         }
-//     </style>
-// </head>
-
-// <body>
-//     <div style="margin: 0 auto">
-//         <div class="container">
-//             <div class="logo">
-//             <img src="https://localhost:3000/images/logo.avif" style="width: 180px;"
-//                     alt="Oredo GPS Logo">
-//             </div>
-//             <div class="title">Hello Admin</div>
-//             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//             <div class="message">
-//                 New message received.
-//                 </strong>
-//                 <br><br>
-//                 Name: ${data?.name}
-//                 <br>
-//                 Email: ${data?.email}
-//                 <br>
-//                 Contact Number: ${data?.number}
-//                 <br>
-//                 Message: ${data?.message}
-//                 <br>
-//                 Role: ${data?.role}
-//                 <br>
-//                 Address: ${data?.country}, ${data?.state}, ${data?.city}, ${data?.address}, ${data?.zipCode}
-//                 <br>
-//             </div>
-//             <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//         </div>
-//     </div>
-// </body>
-
-// </html>
-//   `
-
-//     const subject = "New Contact message received";
-//     return await sendMail({ to: adminEmail, subject, html: body });
-// };
-
-// exports.sendBillingMail = async (data) => {
-//     const { email, amount, companyName, totalGps, vehicleNumbers, deviceUniqueIds } = data;
-//     const ratePerDayPerGps = 10;
-
-//     const body = `
-//     <!DOCTYPE html>
-//     <html lang="en">
-//     <head>
-//         <meta charset="UTF-8">
-//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//         <title>Billing Information</title>
-//         <style>
-//             body {
-//                 margin: 0 auto;
-//                 padding: 0;
-//                 display: flex;
-//                 justify-content: center;
-//                 align-items: center;
-//                 height: 100vh;
-//             }
-//             .container {
-//                 max-width: 600px;
-//                 margin: 0 auto;
-//                 background-color: #fff;
-//                 border: 1px solid gainsboro;
-//                 padding: 20px;
-//                 border-radius: 8px;
-//                 text-align: center;
-//             }
-//             .logo {
-//                 margin-bottom: 20px;
-//             }
-//             .title {
-//                 font-size: 24px;
-//                 color: black;
-//                 font-weight: 500;
-//                 margin-top: 5%;
-//                 margin-bottom: 5%;
-//             }
-//             .message {
-//                 font-size: 16px;
-//                 color: #272727;
-//                 margin-bottom: 20px;
-//                 line-height: 1.5;
-//                 text-align: left;
-//             }
-//             .amount {
-//                 font-size: 36px;
-//                 color: black;
-//                 font-weight: 700;
-//                 margin-bottom: 20px;
-//                 letter-spacing: 2px;
-//             }
-//             .note {
-//                 font-size: 14px;
-//                 color: #272727;
-//                 text-align: left;
-//                 margin-top: 20px;
-//                 margin-bottom: 5%;
-//                 line-height: 1.5;
-//             }
-//             .footer {
-//                 color: #4a4a4a;
-//                 font-size: 12px;
-//                 text-align: center;
-//             }
-//             .vehicle-list {
-//                 list-style-type: none;
-//                 padding: 0;
-//                 margin: 0;
-//                 text-align: left;
-//             }
-//             .vehicle-list li {
-//                 font-size: 14px;
-//                 color: #272727;
-//                 margin-bottom: 5px;
-//                 display: flex;
-//                 justify-content: space-between;
-//             }
-//             .vehicle, .device-id {
-//                 display: inline-block;
-//                 width: 45%;
-//             }
-//         </style>
-//     </head>
-//     <body>
-//         <div style="margin: 0 auto">
-//             <div class="container">
-//                 <div class="logo">
-//                    <img src="https://localhost:3000/images/logo.avif" style="width: 180px;" alt="Oredo GPS Logo">
-//                 </div>
-//                 <div class="title">Billing Information for ${companyName}</div>
-//                 <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-//                 <div class="message">
-//                     Dear ${companyName},<br><br>
-//                     This is to inform you that a billing of <strong>&#8377;${amount}</strong> has been generated for your account based on the following details:
-//                     <ul>
-//                         <li>Total GPS Units: <strong>${totalGps}</strong></li>
-//                         <li>Rate per GPS per day: <strong>&#8377;${ratePerDayPerGps}</strong></li>
-//                     </ul>
-//                     <br>
-//                     <strong>Vehicle Numbers and Device IDs:</strong>
-//                     <ul class="vehicle-list">
-//                         ${vehicleNumbers.map((vehicle, index) => `
-//                             <li>
-//                                 <span class="vehicle">${vehicle}</span>
-//                                 <span class="device-id">${deviceUniqueIds[index] || 'N/A'}</span>
-//                             </li>
-//                         `).join('')}
-//                     </ul>
-//                 </div>
-//                 <div class="amount">Total Amount: &#8377;${amount}</div>
-//                 <div class="note">Please find the attached billing PDF for further details.</div>
-//                 <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
-//             </div>
-//         </div>
-//     </body>
-//     </html>
-//     `;
-
-//     const subject = "Billing Information";
-//     return await sendMail({ to: email, subject, html: body });
-// };
+exports.sendEmailByUserForRequastActiveAccount = async ({ email, fullName, mobile }) => {
+    // Email to the User
+    console.log("User Email:", email);
+    const userSubject = "Account Activation Requested";
+    const userBody = `<!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f2f2f2;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #fff;
+                border: 1px solid gainsboro;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            .title {
+                font-size: 24px;
+                color: #333;
+                margin-bottom: 20px;
+            }
+            .message {
+                font-size: 16px;
+                color: #666;
+                margin-bottom: 20px;
+            }
+            .footer {
+                font-size: 12px;
+                color: #888;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="title">Activation Request Sent</h1>
+            <p class="message">Hi ${fullName},</p>
+            <p class="message">We have received your request to activate your account. Our team will review your details and activate your account shortly.</p>
+            <p class="message">If you have any urgent queries, feel free to reach out to us.</p>
+            <p class="footer">All rights reserved © 2024 | The Anibhavi Creation</p>
+        </div>
+    </body>
+    </html>`;
+
+    // Email to the Admin
+    const adminSubject = "New Account Activation Request";
+    const adminBody = `<!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            h2 {
+                color: #333;
+                margin-bottom: 20px;
+            }
+            .info {
+                font-size: 16px;
+                color: #555;
+                margin-bottom: 10px;
+            }
+            .footer {
+                font-size: 12px;
+                color: #aaa;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Account Activation Request</h2>
+            <p class="info"><strong>Full Name:</strong> ${fullName}</p>
+            <p class="info"><strong>Email:</strong> ${email}</p>
+            <p class="info"><strong>Mobile:</strong> ${mobile}</p>
+            <p class="info">The above user has requested account activation. Please review and activate the account if everything is in order.</p>
+            <p class="footer">Admin Portal | Oredo Gps Solutions Pvt Ltd</p>
+        </div>
+    </body>
+    </html>`;
+
+    // Send to user
+    await sendMail({ to: email, subject: userSubject, html: userBody });
+
+    // Send to admin
+    await sendMail({ to: "aasibkhan155471@gmail.com", subject: adminSubject, html: adminBody });
+
+    return true;
+};
+
+exports.sendEmailByAdminForRequastActiveAccount = async ({ email, fullName, mobile }) => {
+    // Email to the Admin
+    console.log("Admin Email:", email);
+    const adminSubject = "New Account Activation Request";
+    const adminBody = `<!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            h2 {
+                color: #333;
+                margin-bottom: 20px;
+            }
+            .info {
+                font-size: 16px;
+                color: #555;
+                margin-bottom: 10px;
+            }
+            .footer {
+                font-size: 12px;
+                color: #aaa;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Account Activation Request</h2>
+            <p class="info"><strong>Full Name:</strong> ${fullName}</p>
+            <p class="info"><strong>Email:</strong> ${email}</p>
+            <p class="info"><strong>Mobile:</strong> ${mobile}</p>
+            <p class="info">The above user has requested account activation. Please review and activate the account if everything is in order.</p>
+            <p class="footer">Admin Portal | The Anibhavi Creation</p>
+        </div>
+    </body>
+    </html>`;
+
+    // Send to admin
+    await sendMail({ to: process.env.ADMIN_EMAIL, subject: adminSubject, html: adminBody });
+
+    return true;
+};
+
+exports.sendEmailActiveUserAccount = async ({ email, fullName, isActive }) => {
+    console.log(`Sending ${isActive ? 'Activation' : 'Deactivation'} Email To:`, email);
+
+    const subject = isActive
+        ? "🎉 Your Account is Now Active!"
+        : "⚠️ Your Account Has Been Deactivated";
+
+    const html = `<!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            h2 {
+                color: ${isActive ? '#4CAF50' : '#f44336'};
+                margin-bottom: 20px;
+            }
+            .message {
+                font-size: 16px;
+                color: #333;
+                margin-bottom: 15px;
+            }
+            .button {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .footer {
+                font-size: 12px;
+                color: #aaa;
+                margin-top: 30px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Hello ${fullName},</h2>
+            ${isActive
+            ? `<p class="message">Great news! Your account has been <strong>successfully activated</strong> by our admin team. 🎉</p>
+                       <p class="message">You can now log in and start using all of our features.</p>
+                       <p class="message">If you have any questions or need assistance, please don't hesitate to contact our support team.</p>`
+            : `<p class="message">We regret to inform you that your account has been <strong>deactivated</strong> by our admin team.</p>
+                       <p class="message">If you believe this was a mistake or need assistance, please contact our support team.</p>`
+        }
+            <p class="footer">— The Anibhavi Creation</p>
+        </div>
+    </body>
+    </html>`;
+
+    await sendMail({ to: email, subject, html });
+    return true;
+};
+
+exports.sendOrderNotification = async ({ email, name, mobile }) => {
+    const subject = "🛒 We Miss You! Come Back and Shop with Us";
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+                text-align: center;
+            }
+            h2 {
+                color: #ff6600;
+                margin-bottom: 20px;
+            }
+            p {
+                font-size: 16px;
+                color: #444444;
+                margin-bottom: 20px;
+            }
+            .btn {
+                display: inline-block;
+                padding: 12px 25px;
+                background-color: #ff6600;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .footer {
+                font-size: 12px;
+                color: #888888;
+                margin-top: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Hey ${name}, We Miss You! 🧡</h2>
+            <p>We noticed you haven’t placed an order in a while. It’s been some time since we’ve seen you, and we’d love to have you back!</p>
+            <p>Explore our new products and exclusive deals crafted just for you.</p>
+            <p class="footer">If you have any questions, feel free to contact us at ${process.env.SUPPORT_PHONE || "our support"}.<br>– YourWebsite Team</p>
+        </div>
+    </body>
+    </html>`;
+
+    await sendMail({ to: email, subject, html });
+};

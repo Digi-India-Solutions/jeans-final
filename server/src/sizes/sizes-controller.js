@@ -15,11 +15,11 @@ exports.createSize = catchAsyncErrors(async (req, res, next) => {
         }
 
         // Check if size already exists
-        const existingSize = await Size.find({ size });
+        // const existingSize = await Size.find({ size });
 
-        if (existingSize.length > 0) {
-            return res.status(200).json({ success: false, message: "Size already exists" });
-        }
+        // if (existingSize.length > 0) {
+        //     return res.status(200).json({ success: false, message: "Size already exists" });
+        // }
 
         // const uid = new ShortUniqueId({ length: 4, dictionary: "number" });
         // const currentUniqueId = uid.rnd();

@@ -5,6 +5,8 @@ const RewardPoints = require("../rewordsPoints/rewordsPoints-model");
 const ShortUniqueId = require("short-unique-id");
 const ErrorHandler = require("../../utils/ErrorHandler");
 const Cart = require("../addToCard/card-model");
+const crypto = require("crypto");
+const razorpayInstance = require("../../utils/razorpay");
 
 exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -13,35 +15,30 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             products,
             shippingAddress,
             paymentMethod,
-            totalAmount,
-            shippingCost,
-            discountCupan,
+            shippingCost = 0,
+            discountCupan = 0,
             cupanCode = null,
-            rewardPointsUsed,
+            rewardPointsUsed = 0,
             paymentInfo = {},
-            orderStatus = "Pending",
-            paymentStatus = "Successfull",
+            // orderStatus = "pending",
+            paymentStatus = paymentMethod === "Online" ? "Successfull" : "Pending",
             orderDate = new Date(),
+            pendingAmount = 0,
+            recivedAmount = 0
         } = req.body;
 
-        // Validate products
-        // if (!Array.isArray(products) || products.length === 0) {
-        //     return next(new ErrorHandler('No products provided in the order.', 400));
-        // }
-
         // Validate user
-        const cart = await Cart.findOne({ user: userId });
-
         const user = await User.findById(userId);
         if (!user) {
             return next(new ErrorHandler("User not found.", 404));
         }
-        if (!cart.items || cart.items.length === 0) {
-            return res.status(400).json({
-                message: "Your Cart is empty",
-                success: false
-            });
+
+        // Fetch user's cart
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart || !cart.items || cart.items.length === 0) {
+            return res.status(400).json({ success: false, message: "Your cart is empty." });
         }
+
         // Update user's address and phone
         await User.updateOne(
             { _id: userId },
@@ -59,76 +56,153 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             }
         );
 
-        // Generate Order Unique ID and Invoice Number
+        // ✅ Calculate total from `products` array (not trusting frontend's total)
+        let calculatedTotal = 0;
+        // if (!Array.isArray(products) || products.length === 0) {
+        //     return next(new ErrorHandler("No products provided in the order.", 400));
+        // }
+
+        cart.items.forEach((item) => {
+            calculatedTotal += item.price * item.quantity;
+        });
+
+        const grandTotal = (calculatedTotal + shippingCost) - discountCupan;
+        console.log("cart.items:=", grandTotal)
+        // 🔐 Generate Unique Order ID and Invoice
         const uid = new ShortUniqueId({ length: 4, dictionary: "number" });
         const uniqueId = uid.rnd();
         const dateObj = new Date(orderDate);
-        const formattedDate = `${String(dateObj.getMonth() + 1).padStart(
-            2,
-            "0"
-        )}${String(dateObj.getDate()).padStart(2, "0")}${dateObj.getFullYear()}`;
-
+        const formattedDate = `${String(dateObj.getMonth() + 1).padStart(2, "0")}${String(dateObj.getDate()).padStart(2, "0")}${dateObj.getFullYear()}`;
         const orderUniqueId = `OD${uniqueId}`;
         const invoiceNumber = `OGS${formattedDate}${uniqueId}`;
 
-        // Create new Order
-        const order = await Order.create({
-            userId, products: cart.items, shippingAddress, paymentMethod,
-            paymentInfo, totalAmount, shippingCost, discountCupan, cupanCode, rewardPointsUsed,
-            orderStatus, paymentStatus, orderDate: dateObj, orderUniqueId, invoiceNumber,
+        // 📦 Create Order
+        const newOrder = await Order.create({
+            userId,
+            products: cart.items,
+            shippingAddress,
+            paymentMethod,
+            paymentInfo,
+            totalAmount: grandTotal,
+            shippingCost,
+            discountCupan,
+            cupanCode,
+            rewardPointsUsed,
+            // orderStatus,
+            paymentStatus,
+            orderDate: dateObj,
+            orderUniqueId,
+            invoiceNumber,
+            pendingAmount,
+            recivedAmount,
         });
+
+        // 🧹 Clear Cart
         cart.items = [];
         cart.totalAmount = 0;
         await cart.save();
-        // Handle Reward Points Logic
-        let userPoints = await RewardPoints.findOne({ userId });
-        if (order) {
-            if (rewardPointsUsed > 0) {
-                // Deducting reward points
-                if (!userPoints || userPoints.points < rewardPointsUsed) {
-                    return res.status(400).json({ success: false, message: "Insufficient reward points." });
-                }
 
-                userPoints.points -= rewardPointsUsed;
-                userPoints.history.push({
-                    type: "redeemed",
-                    amount: rewardPointsUsed,
-                    description: `Points redeemed for Order ${orderUniqueId}`,
-                });
-            } else {
-                // Earn reward points if not used
-                const earnedPoints = Math.floor((totalAmount * 5) / 100); // 5% of total
-                if (!userPoints) {
-                    userPoints = new RewardPoints({
-                        userId,
-                        points: earnedPoints,
-                        history: [
-                            {
-                                type: "earned",
-                                amount: earnedPoints,
-                                description: `Points earned for Order ${orderUniqueId}`,
-                            },
-                        ],
-                    });
-                } else {
-                    userPoints.points += earnedPoints;
-                    userPoints.history.push({
+        // 🎁 Handle Reward Points
+        let userPoints = await RewardPoints.findOne({ userId });
+        if (rewardPointsUsed > 0) {
+            if (!userPoints || userPoints.points < rewardPointsUsed) {
+                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+            }
+
+            userPoints.points -= rewardPointsUsed;
+            userPoints.history.push({
+                type: "redeemed",
+                amount: rewardPointsUsed,
+                description: `Points redeemed for Order ${orderUniqueId}`,
+            });
+        } else {
+            // Earn 5% points
+            const earnedPoints = Math.floor((grandTotal * 5) / 100);
+
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId,
+                    points: earnedPoints,
+                    history: [{
                         type: "earned",
                         amount: earnedPoints,
                         description: `Points earned for Order ${orderUniqueId}`,
-                    });
-                }
+                    }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({
+                    type: "earned",
+                    amount: earnedPoints,
+                    description: `Points earned for Order ${orderUniqueId}`,
+                });
             }
-            await userPoints.save();
-            // Final response
-            res.status(201).json({ success: true, message: "Order created successfully.", order: { _id: order._id, orderUniqueId, invoiceNumber }, });
         }
+
+        await userPoints.save();
+
+        // ✅ Send Response
+        return res.status(201).json({
+            success: true,
+            message: "Order created successfully.",
+            order: {
+                _id: newOrder._id,
+                orderUniqueId,
+                invoiceNumber,
+                totalAmount: grandTotal,
+            },
+        });
     } catch (error) {
-        return next(
-            new ErrorHandler(error.message || "Failed to create order.", 500)
-        );
+        return next(new ErrorHandler(error.message || "Failed to create order.", 500));
     }
 });
+
+exports.verifyPayment = async (req, res) => {
+    try {
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id } = req.body;
+
+        console.log("Payment verification payload:", req.body);
+
+        // 1. Validate order exists
+        const order = await Order.findById(order_id);
+        if (!order) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        // 2. Generate expected signature
+        const generatedSignature = crypto
+            .createHmac("sha256", razorpayInstance.key_secret)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+            .digest("hex");
+
+        // 3. Compare signatures
+        if (generatedSignature === razorpay_signature) {
+            // 4. Update order details
+            order.paymentStatus = "Successfull";
+            order.paymentInfo = {
+                transactionId: razorpay_payment_id,
+                orderId: razorpay_order_id,
+                paymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature
+            };
+
+            order.recivedAmount = order.totalAmount;
+            order.pendingAmount = 0;
+
+            await order.save();
+
+            return res.status(200).json({
+                message: "Payment verified successfully",
+                orderId: order._id
+            });
+        } else {
+            return res.status(400).json({ error: "Payment verification failed" });
+        }
+    } catch (error) {
+        console.error("Error verifying Razorpay payment:", error);
+        return res.status(500).json({ error: "Server error while verifying payment" });
+    }
+};
 
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -150,12 +224,12 @@ exports.getOrderByID = catchAsyncErrors(async (req, res, next) => {
         const orderID = req.params.id;
 
         const order = await Order.findById(orderID)
-        .populate({
-            path: "products.subProduct",
-            populate: {
-              path: "productId",
-            }
-          })
+            .populate({
+                path: "products.subProduct",
+                populate: {
+                    path: "productId",
+                }
+            })
             .populate("userId", "name email , phone");
         console.log(order);
         res.status(200).json({ success: true, message: "Order Fetched Successfully", order });
@@ -198,9 +272,9 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
         const orders = await Order.find({ userId: userID })
             .sort({ createdAt: -1 })
             .populate("userId", "name email")
-            .populate("products.subProduct" )
-  
-        res.status(200).json({ success: true, message: "Orders Fetched Successfully",  orders, });
+            .populate("products.subProduct")
+
+        res.status(200).json({ success: true, message: "Orders Fetched Successfully", orders, });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
