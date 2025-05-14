@@ -174,7 +174,7 @@ exports.verifyPayment = async (req, res) => {
             .createHmac("sha256", razorpayInstance.key_secret)
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest("hex");
-
+        // console.log("generatedSignature:=", generatedSignature, razorpay_signature)
         // 3. Compare signatures
         if (generatedSignature === razorpay_signature) {
             // 4. Update order details
@@ -185,12 +185,10 @@ exports.verifyPayment = async (req, res) => {
                 paymentId: razorpay_payment_id,
                 razorpaySignature: razorpay_signature
             };
-
             order.recivedAmount = order.totalAmount;
             order.pendingAmount = 0;
 
             await order.save();
-
             return res.status(200).json({
                 message: "Payment verified successfully",
                 orderId: order._id
