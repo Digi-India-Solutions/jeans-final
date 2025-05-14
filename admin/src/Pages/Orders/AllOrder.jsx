@@ -163,7 +163,7 @@ const AllOrder = () => {
                                     <td>{order.totalAmount}</td>
                                     <td>{order.orderStatus}</td>
                                     <td>{order.paymentMethod}</td>
-                                    <td>{order.isPaid ? 'Paid' : 'Unpaid'}</td>
+                                    <td>{order.paymentStatus}</td>
                                     <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                                     <td>
                                         <Link

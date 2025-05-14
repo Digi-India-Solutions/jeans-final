@@ -1,32 +1,29 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
-import { getData } from "../../services/FetchNodeServices";
+import { getData, postData } from "../../services/FetchNodeServices";
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
 
-  // Fetch users from the API
+  // Fetch users
   const fetchUsers = async () => {
     try {
-      const response = await getData('api/user/get-all-user')
-      // console.log("responseXXXXXXXXXXXXX", response);
+      const response = await getData("api/user/get-all-user");
       if (response.success) {
-        setUsers(response?.data);
+        setUsers(response.data);
       } else {
         console.error("Failed to fetch users:", response.message);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching users:", error);
     }
   };
 
-  // Delete user by ID
+  // Delete user
   const deleteUser = async (userId) => {
-    // SweetAlert2 confirmation
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "You will not be able to recover this user!",
+      text: "You won't be able to recover this user!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -37,70 +34,134 @@ const AllUsers = () => {
     if (result.isConfirmed) {
       try {
         const response = await getData(`api/user/delete-user/${userId}`);
-        if (response.success === true) {
-          Swal.fire("Deleted!", "The user has been deleted.", "success");
-
+        if (response.success) {
+          Swal.fire("Deleted!", "User has been deleted.", "success");
           fetchUsers();
         } else {
-          Swal.fire("Failed!", response.data.message, "error");
+          Swal.fire("Error", response.message, "error");
         }
       } catch (error) {
-        console.log(error);
         Swal.fire("Error!", "Something went wrong!", "error");
       }
     }
   };
 
-  // Load data on component mount
+  // Toggle user status
+  const toggleStatus = async (userId, currentStatus) => {
+    const result = await Swal.fire({
+      title: "Change Status?",
+      text: `Mark user as ${currentStatus ? "Inactive" : "Active"}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, change it",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await getData(`api/user/toggle-status/${userId}`);
+        if (response.success) {
+          Swal.fire("Updated!", "User status updated.", "success");
+          fetchUsers();
+        } else {
+          Swal.fire("Error", response.message, "error");
+        }
+      } catch (error) {
+        Swal.fire("Error!", "Could not update status.", "error");
+      }
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  const handleOrderClick =async (users) => {
+    const orderData = users.map((user) => ({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      status: user.status,
+      createdAt: user.createdAt,
+    }));
+
+    // const jsonData = JSON.stringify(orderData);
+    const blob = await postData("api/user/bulk-order-notification", orderData);
+    console.log("blob", blob);
+  }
+
   return (
     <>
-      <div className="bread">
-        <div className="head">
-          <h4>All Users</h4>
+      <div className="bread" style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="header d-flex justify-content-between align-items-center" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+          <h4 className="mb-0 fw-bold" >All Users</h4>
+          <button className="btn btn-primary" onClick={() => handleOrderClick(users)}  >Place Order</button>
         </div>
       </div>
 
       <section className="main-table">
         <div className="table-responsive mt-4">
-          <table className="table table-bordered table-striped table-hover">
-            <thead>
+          <table className="table table-bordered table-hover align-middle">
+            <thead className="table-dark">
               <tr>
-                <th scope="col">Sr.No.</th>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Phone</th>
-                <th scope="col">Role</th>
-                <th scope="col">Created Date</th>
-                <th scope="col">Actions</th>
+                <th>Sr.No.</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.length > 0 ? (
                 users.map((user, index) => (
                   <tr key={user._id}>
-                    <th scope="row">{index + 1}</th>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phone}</td>
+                    <td>{index + 1}</td>
+                    <td>{user.name || "-"}</td>
+                    <td>{user.email || "-"}</td>
+                    <td>{user.phone || "-"}</td>
+                    <td>
+                      {[
+                        user?.address?.street,
+                        user?.address?.city,
+                        user?.address?.state,
+                        user?.address?.zipCode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "-"}
+                    </td>
                     <td>{user.role || "User"}</td>
-                    <td>{new Date(user.createdAt).toLocaleString()}</td>
+                    <td>
+                      <span
+                        className={`badge px-3 py-2 text-white fw-bold ${user.isActive ? "bg-success" : "bg-danger"}`}
+                        style={{ cursor: "pointer", fontSize: "0.9rem" }}
+                        onClick={() => toggleStatus(user._id, user.isActive)}
+                      >
+                        <i className={`fa ${user.isActive ? "fa-toggle-on" : "fa-toggle-off"} me-1`}></i>
+                        {user.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td>
+                      {new Date(user.createdAt).toLocaleDateString()}{" "}
+                      {new Date(user.createdAt).toLocaleTimeString()}
+                    </td>
                     <td>
                       <button
+                        className="btn btn-sm btn-outline-danger"
                         onClick={() => deleteUser(user._id)}
-                        className="bt delete"
                       >
-                        Delete <i className="fa-solid fa-trash"></i>
+                        <i className="fa fa-trash me-1"></i> Delete
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center">
+                  <td colSpan="9" className="text-center py-4">
                     No users found.
                   </td>
                 </tr>
