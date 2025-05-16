@@ -157,9 +157,57 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+// exports.verifyPayment = async (req, res) => {
+//     try {
+//         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id } = req.body;
+
+//         console.log("Payment verification payload:", req.body);
+
+//         // 1. Validate order exists
+//         const order = await Order.findById(order_id);
+//         if (!order) {
+//             return res.status(404).json({ error: "Order not found" });
+//         }
+
+//         // 2. Generate expected signature
+//         const generatedSignature = crypto
+//             .createHmac("sha256", razorpayInstance.key_secret)
+//             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+//             .digest("hex");
+//         console.log("razorpay_order_id:=", razorpay_order_id, "razorpay_payment_id:=", razorpay_payment_id)
+//         console.log("generatedSignature:=", generatedSignature, razorpay_signature)
+//         // 3. Compare signatures
+//         if (generatedSignature === razorpay_signature) {
+//             // 4. Update order details
+//             order.paymentStatus = "Successfull";
+//             order.paymentInfo = {
+//                 transactionId: razorpay_payment_id,
+//                 orderId: razorpay_order_id,
+//                 paymentId: razorpay_payment_id,
+//                 razorpaySignature: razorpay_signature
+//             };
+//             order.recivedAmount = order.totalAmount;
+//             order.pendingAmount = 0;
+
+//             await order.save();
+//             return res.status(200).json({ message: "Payment verified successfully", orderId: order._id });
+//         } else {
+//             return res.status(400).json({ error: "Payment verification failed" });
+//         }
+//     } catch (error) {
+//         console.error("Error verifying Razorpay payment:", error);
+//         return res.status(500).json({ error: "Server error while verifying payment" });
+//     }
+// };
+
 exports.verifyPayment = async (req, res) => {
     try {
-        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id } = req.body;
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            order_id,
+        } = req.body;
 
         console.log("Payment verification payload:", req.body);
 
@@ -169,38 +217,70 @@ exports.verifyPayment = async (req, res) => {
             return res.status(404).json({ error: "Order not found" });
         }
 
-        // 2. Generate expected signature
-        const generatedSignature = crypto
-            .createHmac("sha256", razorpayInstance.key_secret)
-            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-            .digest("hex");
-        // console.log("generatedSignature:=", generatedSignature, razorpay_signature)
-        // 3. Compare signatures
-        if (generatedSignature === razorpay_signature) {
-            // 4. Update order details
-            order.paymentStatus = "Successfull";
-            order.paymentInfo = {
-                transactionId: razorpay_payment_id,
-                orderId: razorpay_order_id,
-                paymentId: razorpay_payment_id,
-                razorpaySignature: razorpay_signature
-            };
-            order.recivedAmount = order.totalAmount;
-            order.pendingAmount = 0;
+        // 1.a Prevent verifying the same payment twice
+        if (order.paymentStatus === "Successful") {
+            return res
+                .status(200)
+                .json({ message: "Payment already verified", orderId: order._id });
+        }
 
-            await order.save();
-            return res.status(200).json({
-                message: "Payment verified successfully",
-                orderId: order._id
-            });
-        } else {
+        // 2. Build the expected signature
+        const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+        const secret = process.env.RAZORPAY_KEY_SECRET;
+        if (!secret) {
+            console.error("Missing RAZORPAY_SECRET in environment");
+            return res.status(500).json({ error: "Server misconfiguration" });
+        }
+
+        const expectedSignature = crypto
+            .createHmac("sha256", secret)
+            .update(body)
+            .digest("hex");
+
+        console.log(
+            "razorpay_order_id:",
+            razorpay_order_id,
+            "razorpay_payment_id:",
+            razorpay_payment_id
+        );
+        console.log("expectedSignature:", expectedSignature, "razorpay_signature:", razorpay_signature);
+
+        // 3. Safe compare (prevents timing attacks)
+        const sigBuffer = Buffer.from(razorpay_signature, "hex");
+        const expBuffer = Buffer.from(expectedSignature, "hex");
+
+        const signaturesMatch =
+            sigBuffer.length === expBuffer.length &&
+            crypto.timingSafeEqual(sigBuffer, expBuffer);
+
+        if (!signaturesMatch) {
+            console.warn("Signature verification failed");
             return res.status(400).json({ error: "Payment verification failed" });
         }
+
+        // 4. Update order on success
+        order.paymentStatus = "Successful";
+        order.paymentInfo = {
+            transactionId: razorpay_payment_id,
+            orderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+        };
+        order.receivedAmount = order.totalAmount;
+        order.pendingAmount = 0;
+
+        await order.save();
+
+        return res
+            .status(200)
+            .json({ message: "Payment verified successfully", orderId: order?._id });
     } catch (error) {
         console.error("Error verifying Razorpay payment:", error);
-        return res.status(500).json({ error: "Server error while verifying payment" });
+        return res
+            .status(500)
+            .json({ error: "Server error while verifying payment" });
     }
-};
+}
 
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     try {
