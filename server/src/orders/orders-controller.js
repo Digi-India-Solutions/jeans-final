@@ -266,7 +266,7 @@ exports.verifyPayment = async (req, res) => {
             paymentId: razorpay_payment_id,
             razorpaySignature: razorpay_signature,
         };
-        order.receivedAmount = order.totalAmount;
+        order.recivedAmount = order.totalAmount;
         order.pendingAmount = 0;
 
         await order.save();
