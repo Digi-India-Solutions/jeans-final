@@ -259,7 +259,7 @@ exports.verifyPayment = async (req, res) => {
         }
 
         // 4. Update order on success
-        order.paymentStatus = "Successful";
+        order.paymentStatus = "Successfull";
         order.paymentInfo = {
             transactionId: razorpay_payment_id,
             orderId: razorpay_order_id,
@@ -271,14 +271,10 @@ exports.verifyPayment = async (req, res) => {
 
         await order.save();
 
-        return res
-            .status(200)
-            .json({ message: "Payment verified successfully", orderId: order?._id });
+        return res.status(200).json({ message: "Payment verified successfully", orderId: order?._id });
     } catch (error) {
         console.error("Error verifying Razorpay payment:", error);
-        return res
-            .status(500)
-            .json({ error: "Server error while verifying payment" });
+        return res.status(500).json({ error: "Server error while verifying payment" });
     }
 }
 
