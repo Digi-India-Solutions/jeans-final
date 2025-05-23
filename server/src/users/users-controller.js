@@ -225,7 +225,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone } = req.body
+        const { name, email, street, city, state, zipCode, country, phone,shopname } = req.body
 
         let imageUrl = "";
         if (req.file) {
@@ -234,7 +234,7 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
             deleteLocalFile(req.file.path);
         }
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
+        const updatedUser = await User.findByIdAndUpdate(userId, { name,shopname, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));
@@ -279,10 +279,10 @@ exports.changePassword = catchAsyncErrors(async (req, res, next) => {
 exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone } = req.body
+        const { name, email, street, city, state, zipCode, country, phone,shopname } = req.body
 
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, address: { street, city, state, zipCode, country, }, });
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone,shopname, address: { street, city, state, zipCode, country, }, });
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));

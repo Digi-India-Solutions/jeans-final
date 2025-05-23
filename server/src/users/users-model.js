@@ -22,6 +22,11 @@ const userSchema = new Schema({
         trim: true,
         default: ""
     },
+    shopname: {
+        type: String,
+        trim: true,
+        default: ""
+    },
     address: {
         street: String,
         city: String,

@@ -98,8 +98,8 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
         });
 
         // 🧹 Clear Cart
-        cart.items = [];
-        cart.totalAmount = 0;
+        // cart.items = [];
+        // cart.totalAmount = 0;
         await cart.save();
 
         // 🎁 Handle Reward Points
@@ -207,9 +207,15 @@ exports.verifyPayment = async (req, res) => {
             razorpay_order_id,
             razorpay_signature,
             order_id,
+            userId
         } = req.body;
 
-        console.log("Payment verification payload:", req.body);
+        // console.log("Payment verification payload:", req.body);
+
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart || !cart.items || cart.items.length === 0) {
+            return res.status(400).json({ success: false, message: "Your cart is empty." });
+        }
 
         // 1. Validate order exists
         const order = await Order.findById(order_id);
@@ -271,12 +277,17 @@ exports.verifyPayment = async (req, res) => {
 
         await order.save();
 
+        cart.items = [];
+        cart.totalAmount = 0;
+        await cart.save();
+
         return res.status(200).json({ message: "Payment verified successfully", orderId: order?._id });
     } catch (error) {
         console.error("Error verifying Razorpay payment:", error);
         return res.status(500).json({ error: "Server error while verifying payment" });
     }
 }
+
 
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     try {
