@@ -18,6 +18,6 @@ router.get("/get-all-card", getAllCard)
 
 router.post("/apply-coupon/:id", applyCoupon)
 
-router.get("/get-card-by-subProduct-id", getCardBySubProductId)
+router.post("/get-card-by-subProduct-id", getCardBySubProductId)
 
 module.exports = router;
