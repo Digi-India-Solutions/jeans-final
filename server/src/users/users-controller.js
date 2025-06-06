@@ -68,7 +68,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
         const hash = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, });
-        sendEmailByUserForRequastActiveAccount({ email, fullName });
+        sendEmailByUserForRequastActiveAccount({ email, fullName,mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
         // sendWhatsappByUserForRequastActiveAccount({ phone: mobile, fullName });
 

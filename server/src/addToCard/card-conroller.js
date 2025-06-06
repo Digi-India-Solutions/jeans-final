@@ -172,7 +172,8 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
             .populate({ path: 'items.subProduct', populate: { path: 'productId', select: "productName" }, select: 'name subProductImages price finalPrice stock ' })
             .populate({ path: 'user', select: 'name email phone' });
 
-        console.log("XXXXXXXXXXX2", card)
+        let Totalquantity = card.items.map((item) => item?.quantity).reduce((a, b) => a + b, 0)
+        console.log("XXXXXXXXXXX2", card.items.map((item) => item?.quantity).reduce((a, b) => a + b, 0));
         // if (!card) {
         //     card = new Card({ user: id, items: [], totalAmount: 0, });
         //     await card.save();
@@ -190,7 +191,7 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
 
         // await card.save();
 
-        res.status(200).json({ success: true, card, });
+        res.status(200).json({ success: true, card, Totalquantity });
     } catch (error) {
         console.error('Get card error:', error);
         res.status(500).json({ success: false, message: 'Failed to get card', error: error.message, });

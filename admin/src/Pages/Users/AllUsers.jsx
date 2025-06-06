@@ -75,21 +75,17 @@ const AllUsers = () => {
     fetchUsers();
   }, []);
 
-  const handleOrderClick =async (users) => {
-    const orderData = users.map((user) => ({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-      status: user.status,
-      createdAt: user.createdAt,
-    }));
-
+  const handleOrderClick = async (users) => {
+    const orderData = users.map((user) => ({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, status: user.status, createdAt: user.createdAt, }));
     // const jsonData = JSON.stringify(orderData);
     const blob = await postData("api/user/bulk-order-notification", orderData);
     console.log("blob", blob);
+    if (blob?.success) {
+      Swal.fire("Success!", "Order notification sent successfully!", "success");
+    }
+    
   }
+
 
   return (
     <>
