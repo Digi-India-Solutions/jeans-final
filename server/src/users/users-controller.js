@@ -13,6 +13,7 @@ const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder
 const Order = require("../orders/orders-model");
 const dayjs = require("dayjs");
 const sendWhatsappByUserForRequastActiveAccount = require("../../utils/whatsAppCampaigns");
+const sendOrderNotificationByAdminOnWhatsapp = require("../../utils/whatsAppCampaigns");
 
 exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -393,6 +394,7 @@ exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
         for (const user of inactiveUsers) {
             console.log("user", user);
             await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
+            await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
         }
 
         return res.status(200).json({

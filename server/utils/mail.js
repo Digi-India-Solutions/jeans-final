@@ -12,7 +12,7 @@ const getSuperAdminEmail = async () => {
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_EMAIL_HOST, // Replace with your SMTP server host
     port: process.env.MAIL_EMAIL_PORT, // Replace with your SMTP server port
-    secure: true, // true for 465, false for other ports
+    secure: true,
     auth: {
         user: process.env.MAIL_EMAIL_ID, // Replace with your SMTP server username
         pass: process.env.MAIL_EMAIL_PASSWORD, // Replace with your SMTP server password

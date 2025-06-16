@@ -4,6 +4,7 @@ import { getData, postData } from "../../services/FetchNodeServices";
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Fetch users
   const fetchUsers = async () => {
@@ -76,14 +77,19 @@ const AllUsers = () => {
   }, []);
 
   const handleOrderClick = async (users) => {
-    const orderData = users.map((user) => ({ _id: user._id, name: user.name, email: user.email, phone: user.phone, address: user.address, status: user.status, createdAt: user.createdAt, }));
+    setLoading(true);
+    const orderData = users.map((user) => ({ _id: user?._id, name: user.name, email: user.email, phone: user.phone, address: user.address, status: user.status, createdAt: user.createdAt, }));
     // const jsonData = JSON.stringify(orderData);
     const blob = await postData("api/user/bulk-order-notification", orderData);
-    console.log("blob", blob);
+    // console.log("blob", blob);
     if (blob?.success) {
-      Swal.fire("Success!", "Order notification sent successfully!", "success");
+      setLoading(false);
+      Swal.fire("Success!", blob?.message || "Order notification sent successfully!", "success");
+    } else {
+      setLoading(false);
+      Swal.fire("Error!", "Failed to send order notification!", "error");
     }
-    
+
   }
 
 
@@ -92,7 +98,7 @@ const AllUsers = () => {
       <div className="bread" style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="header d-flex justify-content-between align-items-center" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
           <h4 className="mb-0 fw-bold" >All Users</h4>
-          <button className="btn btn-primary" onClick={() => handleOrderClick(users)}  >Place Order</button>
+          <button className="btn btn-primary" onClick={() => handleOrderClick(users)}  >{loading?"Sending...":"Send Order Notification"}</button>
         </div>
       </div>
 
