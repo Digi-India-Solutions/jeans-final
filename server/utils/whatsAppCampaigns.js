@@ -1,179 +1,45 @@
-// const fetch = require('node-fetch'); 
-// const { Headers } = fetch;
-
-// const msg91AuthKey = "431139AqSI3v7wQJWi66fd8388P1";
-// const ADMIN_WHATSAPP_NUMBER = "919131734930";
-
-// const sendWhatsappByUserForRequastActiveAccount = async ({ phone, fullName }) => {
-//     try {
-//       const myHeaders = new Headers();
-//       myHeaders.append("Content-Type", "application/json");
-//       myHeaders.append("authkey", msg91AuthKey);
-  
-//       const body = {
-//         integrated_number: "9131734930",
-//         content_type: "template",
-//         payload: {
-//           messaging_product: "whatsapp",
-//           type: "template",
-//           template: {
-//             name: "account_activation_request",
-//             language: {
-//               code: "en_US",
-//               policy: "deterministic"
-//             },
-//             namespace: null,
-//             to_and_components: [
-//               {
-//                 to: [ADMIN_WHATSAPP_NUMBER],
-//                 components: {
-//                   body_1: { type: "text", value: fullName },
-//                   body_2: { type: "text", value: phone }
-//                 }
-//               }
-//             ]
-//           }
-//         }
-//       };
-  
-//       const response = await fetch(
-//         "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/",
-//         {
-//           method: "POST",
-//           headers: myHeaders,
-//           body: JSON.stringify(body)
-//         }
-//       );
-  
-//       const result = await response.text();
-//       console.log("✅ Admin WhatsApp notified:", result);
-//     } catch (error) {
-//       console.error("❌ Error sending WhatsApp message:", error);
-//     }
-//   };
-  
-//   module.exports = sendWhatsappByUserForRequastActiveAccount;
-
-// const sendOrderNotificationByAdminOnWhatsapp = async ({ email, name, mobile }) => {
-//     const myHeaders = new Headers();
-//     myHeaders.append("Content-Type", "application/json");
-//     myHeaders.append("authkey", msg91AuthKey);
-
-//     const raw = JSON.stringify({
-//         "integrated_number": "919177500520", // MSG91-approved sender number
-//         "content_type": "template",
-//         "payload": {
-//             "messaging_product": "whatsapp",
-//             "type": "template",
-//             "template": {
-//                 "name": "order_notification", // your approved template name
-//                 "language": {
-//                     "code": "en_US",
-//                     "policy": "deterministic"
-//                 },
-//                 "namespace": null,
-//                 "to_and_components": [
-//                     {
-//                         "to": [ADMIN_WHATSAPP_NUMBER], // WhatsApp number of admin
-//                         "components": {
-//                             "body_1": {
-//                                 "type": "text",
-//                                 "value": name
-//                             },
-//                             "body_2": {
-//                                 "type": "text",
-//                                 "value": mobile
-//                             },
-//                             "body_3": {
-//                                 "type": "text",
-//                                 "value": email
-//                             }
-//                         }
-//                     }
-//                 ]
-//             }
-//         }
-//     });
-
-//     const requestOptions = { method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' };
-
-//     fetch("https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/", requestOptions)
-//         .then(response => response.text())
-//         .then(result => console.log("Admin WhatsApp notified:", result))
-//         .catch(error => console.error("Error sending WhatsApp message:", error));
-// };
-
-// module.exports = sendOrderNotificationByAdminOnWhatsapp
-
-
 const fetch = require("node-fetch");
+const FormData = require("form-data");
 
-const MSG91_API_URL = "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/";
-const MSG91_AUTH_KEY = "431139AqSI3v7wQJWi66fd8388P1";
-const ADMIN_WHATSAPP_NUMBER = "919131734930";
-const INTEGRATED_NUMBER = "919177500520"; // your MSG91 sender number
+const API_URL_11za = "https://app.11za.in/apis/template/sendTemplate";
+const authToken_11za = "U2FsdGVkX1/R3Dvznq1e0S+QRvIfFac3XfAMYcjsuBSONCNWnNTGblIyFjTKJkR89w1lYYf1TCWSluX/y2O2bVLKa16qP7LzS3gtHOOlF5M2QyxQcleJ2AsFD4JwZektEKSz3MpUXLagDXkyKj0ZmZkLgHlK8VeMLb1IEH9MAMR2wwTFgXjRJy6O6p+k9SBB";
+const ORIGIN_WEBSITE = "http://www.swagside.in/";
 
-// Reusable function to send WhatsApp message
-const sendWhatsAppMessage = async (templateName, components) => {
+
+const sendWhatsAppMessage = async ({ sendTo, templateName = "", data, language = "en", buttonValue = "", isTinyURL = "yes", }) => {
   try {
-    const response = await fetch(MSG91_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        authkey: MSG91_AUTH_KEY,
-      },
-      body: JSON.stringify({
-        integrated_number: INTEGRATED_NUMBER,
-        content_type: "template",
-        payload: {
-          messaging_product: "whatsapp",
-          type: "template",
-          template: {
-            name: templateName,
-            language: {
-              code: "en_US",
-              policy: "deterministic",
-            },
-            to_and_components: [
-              {
-                to: [ADMIN_WHATSAPP_NUMBER],
-                components,
-              },
-            ],
-          },
-        },
-      }),
-    });
+    if (!sendTo || typeof sendTo !== "string") {
+      throw new Error("Invalid 'sendTo' value; expected string.");
+    }
+
+    if (!templateName || typeof templateName !== "string") {
+      throw new Error("Invalid 'templateName' value; expected string.");
+    }
+
+    const form = new FormData();
+    form.append("authToken", authToken_11za);
+    form.append("sendto", sendTo);
+    form.append("originWebsite", ORIGIN_WEBSITE);
+    form.append("templateName", templateName);
+    form.append("data", data.name);
+    form.append("language", language);
+    if (buttonValue) form.append("buttonValue", buttonValue);
+    form.append("isTinyURL", isTinyURL);
+    const response = await fetch(API_URL_11za, { method: "POST", body: form, });
 
     const result = await response.text();
     console.log(`✅ WhatsApp message sent (${templateName}):`, result);
   } catch (error) {
-    console.error(`❌ Error sending WhatsApp message (${templateName}):`, error);
+    console.error(`❌ Error sending WhatsApp message (${templateName}):`, error.message);
   }
 };
 
-// 1. Account Activation Request Notification
-const sendWhatsappByUserForRequestActiveAccount = async ({ phone, fullName }) => {
-  const components = {
-    body_1: { type: "text", value: fullName },
-    body_2: { type: "text", value: phone },
-  };
 
-  await sendWhatsAppMessage("account_activation_request", components);
-};
-
-// 2. Order Notification by Admin
 const sendOrderNotificationByAdminOnWhatsapp = async ({ name, mobile, email }) => {
-  const components = {
-    body_1: { type: "text", value: name },
-    body_2: { type: "text", value: mobile },
-    body_3: { type: "text", value: email },
-  };
-
-  await sendWhatsAppMessage("order_notification", components);
+  const data = { name, mobile, email, };
+  await sendWhatsAppMessage({ sendTo: mobile, templateName: "customare_order_notification_copy_1", data, });
 };
 
 module.exports = {
-  sendWhatsappByUserForRequestActiveAccount,
   sendOrderNotificationByAdminOnWhatsapp,
 };
