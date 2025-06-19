@@ -12,8 +12,7 @@ const { uploadImage } = require("../../middleware/Uploads");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
 const Order = require("../orders/orders-model");
 const dayjs = require("dayjs");
-const sendWhatsappByUserForRequastActiveAccount = require("../../utils/whatsAppCampaigns");
-const {sendOrderNotificationByAdminOnWhatsapp} = require("../../utils/whatsAppCampaigns");
+const { sendOrderNotificationByAdminOnWhatsapp, sendWhatsAppByUserForRequastActiveAccount, sendWhatsAppByUserForRequastDeactiveAccount, sendWhatsAppByAdminForRequastActiveAccount } = require("../../utils/whatsAppCampaigns");
 
 exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -69,9 +68,10 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
         const hash = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, });
-        sendEmailByUserForRequastActiveAccount({ email, fullName,mobile });
+        sendEmailByUserForRequastActiveAccount({ email, fullName, mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
-        // sendWhatsappByUserForRequastActiveAccount({ phone: mobile, fullName });
+        sendWhatsAppByUserForRequastActiveAccount({ name: fullName, phone: mobile, });
+        sendWhatsAppByAdminForRequastActiveAccount({ email, name: fullName, phone: mobile, });
 
         sendToken(newUser, 200, res, "User Created Successfully");
 
@@ -226,7 +226,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone,shopname } = req.body
+        const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body
 
         let imageUrl = "";
         if (req.file) {
@@ -235,7 +235,7 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
             deleteLocalFile(req.file.path);
         }
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name,shopname, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, shopname, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));
@@ -280,10 +280,10 @@ exports.changePassword = catchAsyncErrors(async (req, res, next) => {
 exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone,shopname } = req.body
+        const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body
 
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone,shopname, address: { street, city, state, zipCode, country, }, });
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, shopname, address: { street, city, state, zipCode, country, }, });
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));
@@ -363,6 +363,7 @@ exports.toggleStatusUserId = catchAsyncErrors(async (req, res, next) => {
         const fullName = user.name
         const isActive = user.isActive
         sendEmailActiveUserAccount({ email, fullName, isActive });
+        sendWhatsAppByUserForRequastDeactiveAccount({ name: fullName, phone: user.phone, isActive });
         res.json({ success: true, message: "Status updated successfully" });
     } catch (err) {
         console.log("ERROR:-", err);
@@ -393,7 +394,7 @@ exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
         // Send notification logic (you can replace this with email/SMS/etc)
         for (const user of inactiveUsers) {
             console.log("user", user);
-            // await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
+            await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
             await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
         }
 
@@ -403,5 +404,49 @@ exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
         });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+// exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const days = parseInt(req.params.days);
+
+//         const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+//         const orders = await Order.find({ createdAt: { $gte: sinceDate } })
+//         const Users = await User.find();
+//         const userIdsWithOrders = Users?.map(user => orders?.filter(order => order?.userId?.toString() === user?._id?.toString()));
+//         console.log("userIdsWithOrders:=>", userIdsWithOrders.length);
+//         return res.json({ status: true, data: userIdsWithOrders });
+
+//     } catch (error) {
+//         console.error("Error in getUsersWithoutOrders:", error);
+//         return res.status(500).json({ status: false, message: "Server Error" });
+//     }
+// });
+
+exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const days = parseInt(req.params.days);
+
+        if (isNaN(days) || days <= 0) {
+            return res.status(400).json({ status: false, message: "Invalid number of days" });
+        }
+
+        const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+        const recentOrders = await Order.find({ createdAt: { $gte: sinceDate } }).select("userId");
+
+        const orderedUserIds = new Set(recentOrders.map(order => order?.userId));
+
+        const usersWithoutOrders = await User.find({ _id: { $nin: Array.from(orderedUserIds) } });
+
+        const formattedUsers = usersWithoutOrders.map(user => ({ _id: user._id, name: user.name, email: user.email, phone: user.phone, isActive: user.isActive, createdAt: user?.createdAt, }));
+
+        return res.status(200).json({ status: true, data: formattedUsers });
+
+    } catch (error) {
+        console.error("Error in getUsersWithoutOrders:", error);
+        return res.status(500).json({ status: false, message: "Server Error" });
     }
 });

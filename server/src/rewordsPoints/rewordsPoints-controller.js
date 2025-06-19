@@ -17,7 +17,7 @@ exports.getRewardPoints = catchAsyncErrors(async (req, res, next) => {
 exports.addRewardPoints = catchAsyncErrors(async (req, res, next) => {
     const { userId, amount, description } = req.body;
 
-    const points = Math.floor((amount * 5) / 100);
+    const points = Math.floor((amount * 2.5) / 100);
 
     let userPoints = await RewardPoints.findOne({ userId });
 

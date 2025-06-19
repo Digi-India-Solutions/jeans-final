@@ -7,6 +7,8 @@ const ErrorHandler = require("../../utils/ErrorHandler");
 const Cart = require("../addToCard/card-model");
 const crypto = require("crypto");
 const razorpayInstance = require("../../utils/razorpay");
+const { sendThankYouEmailAdmin, sendThankYouEmail } = require("../../utils/mail");
+const { sendOrderThankByUserOnWhatsapp } = require("../../utils/whatsAppCampaigns");
 
 exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -100,46 +102,8 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
         // 🧹 Clear Cart
         // cart.items = [];
         // cart.totalAmount = 0;
-        await cart.save();
+        // await cart.save();
 
-        // 🎁 Handle Reward Points
-        let userPoints = await RewardPoints.findOne({ userId });
-        if (rewardPointsUsed > 0) {
-            if (!userPoints || userPoints.points < rewardPointsUsed) {
-                return res.status(400).json({ success: false, message: "Insufficient reward points." });
-            }
-
-            userPoints.points -= rewardPointsUsed;
-            userPoints.history.push({
-                type: "redeemed",
-                amount: rewardPointsUsed,
-                description: `Points redeemed for Order ${orderUniqueId}`,
-            });
-        } else {
-            // Earn 5% points
-            const earnedPoints = Math.floor((grandTotal * 5) / 100);
-
-            if (!userPoints) {
-                userPoints = new RewardPoints({
-                    userId,
-                    points: earnedPoints,
-                    history: [{
-                        type: "earned",
-                        amount: earnedPoints,
-                        description: `Points earned for Order ${orderUniqueId}`,
-                    }],
-                });
-            } else {
-                userPoints.points += earnedPoints;
-                userPoints.history.push({
-                    type: "earned",
-                    amount: earnedPoints,
-                    description: `Points earned for Order ${orderUniqueId}`,
-                });
-            }
-        }
-
-        await userPoints.save();
 
         // ✅ Send Response
         return res.status(201).json({
@@ -202,13 +166,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
 
 exports.verifyPayment = async (req, res) => {
     try {
-        const {
-            razorpay_payment_id,
-            razorpay_order_id,
-            razorpay_signature,
-            order_id,
-            userId
-        } = req.body;
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, userId, rewardPointsUsed, orderUniqueId } = req.body;
 
         // console.log("Payment verification payload:", req.body);
 
@@ -218,16 +176,14 @@ exports.verifyPayment = async (req, res) => {
         }
 
         // 1. Validate order exists
-        const order = await Order.findById(order_id);
+        const order = await Order.findById(order_id).populate("userId");
         if (!order) {
             return res.status(404).json({ error: "Order not found" });
         }
 
         // 1.a Prevent verifying the same payment twice
         if (order.paymentStatus === "Successful") {
-            return res
-                .status(200)
-                .json({ message: "Payment already verified", orderId: order._id });
+            return res.status(200).json({ message: "Payment already verified", orderId: order?._id });
         }
 
         // 2. Build the expected signature
@@ -243,13 +199,8 @@ exports.verifyPayment = async (req, res) => {
             .update(body)
             .digest("hex");
 
-        console.log(
-            "razorpay_order_id:",
-            razorpay_order_id,
-            "razorpay_payment_id:",
-            razorpay_payment_id
-        );
-        console.log("expectedSignature:", expectedSignature, "razorpay_signature:", razorpay_signature);
+        // console.log("razorpay_order_id:", razorpay_order_id, "razorpay_payment_id:", razorpay_payment_id);
+        // console.log("expectedSignature:", expectedSignature, "razorpay_signature:", razorpay_signature);
 
         // 3. Safe compare (prevents timing attacks)
         const sigBuffer = Buffer.from(razorpay_signature, "hex");
@@ -266,12 +217,7 @@ exports.verifyPayment = async (req, res) => {
 
         // 4. Update order on success
         order.paymentStatus = "Successfull";
-        order.paymentInfo = {
-            transactionId: razorpay_payment_id,
-            orderId: razorpay_order_id,
-            paymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-        };
+        order.paymentInfo = { transactionId: razorpay_payment_id, orderId: razorpay_order_id, paymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, };
         order.recivedAmount = order.totalAmount;
         order.pendingAmount = 0;
 
@@ -281,6 +227,37 @@ exports.verifyPayment = async (req, res) => {
         cart.totalAmount = 0;
         await cart.save();
 
+        /////////////ADD POINTS//////////////////////////////
+        let userPoints = await RewardPoints.findOne({ userId });
+        if (rewardPointsUsed > 0) {
+            if (!userPoints || userPoints?.points < rewardPointsUsed) {
+                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+            }
+
+            userPoints.points -= rewardPointsUsed;
+            userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
+        } else {
+            // Earn 5% points
+            const earnedPoints = Math.floor((grandTotal * 2.5) / 100);
+
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
+            }
+        }
+
+        await userPoints.save();
+        //////////////////////////////////////////////////////////////////////////////////////////////
+
+        sendThankYouEmail({ email: order?.userId?.email, name: order?.userId?.name, phone: order?.userId?.phone });
+        sendThankYouEmailAdmin({ email: order?.userId?.email, name: order?.userId?.name, phone: order?.userId?.phone });
+        sendOrderThankByUserOnWhatsapp({ name: order?.userId?.name, mobile: order?.userId?.phone, email: order?.userId?.email });
         return res.status(200).json({ message: "Payment verified successfully", orderId: order?._id });
     } catch (error) {
         console.error("Error verifying Razorpay payment:", error);
@@ -383,22 +360,23 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
 //     }
 // })
 
-// exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const orderID = req.params.id;
+exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderID = req.params.id;
+        console.log("orderID:=>", orderID);
+        const orderData = await Order.findByIdAndDelete(orderID);
 
-//         const orderData = await Order.findByIdAndDelete(orderID);
+        if (!orderData) {
+            return res.status(204).json({ status: false, message: "Order not found" });
+            // return next(new ErrorHandler("Order not found!", 400));
+        }
+        return res.status(200).json({ status: true, message: "Payment verified successfully", data: orderData });
+        // sendResponse(res, 200, "Order deleted successfully", orderData);
 
-//         if (!orderData) {
-//             return next(new ErrorHandler("Order not found!", 400));
-//         }
-
-//         sendResponse(res, 200, "Order deleted successfully", orderData);
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
 
 
 

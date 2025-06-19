@@ -113,16 +113,16 @@ const AllRewardPoint = () => {
                     <tbody>
                         {rewards.length > 0 ? (
                             rewards.map((reward, index) => (
-                                <tr key={reward._id}>
+                                <tr key={reward?._id}>
                                     <td>{index + 1}</td>
-                                    <td>{reward?.userId.name}</td>
-                                    <td>{reward?.userId.email}</td>
+                                    <td>{reward?.userId?.name}</td>
+                                    <td>{reward?.userId?.email}</td>
                                     <td>{reward?.points}</td>
                                     <td>
                                         <input
                                             type="checkbox"
                                             checked={reward?.status}
-                                            onChange={(e) => handleCheckboxChange(e, reward._id)}
+                                            onChange={(e) => handleCheckboxChange(e, reward?._id)}
                                         />
                                     </td>
                                     <td>
@@ -133,7 +133,7 @@ const AllRewardPoint = () => {
                                         {/* </Link> */}
                                     </td>
                                     <td>
-                                        <button className="bt delete" onClick={() => handleDelete(reward._id)}>
+                                        <button className="bt delete" onClick={() => handleDelete(reward?._id)}>
                                             Delete <i className="fa-solid fa-trash"></i>
                                         </button>
                                     </td>

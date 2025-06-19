@@ -41,8 +41,8 @@ const AllOrder = () => {
 
             if (confirmation.isConfirmed) {
                 const body = { orderId: orderId }
-                const response = await postData(`api/orders/order-delete`, body);
-                if (response?.success === true) {
+                const response = await postData(`api/order/order-delete/${orderId}`, body);
+                if (response?.status === true) {
                     setOrders((prevOrders) => prevOrders.filter(order => order._id !== orderId));
                     setFilteredOrders((prevOrders) => prevOrders.filter(order => order._id !== orderId));
                     toast.success("Order deleted successfully.");

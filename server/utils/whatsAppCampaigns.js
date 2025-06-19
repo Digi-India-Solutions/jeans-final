@@ -21,7 +21,14 @@ const sendWhatsAppMessage = async ({ sendTo, templateName = "", data, language =
     form.append("sendto", sendTo);
     form.append("originWebsite", ORIGIN_WEBSITE);
     form.append("templateName", templateName);
-    form.append("data", data.name);
+    if (data.title === 'Anibhavi Creation') {
+      form.append("data1", data.name),
+        form.append("data2", data.email),
+        form.append("data3", data.phone),
+        form.append("data4", data?.title)
+    } else {
+      form.append("data", data.name);
+    }
     form.append("language", language);
     if (buttonValue) form.append("buttonValue", buttonValue);
     form.append("isTinyURL", isTinyURL);
@@ -34,12 +41,35 @@ const sendWhatsAppMessage = async ({ sendTo, templateName = "", data, language =
   }
 };
 
-
 const sendOrderNotificationByAdminOnWhatsapp = async ({ name, mobile, email }) => {
   const data = { name, mobile, email, };
-  await sendWhatsAppMessage({ sendTo: mobile, templateName: "customare_order_notification_copy_1", data, });
+  await sendWhatsAppMessage({ sendTo: mobile, templateName: "customare_order_notification_copy_1", data, }); thank_your_for_order
 };
+
+const sendOrderThankByUserOnWhatsapp = async ({ name, mobile, email }) => {
+  const data = { name, mobile, email, };
+  await sendWhatsAppMessage({ sendTo: mobile, templateName: "thank_your_for_order", data, });
+};
+
+const sendWhatsAppByUserForRequastActiveAccount = async ({ name, phone }) => {
+  const data = { name, phone };
+  await sendWhatsAppMessage({ sendTo: phone, templateName: "active_account", data, });
+};
+
+const sendWhatsAppByUserForRequastDeactiveAccount = async ({ name, phone, isActive }) => {
+  const data = { name, phone, isActive };
+  await sendWhatsAppMessage({ sendTo: phone, templateName: isActive ? "active_account" : "deactivate_account_copy_1", data, });
+};
+
+const sendWhatsAppByAdminForRequastActiveAccount = async ({ email, name, phone }) => {
+  const data = { email, name, phone, title: "Anibhavi Creation" };
+  await sendWhatsAppMessage({ sendTo: phone, templateName: "create_admin_accounte", data, });
+}
 
 module.exports = {
   sendOrderNotificationByAdminOnWhatsapp,
+  sendOrderThankByUserOnWhatsapp,
+  sendWhatsAppByUserForRequastActiveAccount,
+  sendWhatsAppByUserForRequastDeactiveAccount,
+  sendWhatsAppByAdminForRequastActiveAccount
 };

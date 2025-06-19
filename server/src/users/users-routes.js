@@ -4,7 +4,7 @@ const upload = require("../../middleware/multer")
 
 const { sendOtpToUserSignup, verifyOtpToUserSignup, userLogin, sendResetPasswordEmail, resetPassword,
     getAllUser, getUserById, deleteUser, updateUserWithPhoto, changePassword, updateUser,
-    sendMessageWhatsapp, toggleStatusUserId ,bulkOrderNotification} = require("./users-controller");
+    sendMessageWhatsapp, toggleStatusUserId, bulkOrderNotification,getUsersWithoutOrders } = require("./users-controller");
 
 router.post("/send-otp-for-user-signup", sendOtpToUserSignup);
 
@@ -33,5 +33,7 @@ router.post("/send-message-whatsapp", sendMessageWhatsapp);
 router.get("/toggle-status/:userId", toggleStatusUserId)
 
 router.post("/bulk-order-notification", bulkOrderNotification);
+
+router.get("/get-users-without-orders/:days", getUsersWithoutOrders);
 
 module.exports = router;

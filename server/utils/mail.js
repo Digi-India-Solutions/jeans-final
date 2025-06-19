@@ -595,7 +595,7 @@ exports.sendEmailActiveUserAccount = async ({ email, fullName, isActive }) => {
     return true;
 };
 
-exports.sendOrderNotification = async ({ email, name, mobile }) => {
+exports.sendOrderNotification = async ({ email, name, phone }) => {
     const subject = "🛒 We Miss You! Come Back and Shop with Us";
 
     const html = `
@@ -654,4 +654,126 @@ exports.sendOrderNotification = async ({ email, name, mobile }) => {
     </html>`;
 
     await sendMail({ to: email, subject, html });
+};
+
+exports.sendThankYouEmail = async ({ email, name, phone }) => {
+    const subject = "🙏 Thank You for Your Order!";
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+                text-align: center;
+            }
+            h2 {
+                color: #28a745;
+                margin-bottom: 20px;
+            }
+            p {
+                font-size: 16px;
+                color: #555555;
+                margin-bottom: 20px;
+            }
+            .btn {
+                display: inline-block;
+                padding: 12px 25px;
+                background-color: #28a745;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .footer {
+                font-size: 12px;
+                color: #999999;
+                margin-top: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Thank You, ${name}! 🙌</h2>
+            <p>We appreciate your order and the trust you’ve placed in us.</p>
+            <p>We’re preparing your package and will notify you once it’s on the way. 🚚</p>
+            <a href="https://yourwebsite.com/orders" class="btn">View Your Order</a>
+            <p class="footer">Need help? Contact us at ${process.env.SUPPORT_PHONE || "our support team"}<br>– YourWebsite Team</p>
+        </div>
+    </body>
+    </html>`;
+
+    await sendMail({ to: email, subject, html });
+};
+exports.sendThankYouEmailAdmin = async ({ email, name, phone }) => {
+    const subject = "🙏 Thank You for Your Order!";
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+                text-align: center;
+            }
+            h2 {
+                color: #28a745;
+                margin-bottom: 20px;
+            }
+            p {
+                font-size: 16px;
+                color: #555555;
+                margin-bottom: 20px;
+            }
+            .btn {
+                display: inline-block;
+                padding: 12px 25px;
+                background-color: #28a745;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            .footer {
+                font-size: 12px;
+                color: #999999;
+                margin-top: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Thank You, ${name}! 🙌</h2>
+            <p>We appreciate your order and the trust you’ve placed in us.</p>
+            <p>We’re preparing your package and will notify you once it’s on the way. 🚚</p>
+            <a href="https://yourwebsite.com/orders" class="btn">View Your Order</a>
+            <p class="footer">Need help? Contact us at ${process.env.SUPPORT_PHONE || "our support team"}<br>– YourWebsite Team</p>
+        </div>
+    </body>
+    </html>`;
+    await sendMail({ to: process.env.MAIL_EMAIL_ID, subject, html });
 };
