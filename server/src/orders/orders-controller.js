@@ -233,7 +233,6 @@ exports.verifyPayment = async (req, res) => {
             if (!userPoints || userPoints?.points < rewardPointsUsed) {
                 return res.status(400).json({ success: false, message: "Insufficient reward points." });
             }
-
             userPoints.points -= rewardPointsUsed;
             userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
         } else {
@@ -341,6 +340,7 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
 // exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
 //     try {
 //         const orderID = req.params.id;
@@ -378,12 +378,6 @@ exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
     }
 })
 
-
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
 
 // exports.searchOrders = catchAsyncErrors(async (req, res, next) => {
 //     try {

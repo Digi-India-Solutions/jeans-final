@@ -169,11 +169,12 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
         //     return res.status(400).json({ success: false, message: 'Invalid user ID' });
         // }
         let card = await Card.findOne({ user: id })
-            .populate({ path: 'items.subProduct', populate: { path: 'productId', select: "productName" }, select: 'name subProductImages price finalPrice stock ' })
+            .populate({ path: 'items.subProduct', populate: { path: 'productId', select: "productName sizes" }, select: 'name subProductImages price finalPrice stock sizes' })
             .populate({ path: 'user', select: 'name email phone' });
 
         let Totalquantity = card.items.map((item) => item?.quantity).reduce((a, b) => a + b, 0)
-        console.log("XXXXXXXXXXX2", card.items.map((item) => item?.quantity).reduce((a, b) => a + b, 0));
+        let TotlePsc = card.items.map((item) => item?.subProduct.sizes.length * item?.quantity).reduce((a, b) => a + b, 0)
+        console.log("XXXXXXXXXXX2", card.items.map((item) => item?.subProduct.sizes.length * item?.quantity).reduce((a, b) => a + b, 0));
         // if (!card) {
         //     card = new Card({ user: id, items: [], totalAmount: 0, });
         //     await card.save();
@@ -191,7 +192,7 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
 
         // await card.save();
 
-        res.status(200).json({ success: true, card, Totalquantity });
+        res.status(200).json({ success: true, card, Totalquantity, TotlePsc });
     } catch (error) {
         console.error('Get card error:', error);
         res.status(500).json({ success: false, message: 'Failed to get card', error: error.message, });
