@@ -264,7 +264,6 @@ exports.verifyPayment = async (req, res) => {
     }
 }
 
-
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     try {
         const totalOrders = await Order.countDocuments();
