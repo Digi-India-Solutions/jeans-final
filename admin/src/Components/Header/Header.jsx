@@ -19,7 +19,7 @@ const Header = () => {
   const navItems = [
     { to: "/", label: "Dashboard", icon: "fa-solid fa-gauge" },
     { to: "/all-orders", label: "Manage Orders", icon: "fa-solid fa-truck" },
-    { to: "/all-cards", label: "All Cards", icon: "fa-solid fa-star" },
+    { to: "/all-cards", label: "All Carts", icon: "fa-solid fa-star" },
     { to: "/all-dieses", label: "All Category", icon: "fa-solid fa-virus" },
     { to: "/all-products", label: "All Products", icon: "fa-solid fa-boxes" },
     { to: "/all-Sub-products", label: "All Sub Products", icon: "fa-solid fa-boxes" },

@@ -41,7 +41,7 @@ exports.getAllReviews = catchAsyncErrors(async (req, res) => {
         const reviews = await (await Review.find().populate('userId').populate('productId')).reverse()
 
         if (!reviews || reviews.length === 0) {
-            return res.status(204).json({ success: false, message: 'No reviews found' });
+            return res.status(201).json({ success: false, message: 'No reviews found' });
         }
 
         res.status(200).json({ success: true, message: 'Reviews fetched successfully', reviews });

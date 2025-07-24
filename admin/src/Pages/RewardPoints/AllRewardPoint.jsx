@@ -13,11 +13,10 @@ const AllRewardPoint = () => {
     useEffect(() => {
         const fetchRewards = async () => {
             try {
-                const response = await getData('api/reward/get-All-rewards');
+                const response = await getData('api/review/get-all-review');
+                console.log('SSSSSSXXXXXXXSSSSSSS:--', response);
                 if (response?.success) {
-                    setRewards(response.rewards.reverse());
-                } else {
-                    toast.error(response.message || 'Failed to fetch rewards');
+                    setRewards(response?.rewards.reverse());
                 }
             } catch (error) {
                 console.error('Error fetching rewards:', error);
