@@ -13,8 +13,8 @@ const AllRewardPoint = () => {
     useEffect(() => {
         const fetchRewards = async () => {
             try {
-                const response = await getData('api/review/get-all-review');
-                console.log('SSSSSSXXXXXXXSSSSSSS:--', response);
+                const response = await getData('api/reward/get-All-rewards');
+                // console.log('SSSSSSXXXXXXXSSSSSSS:--', response);
                 if (response?.success) {
                     setRewards(response?.rewards.reverse());
                 }

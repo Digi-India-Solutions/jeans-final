@@ -157,14 +157,14 @@ const AllOrder = () => {
                                 <tr key={order._id}>
                                     <th scope="row">{index + 1}</th>
                                     <td>
-                                        <Link to={`/order-details/${order._id}`}>{order._id}</Link>
+                                        <Link to={`/order-details/${order?._id}`}>{order?._id}</Link>
                                     </td>
-                                    <td>{order.products?.length}</td>
-                                    <td>{order.totalAmount}</td>
-                                    <td>{order.orderStatus}</td>
-                                    <td>{order.paymentMethod}</td>
-                                    <td>{order.paymentStatus}</td>
-                                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                                    <td>{order?.products?.length}</td>
+                                    <td>{order?.totalAmount}</td>
+                                    <td>{order?.orderStatus}</td>
+                                    <td>{order?.paymentMethod}</td>
+                                    <td>{order?.paymentStatus}</td>
+                                    <td>{new Date(order?.createdAt).toLocaleDateString()}</td>
                                     <td>
                                         <Link
                                             to={`/order-details/${order?._id}`}

@@ -326,14 +326,17 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 
 exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { pageNumber } = req.query;
+        // const { pageNumber } = req.query;
         const userID = req.params.id;
 
-        const orders = await Order.find({ userId: userID })
-            .sort({ createdAt: -1 })
-            .populate("userId", "name email")
-            .populate("products.subProduct")
-
+        const orders = await Order.find({ userId: userID }).sort({ createdAt: -1 }).populate("userId", "name email").populate("products.subProduct")
+        
+        if (!orders || orders.length === 0) {
+            return res.status(201).json({ success: false, message: "Your Orders is empty" });
+        }
+        else if (!orders[0]?.products?.length >= 0) {
+            return res.status(201).json({ success: false, message: "You have no Orders" });
+        }
         res.status(200).json({ success: true, message: "Orders Fetched Successfully", orders, });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
