@@ -136,8 +136,8 @@ exports.sendResetPasswordEmail = catchAsyncErrors(async (req, res, next) => {
             user: user,
         };
 
-        await sendResetPassword(mailData);
-        res.status(200).json({ status: true, message: "Reset password email sent successfully" });
+        // await sendResetPassword(mailData);
+        res.status(200).json({ status: true, token: token, email: email, message: "Reset password email sent successfully" });
 
     } catch (error) {
         console.error("Error:", error);

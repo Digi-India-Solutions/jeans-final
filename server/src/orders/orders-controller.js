@@ -171,9 +171,9 @@ exports.verifyPayment = async (req, res) => {
         // console.log("Payment verification payload:", req.body);
 
         const cart = await Cart.findOne({ user: userId });
-        if (!cart || !cart.items || cart.items.length === 0) {
-            return res.status(400).json({ success: false, message: "Your cart is empty." });
-        }
+        // if (!cart || !cart.items || cart.items.length === 0) {
+        //     return res.status(400).json({ success: false, message: "Your cart is empty." });
+        // }
 
         // 1. Validate order exists
         const order = await Order.findById(order_id).populate("userId");
