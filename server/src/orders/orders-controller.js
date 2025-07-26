@@ -23,7 +23,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             rewardPointsUsed = 0,
             paymentInfo = {},
             // orderStatus = "pending",
-            paymentStatus = paymentMethod === "Online" ? "Successfull" : "Pending",
+            paymentStatus = paymentMethod === "Online" ? "Failed" : "Pending",
             orderDate = new Date(),
             pendingAmount = 0,
             recivedAmount = 0
@@ -91,7 +91,8 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             cupanCode,
             rewardPointsUsed,
             // orderStatus,
-            paymentStatus,
+            // paymentStatus,
+            paymentStatus: paymentMethod === "Online" ? "Failed" : "Pending",
             orderDate: dateObj,
             orderUniqueId,
             invoiceNumber,
@@ -122,48 +123,6 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-// exports.verifyPayment = async (req, res) => {
-//     try {
-//         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id } = req.body;
-
-//         console.log("Payment verification payload:", req.body);
-
-//         // 1. Validate order exists
-//         const order = await Order.findById(order_id);
-//         if (!order) {
-//             return res.status(404).json({ error: "Order not found" });
-//         }
-
-//         // 2. Generate expected signature
-//         const generatedSignature = crypto
-//             .createHmac("sha256", razorpayInstance.key_secret)
-//             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-//             .digest("hex");
-//         console.log("razorpay_order_id:=", razorpay_order_id, "razorpay_payment_id:=", razorpay_payment_id)
-//         console.log("generatedSignature:=", generatedSignature, razorpay_signature)
-//         // 3. Compare signatures
-//         if (generatedSignature === razorpay_signature) {
-//             // 4. Update order details
-//             order.paymentStatus = "Successfull";
-//             order.paymentInfo = {
-//                 transactionId: razorpay_payment_id,
-//                 orderId: razorpay_order_id,
-//                 paymentId: razorpay_payment_id,
-//                 razorpaySignature: razorpay_signature
-//             };
-//             order.recivedAmount = order.totalAmount;
-//             order.pendingAmount = 0;
-
-//             await order.save();
-//             return res.status(200).json({ message: "Payment verified successfully", orderId: order._id });
-//         } else {
-//             return res.status(400).json({ error: "Payment verification failed" });
-//         }
-//     } catch (error) {
-//         console.error("Error verifying Razorpay payment:", error);
-//         return res.status(500).json({ error: "Server error while verifying payment" });
-//     }
-// };
 
 exports.verifyPayment = async (req, res) => {
     try {
@@ -179,11 +138,11 @@ exports.verifyPayment = async (req, res) => {
         // 1. Validate order exists
         const order = await Order.findById(order_id).populate("userId");
         if (!order) {
-            return res.status(404).json({ error: "Order not found" });
+            return res.status(201).json({ error: "Order not found" });
         }
 
         // 1.a Prevent verifying the same payment twice
-        if (order.paymentStatus === "Successful") {
+        if (order?.paymentStatus === "Successfull") {
             return res.status(200).json({ message: "Payment already verified", orderId: order?._id });
         }
 
@@ -192,7 +151,7 @@ exports.verifyPayment = async (req, res) => {
         const secret = process.env.RAZORPAY_KEY_SECRET;
         if (!secret) {
             console.error("Missing RAZORPAY_SECRET in environment");
-            return res.status(500).json({ error: "Server misconfiguration" });
+            return res.status(400).json({ error: "Server misconfiguration" });
         }
 
         const expectedSignature = crypto
@@ -331,7 +290,7 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
         const userID = req.params.id;
 
         const orders = await Order.find({ userId: userID }).sort({ createdAt: -1 }).populate("userId", "name email").populate("products.subProduct")
-        
+
         if (!orders || orders.length === 0) {
             return res.status(201).json({ success: false, message: "Your Orders is empty" });
         }
