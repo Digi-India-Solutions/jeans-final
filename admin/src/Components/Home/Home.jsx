@@ -46,6 +46,7 @@ import AllSubProduct from '../../Pages/SubProduct/AllSubProduct'
 import AddSubProduct from '../../Pages/SubProduct/AddSubProduct'
 import EditSubProduct from '../../Pages/SubProduct/EditSubProduct'
 import WhatsApps from '../../Pages/WhatsappMess/WhatsApps'
+import AllEnquiry from '../../Pages/Enquiry/AllEnquiry'
 
 const Home = () => {
 
@@ -130,6 +131,11 @@ const Home = () => {
 
                 {/* all-whatsapp */}
                 <Route path={"all-whatsapp"} element={<WhatsApps />} />
+
+                {/* all-enquiry */}
+                <Route path={"all-enquiry"} element={<AllEnquiry />} />
+                {/* <Route path={"add-enquiry"} element={<AddEnquiry />} />
+                <Route path={"edit-enquiry/:id"} element={<EditEnquiry />} /> */}
               </Routes>
             </div>
           </>

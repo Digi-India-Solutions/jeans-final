@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Dashboard.css";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import { Line } from "react-chartjs-2";
 import { getData } from "../../services/FetchNodeServices";
 
-// Register the chart.js components
+// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
-  // Define state variables for data
   const [users, setUsers] = useState([]);
   const [banners, setBanners] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -16,88 +16,71 @@ const Dashboard = () => {
   const [rewardPoints, setRewardPoints] = useState([]);
   const [products, setProducts] = useState([]);
   const [coupones, setCoupones] = useState([]);
+  const [enquiry, setEnquiry] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [daySales, setDaySales] = useState([]); // Holds sales data for charts
+  const [daySales, setDaySales] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch all dashboard data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch users data
-        const usersResponse = await getData("api/user/get-all-user");
-        if (usersResponse.success) {
-          setUsers(usersResponse?.data);
+        const [
+          usersRes,
+          bannersRes,
+          categoriesRes,
+          wishlistRes,
+          productsRes,
+          rewardsRes,
+          couponsRes,
+          enquiryRes,
+          ordersRes
+        ] = await Promise.all([
+          getData("api/user/get-all-user"),
+          getData("api/banner"),
+          getData("api/category/get-all-categorys-with-pagination"),
+          getData("api/wishlist/get-all-size-with-pagination"),
+          getData("api/product/get-all-products-with-pagination"),
+          getData("api/reward/get-All-rewards"),
+          getData("api/coupon/get-All-coupons"),
+          getData("api/enquiry/get_all_enquiry_list"),
+          getData("api/order/get-all-orders")
+        ]);
+
+        if (usersRes?.success) setUsers(usersRes.data);
+        if (bannersRes?.success) setBanners(bannersRes.data);
+        if (categoriesRes?.success) setCategories(categoriesRes.data);
+        if (wishlistRes?.success) setUserWishlists(wishlistRes.data);
+        if (productsRes?.success) setProducts(productsRes.data || []);
+        if (rewardsRes?.success) setRewardPoints(rewardsRes.rewards || []);
+        if (couponsRes?.success) setCoupones(couponsRes.coupons);
+        if (enquiryRes?.status === true) setEnquiry(enquiryRes.data);
+        if (ordersRes?.success) {
+          setOrders(ordersRes.orders);
+          setDaySales(ordersRes.orders); // using same data for now
         }
 
-        // Fetch banners data
-        const bannersResponse = await getData('api/banner');
-        if (bannersResponse?.success) {
-          setBanners(bannersResponse.data);
-        }
-
-        // Fetch categories data
-        const categoriesResponse = await getData('api/category/get-all-categorys-with-pagination');
-        if (categoriesResponse?.success) {
-          setCategories(categoriesResponse.data);
-        }
-
-        // Fetch user Wishlist data
-        const userWishlistResponse = await getData('api/wishlist/get-all-size-with-pagination');
-        if (userWishlistResponse?.success) {
-          setUserWishlists(userWishlistResponse.data);
-        }
-
-        // Fetch products data
-        const productsResponse = await getData("api/product/get-all-products-with-pagination");
-        if (productsResponse?.success) {
-          setProducts(productsResponse.data || []);
-        }
-
-        // Fetch reviews data
-        const rewardPointsResponse = await getData('api/reward/get-All-rewards');
-        if (rewardPointsResponse?.success) {
-          setRewardPoints(rewardPointsResponse.rewards || []);
-        }
-
-        // Fetch coupones data
-        const couponesResponse = await getData('api/coupon/get-All-coupons');
-        console.log("xxxxxxxxxxxxxxxxx", couponesResponse)
-        if (couponesResponse?.success) {
-          setCoupones(couponesResponse.coupons);
-        }
-
-        // Fetch orders data
-        const ordersResponse = await getData('api/order/get-all-orders');
-        if (ordersResponse?.success) {
-          setOrders(ordersResponse.orders);
-        }
-
-        // Fetch day-sales data for the graph
-        // const daySalesResponse = await getData('api/sales/day-sales'); // Assuming this endpoint exists
-        // if (daySalesResponse?.success) {
-        //   setDaySales(daySalesResponse.sales); // Assuming the response contains 'sales'
-        // }
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    // Call the function to fetch data
     fetchData();
-  }, []); // Empty dependency array ensures the fetch runs only once when the component mounts
+  }, []);
 
-  // const daySalesData = {
-  //   labels: daySales.map(sale => sale.date), // Assuming 'date' is available in sales data
-  //   datasets: [
-  //     {
-  //       label: "Sales",
-  //       data: daySales.map(sale => sale.totalSales), // Assuming 'totalSales' contains sales amount
-  //       fill: false,
-  //       borderColor: "rgba(255,99,132,1)",
-  //       tension: 0.1,
-  //     },
-  //   ],
-  // };
+  // Prepare chart data
+  const daySalesData = {
+    labels: daySales.map(order => new Date(order.createdAt).toLocaleDateString()),
+    datasets: [{
+      label: "Sales",
+      data: daySales.map(order => order?.totalAmount || 0),
+      borderColor: "#36a2eb",
+      fill: false,
+      tension: 0.3
+    }]
+  };
 
   return (
     <div className="dashboard-container">
@@ -106,88 +89,46 @@ const Dashboard = () => {
         <p>Manage your Anibhavi Creation store data from here!</p>
       </div>
 
-      <div className="dashboard-cards">
-        <div className="dashboard-card">
-          <Link to="/all-orders">
-            <i className="fa-solid fa-truck"></i>
-            <h3>Manage Orders</h3>
-            <p>Track and manage your customer orders</p>
-            <p>{orders.length} Orders</p>
-          </Link>
-        </div>
+      {loading ? (
+        <p className="text-center">Loading Dashboard Data...</p>
+      ) : (
+        <>
+          <div className="dashboard-cards">
+            <DashboardCard to="/all-orders" icon="fa-truck" title="Manage Orders" count={orders.length} />
+            <DashboardCard to="/all-banners" icon="fa-images" title="Manage Banners" count={banners.length} />
+            <DashboardCard to="/all-category" icon="fa-virus" title="Manage Categories" count={categories.length} />
+            <DashboardCard to="/all-wishlist" icon="fa-heartbeat" title="User Wishlists" count={userWishlists.length} />
+            <DashboardCard to="/all-rewardPoint" icon="fa-star" title="Manage Reviews" count={rewardPoints.length} />
+            <DashboardCard to="/all-products" icon="fa-boxes-stacked" title="Manage Products" count={products.length} />
+            <DashboardCard to="/all-users" icon="fa-users" title="All Users" count={users.length} />
+            <DashboardCard to="/all-coupen" icon="fa-tags" title="All Coupons" count={coupones.length} />
+            <DashboardCard to="/all-enquiry" icon="fa-envelope-open-text" title="All Enquiries" count={enquiry.length} />
+          </div>
 
-        <div className="dashboard-card">
-          <Link to="/all-banners">
-            <i className="fa-regular fa-images"></i>
-            <h3>Manage Banners</h3>
-            <p>Update your website's banners</p>
-            <p>{banners.length} Banners</p>
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <Link to="/all-category">
-            <i className="fa-solid fa-virus"></i>
-            <h3>Manage Categorys</h3>
-            <p>Manage Category of your products</p>
-            <p>{categories.length} Categorys</p>
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <Link to="/all-wishlist">
-            <i className="fa-solid fa-heartbeat"></i>
-            <h3>Manage User Wishlists</h3>
-            <p>Organize products in User Wishlists</p>
-            <p>{userWishlists.length} User Wishlist</p>
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <Link to="/all-rewardPoint">
-            <i className="fa-solid fa-star"></i>
-            <h3>Manage Reviews</h3>
-            <p>Update and moderate product reviews</p>
-            <p>{rewardPoints?.length || 0} Total Reviews</p>
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <Link to="/all-products">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <h3>Manage Products</h3>
-            <p>Add, update, or remove products</p>
-            <p>{products.length} Products</p>
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <Link to="/all-users">
-            <i className="fa-solid fa-users"></i>
-            <h3>All Users</h3>
-            <p>View and manage users</p>
-            <p>{users.length} Users</p>
-          </Link>
-        </div>
-
-        <div className="dashboard-card">
-          <Link to="/all-coupen">
-            <i className="fa-solid fa-tags"></i>
-            <h3>All Coupons</h3>
-            <p>View and manage coupons</p>
-            <p>{coupones.length} Coupons</p>
-          </Link>
-        </div>
-      </div>
-
-      {/* Graphs (Optional) */}
-      {/* <div className="dashboard-card">
-        <h3>Day by Day Sales</h3>
-        <p>Overview of your sales</p>
-        <Line data={daySalesData} />
-      </div> */}
+          {/* Sales Chart */}
+          <div className="dashboard-chart mt-5">
+            <h3>Day-by-Day Sales Overview</h3>
+            {daySales.length > 0 ? (
+              <Line data={daySalesData} />
+            ) : (
+              <p>No sales data available.</p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
+
+// Reusable Card Component
+const DashboardCard = ({ to, icon, title, count }) => (
+  <div className="dashboard-card">
+    <Link to={to}>
+      <i className={`fa-solid ${icon}`}></i>
+      <h3>{title}</h3>
+      <p>{count} {title.includes("All") ? "" : title.split(" ")[1]}</p>
+    </Link>
+  </div>
+);
 
 export default Dashboard;

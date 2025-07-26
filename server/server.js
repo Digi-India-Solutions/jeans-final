@@ -30,6 +30,9 @@ const orderRoutes = require("./src/orders/orders-routes");
 const cardRoutes = require("./src/addToCard/card-routers")
 const faqRoutes = require("./src/faq/faq-routes")
 const reviewRoutes = require("./src/Reviews/review-routes")
+const enquiryRoutes = require("./src/enquiry/enquiry-routes");
+
+
 
 app.use("/api/admin", superAdminRoutes);
 app.use("/api/banner", bannerRoutes);
@@ -47,6 +50,7 @@ app.use("/api/order", orderRoutes);
 app.use("/api/card", cardRoutes)
 app.use("/api/faq", faqRoutes)
 app.use("/api/review", reviewRoutes)
+app.use("/api/enquiry", enquiryRoutes);
 
 const connectDatabase = require("./db/database");
 

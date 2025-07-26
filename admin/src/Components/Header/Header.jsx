@@ -25,7 +25,7 @@ const Header = () => {
     { to: "/all-Sub-products", label: "All Sub Products", icon: "fa-solid fa-boxes" },
     { to: "/all-banners", label: "Manage Banners", icon: "fa-solid fa-images" },
     { to: "/all-size", label: "Manage Size", icon: "fa-solid fa-heartbeat" },
-    // { to: "/all-color", label: "Manage Color", icon: "fa-solid fa-heartbeat" },
+    { to: "/all-enquiry", label: "All Enquiry", icon: "fa-solid fa-envelope-open-text" },
     { to: "/all-coupen", label: "Manage Coupens", icon: "fa-solid fa-tag" },
     { to: "/all-users", label: "All Users", icon: "fa-solid fa-users" },
     { to: "/all-wishlist", label: "manage user wishlist", icon: "fa-solid fa-brain" },
@@ -49,7 +49,7 @@ const Header = () => {
           </div>
         </div>
         <div className="left">
-          <a href="https://manovedya.vercel.app/" target="_blank" rel="noopener noreferrer">
+          <a href="https://anibhavi-creation.vercel.app/" target="_blank" rel="noopener noreferrer">
             <i className="fa-solid fa-globe"></i> Go To Website
           </a>
           <div className="logout" onClick={handleLogout}>
