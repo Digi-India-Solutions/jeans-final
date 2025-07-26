@@ -92,7 +92,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             rewardPointsUsed,
             // orderStatus,
             // paymentStatus,
-            paymentStatus: paymentMethod === "Online" ? "Failed" : "Pending",
+            paymentStatus: paymentMethod == "Online" ? "Failed" : "Pending",
             orderDate: dateObj,
             orderUniqueId,
             invoiceNumber,
@@ -131,9 +131,7 @@ exports.verifyPayment = async (req, res) => {
         // console.log("Payment verification payload:", req.body);
 
         const cart = await Cart.findOne({ user: userId });
-        // if (!cart || !cart.items || cart.items.length === 0) {
-        //     return res.status(400).json({ success: false, message: "Your cart is empty." });
-        // }
+
 
         // 1. Validate order exists
         const order = await Order.findById(order_id).populate("userId");
@@ -159,16 +157,14 @@ exports.verifyPayment = async (req, res) => {
             .update(body)
             .digest("hex");
 
-        // console.log("razorpay_order_id:", razorpay_order_id, "razorpay_payment_id:", razorpay_payment_id);
-        // console.log("expectedSignature:", expectedSignature, "razorpay_signature:", razorpay_signature);
+        console.log("razorpay_order_id:", razorpay_order_id, "razorpay_payment_id:", razorpay_payment_id);
+        console.log("expectedSignature:", expectedSignature, "razorpay_signature:", razorpay_signature);
 
         // 3. Safe compare (prevents timing attacks)
         const sigBuffer = Buffer.from(razorpay_signature, "hex");
         const expBuffer = Buffer.from(expectedSignature, "hex");
 
-        const signaturesMatch =
-            sigBuffer.length === expBuffer.length &&
-            crypto.timingSafeEqual(sigBuffer, expBuffer);
+        const signaturesMatch = sigBuffer.length === expBuffer.length && crypto.timingSafeEqual(sigBuffer, expBuffer);
 
         if (!signaturesMatch) {
             console.warn("Signature verification failed");
@@ -197,7 +193,7 @@ exports.verifyPayment = async (req, res) => {
             userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
         } else {
             // Earn 5% points
-            const earnedPoints = Math.floor((grandTotal * 2.5) / 100);
+            const earnedPoints = Math.floor((order.totalAmount * 2.5) / 100);
 
             if (!userPoints) {
                 userPoints = new RewardPoints({
