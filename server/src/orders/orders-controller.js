@@ -114,6 +114,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
                 orderUniqueId,
                 invoiceNumber,
                 totalAmount: grandTotal,
+                userId,
             },
         });
     } catch (error) {
