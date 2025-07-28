@@ -9,7 +9,7 @@ const ShortUniqueId = require("short-unique-id");
 
 exports.createCategory = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { name, subCategoryId, description, status } = req.body;
+        const { name, mainCategoryId, description, status } = req.body;
         let bannerUrl = "";
         let imageUrl = "";
         // if (req.file.images) {
@@ -40,7 +40,7 @@ exports.createCategory = catchAsyncErrors(async (req, res, next) => {
         }
 
         // Create new category
-        const newCategory = await Category.create({ name, description, subCategoryId: subCategoryId, images: imageUrl, categoryBanner: bannerUrl, status, });
+        const newCategory = await Category.create({ name, description, mainCategoryId: mainCategoryId, images: imageUrl, categoryBanner: bannerUrl, status, });
 
         res.status(200).json({ success: true, message: "Category created successfully", data: newCategory, });
     } catch (error) {
@@ -54,7 +54,7 @@ exports.getAllCategorys = catchAsyncErrors(async (req, res, next) => {
         const { pageNumber } = req.query;
         const totalCategorys = await Category.countDocuments();
 
-        const categorys = await Category.find({}).sort({ createdAt: -1 }).populate("subCategoryId");
+        const categorys = await Category.find({}).sort({ createdAt: -1 }).populate("mainCategoryId");
 
         res.status(200).json({ success: true, data: categorys, totalCategorys, });
     } catch (error) {
@@ -75,7 +75,7 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 exports.getCategoryByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const categoryID = req.params.id;
-        const category = await Category.findOne({ _id: categoryID }).populate("subCategoryId")
+        const category = await Category.findOne({ _id: categoryID }).populate("mainCategoryId")
         // .populate("productId");
 
         res.status(200).json({ success: true, data: category });
@@ -87,7 +87,7 @@ exports.getCategoryByID = catchAsyncErrors(async (req, res, next) => {
 
 exports.updateCategoryByID = catchAsyncErrors(async (req, res, next) => {
     const categoryID = req.params.id;
-    const { name, description, subCategoryId, status, oldImage, oldBanner } = req.body;
+    const { name, description, mainCategoryId, status, oldImage, oldBanner } = req.body;
 
     const existingCategory = await Category.findById(categoryID);
     if (!existingCategory) {
@@ -136,7 +136,7 @@ exports.updateCategoryByID = catchAsyncErrors(async (req, res, next) => {
             name,
             description,
             status,
-            subCategoryId: Array.isArray(subCategoryId) ? subCategoryId : [subCategoryId],
+            mainCategoryId: mainCategoryId,
             images: updatedImageUrl,
             categoryBanner: updatedBannerUrl,
         },
@@ -159,7 +159,7 @@ exports.deleteCategoryByID = catchAsyncErrors(async (req, res, next) => {
         if (categoryData?.images) {
             deleteImage(categoryData.images)
         }
-         if (categoryData?.categoryBanner) {
+        if (categoryData?.categoryBanner) {
             deleteImage(categoryData?.categoryBanner)
         }
 

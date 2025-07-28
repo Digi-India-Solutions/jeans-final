@@ -92,7 +92,7 @@ const AllDieses = () => {
             <ToastContainer />
             <div className="bread">
                 <div className="head">
-                    <h4>All Disease</h4>
+                    <h4>All Sub Categorys</h4>
                 </div>
                 <div className="links">
                     <Link to="/add-category" className="add-new">Add New <i className="fa-solid fa-plus"></i></Link>
@@ -124,7 +124,7 @@ const AllDieses = () => {
                                     <td>
                                         <img src={`${category?.categoryBanner}`} alt={category?.name} style={{ width: '50px', height: '50px' }} />
                                     </td>
-                                    <td>{category?.subCategoryId.map((subCategory) => subCategory?.subCategoryName).join(", ")}</td>
+                                    <td>{category?.mainCategoryId?.mainCategoryName}</td>
                                     <td>
                                         <input
                                             type="checkbox"

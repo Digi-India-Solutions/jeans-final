@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getData, postData, serverURL } from '../../services/FetchNodeServices';
 
-const SubCategory = () => {
+const MainCategory = () => {
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -14,7 +14,7 @@ const SubCategory = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await getData('api/subCategory/get-all-sub-categorys-with-pagination');
+                const response = await getData('api/mainCategory/get-all-main-categorys-with-pagination');
                 if (response.success === true) {
                     setCategories([...response?.data])
                 }
@@ -43,7 +43,7 @@ const SubCategory = () => {
 
         if (confirmDelete.isConfirmed) {
             try {
-                const data = await postData(`api/subCategory/delete-sub-category/${id}`);
+                const data = await postData(`api/mainCategory/delete-main-category/${id}`);
                 if (data.success === true) {
                     setCategories(categories.filter(category => category._id !== id));
                     Swal.fire('Deleted!', 'Your Main category has been deleted.', 'success');
@@ -60,8 +60,8 @@ const SubCategory = () => {
         const updatedStatus = e.target.checked;
 
         try {
-            const response = await postData('api/subCategory/change-status', {
-                SubCategoryId: categoryId,
+            const response = await postData('api/mainCategory/change-status', {
+                mainCategoryId: categoryId,
                 status: updatedStatus
             });
 
@@ -95,7 +95,7 @@ const SubCategory = () => {
                     <h4>All Main Category</h4>
                 </div>
                 <div className="links">
-                    <Link to="/add-sub-category" className="add-new">Add New <i className="fa-solid fa-plus"></i></Link>
+                    <Link to="/add-main-category" className="add-new">Add New <i className="fa-solid fa-plus"></i></Link>
                 </div>
             </div>
 
@@ -105,7 +105,7 @@ const SubCategory = () => {
                         <tr>
                             <th scope="col">Sr.No.</th>
                             <th scope="col">Name</th>
-                            <th scope="col">Image</th>
+                            {/* <th scope="col">Image</th> */}
                             <th scope="col">Show in homepage</th>
                             <th scope="col">Edit</th>
                             <th scope="col">Delete</th>
@@ -116,10 +116,10 @@ const SubCategory = () => {
                             categories?.map((category, index) => (
                                 <tr key={category._id}>
                                     <th scope="row">{index + 1}</th>
-                                    <td>{category?.subCategoryName}</td>
-                                    <td>
+                                    <td>{category?.mainCategoryName}</td>
+                                    {/* <td>
                                         <img src={`${category?.images}`} alt={category?.name} style={{ width: '50px', height: '50px' }} />
-                                    </td>
+                                    </td> */}
                                     <td>
                                         <input
                                             type="checkbox"
@@ -128,7 +128,7 @@ const SubCategory = () => {
                                         />
                                     </td>
                                     <td>
-                                        <Link to={`/edit-sub-category/${category?._id}`} className="bt edit">
+                                        <Link to={`/edit-main-category/${category?._id}`} className="bt edit">
                                             Edit <i className="fa-solid fa-pen-to-square"></i>
                                         </Link>
                                     </td>
@@ -151,4 +151,4 @@ const SubCategory = () => {
     );
 }
 
-export default SubCategory;
+export default MainCategory;

@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const subCategorySchema = new mongoose.Schema({
+const mainCategorySchema = new mongoose.Schema({
     // productId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-    subCategoryName: { type: String, required: true },
-    description: String,
-    images: [String],
+    mainCategoryName: { type: String, required: true },
+    // description: String,
+    // images: [String],
     status: { type: Boolean, default: true },
     // uniqueCategoryId: { type: String, unique: true },
     createdAt: {
@@ -18,9 +18,9 @@ const subCategorySchema = new mongoose.Schema({
 });
 
 // Pre-save middleware to update the updatedAt field
-subCategorySchema.pre('save', function (next) {
+mainCategorySchema.pre('save', function (next) {
     this.updatedAt = Date.now();
     next();
 });
 
-module.exports = mongoose.model('SubCategory', subCategorySchema);
+module.exports = mongoose.model('MainCategory', mainCategorySchema);

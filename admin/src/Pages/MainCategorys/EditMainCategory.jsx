@@ -6,16 +6,16 @@ import { getData, postData, serverURL } from "../../services/FetchNodeServices";
 import JoditEditor from "jodit-react";
 import { Autocomplete, TextField } from "@mui/material";
 
-const EditSubCategory = () => {
+const EditMainCategory = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     subCategoryName: "",
-    image: null,
+    // image: null,
     status: false,
-    description: "",
+    // description: "",
     // productId: [],
-    oldImage: null,
+    // oldImage: null,
   });
   const [btnLoading, setBtnLoading] = useState(false);
   // const [productList, setProductList] = useState([]);
@@ -23,15 +23,15 @@ const EditSubCategory = () => {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const response = await getData(`api/subCategory/get_sub-category_by_id/${id}`);
+        const response = await getData(`api/mainCategory/get_main-category_by_id/${id}`);
         if (response?.success) {
           setFormData({
-            subCategoryName: response?.data?.subCategoryName || "",
-            description: response?.data?.description || "",
+            mainCategoryName: response?.data?.mainCategoryName || "",
+            // description: response?.data?.description || "",
             // productId: response?.data?.productId?.map(p => p._id) || [],
             status: response?.data?.status || false,
-            oldImage: response?.data?.images?.[0] || null,
-            image: null,
+            // oldImage: response?.data?.images?.[0] || null,
+            // image: null,
           });
         }
       } catch (error) {
@@ -62,20 +62,20 @@ const EditSubCategory = () => {
     e.preventDefault();
     setBtnLoading(true);
 
-    const payload = new FormData();
-    payload.append("subCategoryName", formData.subCategoryName);
-    if (formData.image) payload.append("images", formData.image);
-    payload.append("status", formData.status);
-    payload.append("description", formData.description);
-    // payload.append("productId", JSON.stringify(formData.productId));
-    if (formData.oldImage) payload.append("oldImage", formData.oldImage);
-
+    // const payload = new FormData();
+    // payload.append("mainCategoryName", formData.mainCategoryName);
+    // if (formData.image) payload.append("images", formData.image);
+    // payload.append("status", formData.status);
+    // payload.append("description", formData.description);
+    // // payload.append("productId", JSON.stringify(formData.productId));
+    // if (formData.oldImage) payload.append("oldImage", formData.oldImage);
+    const body = { mainCategoryName: formData.mainCategoryName, status: formData.status, }
     try {
-      const response = await postData(`api/subCategory/update-sub-category/${id}`, payload);
+      const response = await postData(`api/mainCategory/update-main-category/${id}`, body);
       console.log("response=>>>", response);
       if (response?.success) {
         toast.success(response.message);
-        navigate("/all-sub-category");
+        navigate("/all-main-category");
       } else {
         toast.error(response.message || "Failed to update category");
       }
@@ -95,7 +95,7 @@ const EditSubCategory = () => {
           <h4>Edit Main Category</h4>
         </div>
         <div className="links">
-          <Link to="/all-sub-category" className="add-new">
+          <Link to="/all-main-category" className="add-new">
             Back <i className="fa-regular fa-circle-left"></i>
           </Link>
         </div>
@@ -104,11 +104,11 @@ const EditSubCategory = () => {
       <div className="d-form">
         <form className="row g-3" onSubmit={handleSubmit}>
           <div className="col-md-4">
-            <label className="form-label">Sub Category  Name</label>
-            <input type="text" name="subCategoryName" className="form-control" value={formData.subCategoryName} onChange={handleChange} required />
+            <label className="form-label">Main Category  Name</label>
+            <input type="text" name="mainCategoryName" className="form-control" value={formData.mainCategoryName} onChange={handleChange} required />
           </div>
 
-          <div className="col-md-4">
+          {/* <div className="col-md-4">
             <label className="form-label">Sub Category Image</label>
             <input type="file" name="image" className="form-control" onChange={handleChange} />
             {formData.oldImage && (
@@ -118,7 +118,7 @@ const EditSubCategory = () => {
           <div className="col-md-12">
             <label className="form-label">Description</label>
             <JoditEditor value={formData.description} onChange={handleJoditChange} />
-          </div>
+          </div> */}
 
           <div className="col-12">
             <div className="form-check">
@@ -144,4 +144,4 @@ const EditSubCategory = () => {
   );
 };
 
-export default EditSubCategory;
+export default EditMainCategory;

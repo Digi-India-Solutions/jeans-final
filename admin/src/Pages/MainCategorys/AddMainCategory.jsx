@@ -6,33 +6,14 @@ import { getData, postData } from "../../services/FetchNodeServices";
 import JoditEditor from "jodit-react";
 import { Autocomplete, TextField } from "@mui/material";
 
-const AddSubCategory = () => {
+const AddMainCategory = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [categoryList, setCategoryList] = useState([]);
   const [formData, setFormData] = useState({ subCategoryName: "", image: null, status: false, subCategoryId: [], description: "" });
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const fetchCategory = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       const response = await getData("api/subProduct/get-all-sub-products");
-  //       console.log("response=>>>", response);
-  //       if (response?.success === true) {
-  //         setCategoryList(response?.data || []);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   fetchCategory();
-  // }, []);
-
-  const handleJoditChange = (newValue) => {
-    setFormData({ ...formData, description: newValue });
-  };
+  // const handleJoditChange = (newValue) => {
+  //   setFormData({ ...formData, description: newValue });
+  // };
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -51,21 +32,21 @@ const AddSubCategory = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const uploadData = new FormData();
-    uploadData.append("subCategoryName", formData.subCategoryName);
-    uploadData.append("images", formData.image);
-    uploadData.append("status", formData.status);
+    // const uploadData = new FormData();
+    // uploadData.append("mainCategoryName", formData.mainCategoryName);
+    // uploadData.append("images", formData.image);
+    // uploadData.append("status", formData.status);
     // uploadData.append("productId", JSON.stringify(formData.productId));
-    uploadData.append("description", formData.description);
-
+    // uploadData.append("description", formData.description);
+    const body = { mainCategoryName: formData.mainCategoryName, status: formData.status, }
     try {
-      const response = await postData("api/subCategory/create-sub-category", uploadData, {
+      const response = await postData("api/mainCategory/create-main-category", body, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("response=>>>", response);
       if (response?.success === true) {
         toast.success(response?.message || "Category created successfully");
-        navigate("/all-sub-category");
+        navigate("/all-main-category");
       } else {
         toast.error(response?.message || "Error adding category");
       }
@@ -85,7 +66,7 @@ const AddSubCategory = () => {
           <h4>Add Main Category</h4>
         </div>
         <div className="links">
-          <Link to="/all-sub-category" className="add-new">
+          <Link to="/all-main-category" className="add-new">
             Back <i className="fa-regular fa-circle-left"></i>
           </Link>
         </div>
@@ -93,7 +74,7 @@ const AddSubCategory = () => {
 
       <div className="d-form">
         <form className="row g-3" onSubmit={handleSubmit}>
-          <div className="col-md-4">
+          {/* <div className="col-md-4">
             <label htmlFor="image" className="form-label">
               Sub Category Image
             </label>
@@ -102,13 +83,13 @@ const AddSubCategory = () => {
             {formData.image && (
               <img src={URL.createObjectURL(formData.image)} alt="Preview" width="100" />
             )}
-          </div>
+          </div> */}
 
           <div className="col-md-4">
             <label htmlFor="name" className="form-label">
-              Sub Category Name
+              Main Category Name
             </label>
-            <input type="text" name="subCategoryName" className="form-control" id="subCategoryName" value={formData.subCategoryName} onChange={handleChange} required />
+            <input type="text" name="mainCategoryName" className="form-control" id="mainCategoryName" value={formData.mainCategoryName} onChange={handleChange} required />
           </div>
 
           {/* <div className="col-md-4" style={{ marginTop: "10px" }}>
@@ -132,16 +113,16 @@ const AddSubCategory = () => {
               </label>
             </div>
           </div>
-
+          {/* 
           <hr />
           <div className="col-md-12">
             <label className="form-label">Sub Category Details</label>
             <JoditEditor value={formData.description} onChange={handleJoditChange} />
-          </div>
+          </div> */}
 
           <div className="col-md-12 mt-3">
             <button type="submit" className="btn btn-success" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Add Sub Category"}
+              {isLoading ? "Saving..." : "Add Main Category"}
             </button>
           </div>
         </form>
@@ -150,4 +131,4 @@ const AddSubCategory = () => {
   );
 };
 
-export default AddSubCategory;
+export default AddMainCategory;

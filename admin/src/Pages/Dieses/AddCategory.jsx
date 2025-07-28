@@ -8,32 +8,32 @@ import { Autocomplete, TextField } from "@mui/material";
 
 const AddCategory = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [subCategoryList, setSubCategoryList] = useState([]);
+  const [mainCategoryList, setMainCategoryList] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     image: null,
     banner: null,
     status: false,
-    subCategoryId: [],
+    mainCategoryId: [],
     description: "",
   });
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSubCategories = async () => {
+    const fetchmainCategories = async () => {
       try {
-        const response = await getData('api/subCategory/get-all-sub-categorys-with-pagination');
+        const response = await getData('api/mainCategory/get-all-main-categorys-with-pagination');
         if (response.success) {
-          setSubCategoryList(response.data || []);
+          setMainCategoryList(response.data || []);
         }
       } catch (error) {
-        toast.error("Error fetching subcategories");
+        toast.error("Error fetching maincategories");
         console.error(error);
       }
     };
 
-    fetchSubCategories();
+    fetchmainCategories();
   }, []);
 
   const handleJoditChange = (newValue) => {
@@ -63,10 +63,10 @@ const AddCategory = () => {
     uploadData.append("banner", formData.banner);
     uploadData.append("status", formData?.status);
     uploadData.append("description", formData?.description);
-
-    formData.subCategoryId.forEach((id) => {
-      uploadData.append("subCategoryId", id);
-    });
+    uploadData.append("mainCategoryId", formData?.mainCategoryId);
+    // formData.mainCategoryId.forEach((id) => {
+    //   uploadData.append("mainCategoryId", id);
+    // });
 
     try {
       const response = await postData("api/category/create-category", uploadData, {
@@ -91,7 +91,7 @@ const AddCategory = () => {
     <>
       <ToastContainer />
       <div className="bread d-flex justify-content-between align-items-center mb-3">
-        <h4>Add Category</h4>
+        <h4>Add Sub Category</h4>
         <Link to="/all-dieses" className="btn btn-outline-primary">
           Back <i className="fa-regular fa-circle-left"></i>
         </Link>
@@ -106,25 +106,48 @@ const AddCategory = () => {
           </div>
 
           <div className="col-md-4">
-            <label htmlFor="name" className="form-label">Category Name *</label>
+            <label htmlFor="name" className="form-label"> Sub Category Name *</label>
             <input type="text" name="name" className="form-control" id="name" value={formData.name} onChange={handleChange} required placeholder="Enter category name" />
           </div>
 
-          <div className="col-md-4">
-            <label className="form-label">Select Subcategories *</label>
+          {/* <div className="col-md-4">
+            <label className="form-label">Select Main Categories *</label>
             <Autocomplete
               multiple
-              options={subCategoryList}
-              getOptionLabel={(option) => option?.subCategoryName}
-              value={subCategoryList.filter((item) => formData.subCategoryId.includes(item?._id))}
+              options={mainCategoryList}
+              getOptionLabel={(option) => option?.mainCategoryName}
+              value={mainCategoryList.filter((item) => formData.mainCategoryId.includes(item?._id))}
               onChange={(e, newValue) =>
                 setFormData((prev) => ({
                   ...prev,
-                  subCategoryId: newValue.map((item) => item._id),
+                  mainCategoryId: newValue.map((item) => item._id),
                 }))
               }
               renderInput={(params) => (
-                <TextField {...params} placeholder="Choose subcategories" variant="outlined" />
+                <TextField {...params} placeholder="Choose maincategories" variant="outlined" />
+              )}
+            />
+          </div> */}
+          <div className="col-md-4">
+            <label className="form-label">Select Main Category *</label>
+            <Autocomplete
+              options={mainCategoryList}
+              getOptionLabel={(option) => option?.mainCategoryName || ""}
+              value={
+                mainCategoryList.find((item) => item._id === formData.mainCategoryId) || null
+              }
+              onChange={(e, newValue) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  mainCategoryId: newValue?._id || "",
+                }))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Choose main category"
+                  variant="outlined"
+                />
               )}
             />
           </div>
@@ -149,7 +172,7 @@ const AddCategory = () => {
 
           <div className="col-md-12 mt-3">
             <button type="submit" className="btn btn-success" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Add Category"}
+              {isLoading ? "Saving..." : "Add Sub Category"}
             </button>
           </div>
         </form>

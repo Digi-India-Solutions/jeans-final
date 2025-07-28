@@ -47,10 +47,9 @@ import AddSubProduct from '../../Pages/SubProduct/AddSubProduct'
 import EditSubProduct from '../../Pages/SubProduct/EditSubProduct'
 import WhatsApps from '../../Pages/WhatsappMess/WhatsApps'
 import AllEnquiry from '../../Pages/Enquiry/AllEnquiry'
-import AllSubCategory from '../../Pages/SubCategorys/AllSubCategory'
-import AddSubCategory from '../../Pages/SubCategorys/AddSubCategory'
-import EditSubCategory from '../../Pages/SubCategorys/EditSubCategory'
-
+import AllMainCategory from "../../Pages/MainCategorys/AllMainMainCategory"
+import AddMainCategory from '../../Pages/MainCategorys/AddMainCategory'
+import EditMainCategory from '../../Pages/MainCategorys/EditMainCategory'
 const Home = () => {
 
   const login = sessionStorage.getItem("login")
@@ -97,9 +96,9 @@ const Home = () => {
                 <Route path={"/edit-category/:id"} element={<EditCategory />} />
 
                 {/*Sub Category --  */}
-                <Route path={"/all-sub-category"} element={<AllSubCategory />} />
-                <Route path={"/add-sub-category"} element={<AddSubCategory />} />
-                <Route path={"/edit-sub-category/:id"} element={<EditSubCategory />} />
+                <Route path={"/all-main-category"} element={<AllMainCategory />} />
+                <Route path={"/add-main-category"} element={<AddMainCategory />} />
+                <Route path={"/edit-main-category/:id"} element={<EditMainCategory />} />
 
                 {/* --- Orders --- */}
                 <Route path={"/all-users"} element={<AllUsers />} />

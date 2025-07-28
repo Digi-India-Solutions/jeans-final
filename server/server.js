@@ -31,7 +31,7 @@ const cardRoutes = require("./src/addToCard/card-routers")
 const faqRoutes = require("./src/faq/faq-routes")
 const reviewRoutes = require("./src/Reviews/review-routes")
 const enquiryRoutes = require("./src/enquiry/enquiry-routes");
-const subCategoryRoutes = require("./src/subCategorys/subCategorys.routes");
+const mainCategoryRoutes = require("./src/mainCategorys/mainCategorys.routes");
 
 
 app.use("/api/admin", superAdminRoutes);
@@ -51,7 +51,7 @@ app.use("/api/card", cardRoutes)
 app.use("/api/faq", faqRoutes)
 app.use("/api/review", reviewRoutes)
 app.use("/api/enquiry", enquiryRoutes);
-app.use("/api/subCategory", subCategoryRoutes)
+app.use("/api/mainCategory", mainCategoryRoutes)
 
 const connectDatabase = require("./db/database");
 

@@ -109,7 +109,7 @@ const EditCategory = () => {
       <ToastContainer />
       <div className="bread">
         <div className="head">
-          <h4>Edit Category</h4>
+          <h4>Edit Sub Category</h4>
         </div>
         <div className="links">
           <Link to="/all-dieses" className="add-new">
@@ -129,7 +129,7 @@ const EditCategory = () => {
           </div>
 
           <div className="col-md-4">
-            <label className="form-label">Category Name</label>
+            <label className="form-label"> Sub Category Name</label>
             <input type="text" name="name" className="form-control" value={formData?.name} onChange={handleChange} required />
           </div>
 
@@ -183,7 +183,7 @@ const EditCategory = () => {
 
           <div className="col-12 text-center">
             <button type="submit" className="btn btn-success" disabled={btnLoading}>
-              {btnLoading ? "Updating..." : "Update Category"}
+              {btnLoading ? "Updating..." : "Update Sub Category"}
             </button>
           </div>
         </form>
