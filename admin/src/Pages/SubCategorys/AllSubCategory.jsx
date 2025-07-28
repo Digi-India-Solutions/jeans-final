@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getData, postData, serverURL } from '../../services/FetchNodeServices';
 
-const AllDieses = () => {
+const SubCategory = () => {
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -14,7 +14,7 @@ const AllDieses = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await getData('api/category/get-all-categorys-with-pagination');
+                const response = await getData('api/subCategory/get-all-sub-categorys-with-pagination');
                 if (response.success === true) {
                     setCategories([...response?.data])
                 }
@@ -43,10 +43,10 @@ const AllDieses = () => {
 
         if (confirmDelete.isConfirmed) {
             try {
-                const data = await postData(`api/category/delete-category/${id}`);
+                const data = await postData(`api/subCategory/delete-sub-category/${id}`);
                 if (data.success === true) {
                     setCategories(categories.filter(category => category._id !== id));
-                    Swal.fire('Deleted!', 'Your category has been deleted.', 'success');
+                    Swal.fire('Deleted!', 'Your Main category has been deleted.', 'success');
                 }
             } catch (error) {
                 Swal.fire('Error!', 'There was an error deleting the category.', 'error');
@@ -60,8 +60,8 @@ const AllDieses = () => {
         const updatedStatus = e.target.checked;
 
         try {
-            const response = await postData('api/category/change-status', {
-                categoryId: categoryId,
+            const response = await postData('api/subCategory/change-status', {
+                SubCategoryId: categoryId,
                 status: updatedStatus
             });
 
@@ -92,12 +92,13 @@ const AllDieses = () => {
             <ToastContainer />
             <div className="bread">
                 <div className="head">
-                    <h4>All Disease</h4>
+                    <h4>All Main Category</h4>
                 </div>
                 <div className="links">
-                    <Link to="/add-category" className="add-new">Add New <i className="fa-solid fa-plus"></i></Link>
+                    <Link to="/add-sub-category" className="add-new">Add New <i className="fa-solid fa-plus"></i></Link>
                 </div>
             </div>
+
             <section className="main-table">
                 <table className="table table-bordered table-striped table-hover">
                     <thead>
@@ -105,8 +106,6 @@ const AllDieses = () => {
                             <th scope="col">Sr.No.</th>
                             <th scope="col">Name</th>
                             <th scope="col">Image</th>
-                            <th scope="col">Banner</th>
-                            <th scope="col">Main Category </th>
                             <th scope="col">Show in homepage</th>
                             <th scope="col">Edit</th>
                             <th scope="col">Delete</th>
@@ -117,14 +116,10 @@ const AllDieses = () => {
                             categories?.map((category, index) => (
                                 <tr key={category._id}>
                                     <th scope="row">{index + 1}</th>
-                                    <td>{category?.name}</td>
+                                    <td>{category?.subCategoryName}</td>
                                     <td>
                                         <img src={`${category?.images}`} alt={category?.name} style={{ width: '50px', height: '50px' }} />
                                     </td>
-                                    <td>
-                                        <img src={`${category?.categoryBanner}`} alt={category?.name} style={{ width: '50px', height: '50px' }} />
-                                    </td>
-                                    <td>{category?.subCategoryId.map((subCategory) => subCategory?.subCategoryName).join(", ")}</td>
                                     <td>
                                         <input
                                             type="checkbox"
@@ -133,12 +128,12 @@ const AllDieses = () => {
                                         />
                                     </td>
                                     <td>
-                                        <Link to={`/edit-category/${category?._id}`} className="bt edit">
+                                        <Link to={`/edit-sub-category/${category?._id}`} className="bt edit">
                                             Edit <i className="fa-solid fa-pen-to-square"></i>
                                         </Link>
                                     </td>
                                     <td>
-                                        <button className="bt delete" onClick={() => handleDelete(category._id)}>
+                                        <button className="bt delete" onClick={() => handleDelete(category?._id)}>
                                             Delete <i className="fa-solid fa-trash"></i>
                                         </button>
                                     </td>
@@ -156,4 +151,4 @@ const AllDieses = () => {
     );
 }
 
-export default AllDieses;
+export default SubCategory;

@@ -47,6 +47,9 @@ import AddSubProduct from '../../Pages/SubProduct/AddSubProduct'
 import EditSubProduct from '../../Pages/SubProduct/EditSubProduct'
 import WhatsApps from '../../Pages/WhatsappMess/WhatsApps'
 import AllEnquiry from '../../Pages/Enquiry/AllEnquiry'
+import AllSubCategory from '../../Pages/SubCategorys/AllSubCategory'
+import AddSubCategory from '../../Pages/SubCategorys/AddSubCategory'
+import EditSubCategory from '../../Pages/SubCategorys/EditSubCategory'
 
 const Home = () => {
 
@@ -92,6 +95,11 @@ const Home = () => {
                 <Route path={"/all-dieses"} element={<AllDieses />} />
                 <Route path={"/add-category"} element={<AddCategory />} />
                 <Route path={"/edit-category/:id"} element={<EditCategory />} />
+
+                {/*Sub Category --  */}
+                <Route path={"/all-sub-category"} element={<AllSubCategory />} />
+                <Route path={"/add-sub-category"} element={<AddSubCategory />} />
+                <Route path={"/edit-sub-category/:id"} element={<EditSubCategory />} />
 
                 {/* --- Orders --- */}
                 <Route path={"/all-users"} element={<AllUsers />} />

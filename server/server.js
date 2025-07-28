@@ -31,7 +31,7 @@ const cardRoutes = require("./src/addToCard/card-routers")
 const faqRoutes = require("./src/faq/faq-routes")
 const reviewRoutes = require("./src/Reviews/review-routes")
 const enquiryRoutes = require("./src/enquiry/enquiry-routes");
-
+const subCategoryRoutes = require("./src/subCategorys/subCategorys.routes");
 
 
 app.use("/api/admin", superAdminRoutes);
@@ -51,14 +51,15 @@ app.use("/api/card", cardRoutes)
 app.use("/api/faq", faqRoutes)
 app.use("/api/review", reviewRoutes)
 app.use("/api/enquiry", enquiryRoutes);
+app.use("/api/subCategory", subCategoryRoutes)
 
 const connectDatabase = require("./db/database");
 
 //connect db
 connectDatabase();
 // sendBillingToClient();
-app.use("/",(req,res)=>{
- return res.send("app is running")
+app.use("/", (req, res) => {
+  return res.send("app is running")
 })
 
 //create server//

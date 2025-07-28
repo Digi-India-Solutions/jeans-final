@@ -2,72 +2,75 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getData, postData, serverURL } from "../../services/FetchNodeServices";
+import { getData, postData } from "../../services/FetchNodeServices";
 import JoditEditor from "jodit-react";
 import { Autocomplete, TextField } from "@mui/material";
 
 const EditCategory = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     image: null,
+    banner: null,
     status: false,
+    subCategoryId: [],
     description: "",
-    // productId: [],
     oldImage: null,
+    oldBanner: null,
   });
-  const [btnLoading, setBtnLoading] = useState(false);
-  // const [productList, setProductList] = useState([]);
 
+  const [btnLoading, setBtnLoading] = useState(false);
+  const [subCategoryList, setSubCategoryList] = useState([]);
+
+  // Fetch category and subcategories on mount
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getData(`api/category/get_category_by_id/${id}`);
-        if (response?.success) {
-          setFormData({
-            name: response?.data?.name || "",
-            description: response?.data?.description || "",
-            // productId: response?.data?.productId?.map(p => p._id) || [],
-            status: response?.data?.status || false,
-            oldImage: response?.data?.images?.[0] || null,
-            image: null,
-          });
+        const [categoryRes, subCatRes] = await Promise.all([
+          getData(`api/category/get_category_by_id/${id}`),
+          getData("api/subCategory/get-all-sub-categorys-with-pagination")
+        ]);
+
+        if (categoryRes.success) {
+          const cat = categoryRes.data;
+          setFormData((prev) => ({
+            ...prev,
+            name: cat.name || "",
+            description: cat.description || "",
+            subCategoryId: cat.subCategoryId?.map((p) => p._id) || [],
+            status: cat.status || false,
+            oldImage: cat.images || null,
+            oldBanner: cat.categoryBanner || null,
+          }));
         }
+
+        if (subCatRes.success) {
+          setSubCategoryList(subCatRes.data || []);
+        }
+
       } catch (error) {
-        toast.error("Error fetching category data");
-        console.error("Fetch category error:", error);
+        toast.error("Error loading data");
+        console.error(error);
       }
     };
 
-    // const fetchProducts = async () => {
-    //   try {
-    //     const response = await getData("api/product/get-all-products-with-pagination");
-    //     if (response?.success) {
-    //       setProductList(response?.data || []);
-    //     }
-    //   } catch (error) {
-    //     toast.error("Failed to fetch products!");
-    //     console.error("Fetch products error:", error);
-    //   }
-    // };
-
-    fetchCategory();
-    // fetchProducts();
+    fetchData();
   }, [id]);
 
   const handleJoditChange = (newValue) => {
-    setFormData(prev => ({ ...prev, description: newValue }));
+    setFormData((prev) => ({ ...prev, description: newValue }));
   };
 
   const handleChange = (e) => {
-    const { name, type, checked, value, files } = e.target;
+    const { name, type, value, checked, files } = e.target;
     if (type === "file") {
-      setFormData(prev => ({ ...prev, image: files[0] }));
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else if (type === "checkbox") {
-      setFormData(prev => ({ ...prev, status: checked }));
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -75,25 +78,27 @@ const EditCategory = () => {
     e.preventDefault();
     setBtnLoading(true);
 
-    const payload = new FormData();
-    payload.append("name", formData.name);
-    if (formData.image) payload.append("images", formData.image);
-    payload.append("status", formData.status);
-    payload.append("description", formData.description);
-    // payload.append("productId", JSON.stringify(formData.productId));
-    if (formData.oldImage) payload.append("oldImage", formData.oldImage);
+    const uploadData = new FormData();
+    uploadData.append("name", formData.name);
+    uploadData.append("description", formData.description);
+    uploadData.append("status", formData.status);
+    if (formData.image) uploadData.append("image", formData.image);
+    if (formData.banner) uploadData.append("banner", formData.banner);
+    if (formData.oldImage) uploadData.append("oldImage", formData.oldImage);
+    if (formData.oldBanner) uploadData.append("oldBanner", formData.oldBanner);
+    formData.subCategoryId.forEach((id) => uploadData.append("subCategoryId", id));
 
     try {
-      const response = await postData(`api/category/update-category/${id}`, payload);
-      if (response?.success) {
-        toast.success(response.message);
+      const response = await postData(`api/category/update-category/${id}`, uploadData);
+      if (response.success) {
+        toast.success(response.message || "Category updated successfully");
         navigate("/all-dieses");
       } else {
-        toast.error(response.message || "Failed to update category");
+        toast.error(response.message || "Update failed");
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Error updating category");
-      console.error("Update category error:", error);
+      toast.error("Error while updating category");
+      console.error(error);
     } finally {
       setBtnLoading(false);
     }
@@ -116,50 +121,44 @@ const EditCategory = () => {
       <div className="d-form">
         <form className="row g-3" onSubmit={handleSubmit}>
           <div className="col-md-4">
+            <label className="form-label">Category Image</label>
+            <input type="file" name="image" className="form-control" onChange={handleChange} />
+            {formData.oldImage && (
+              <img src={formData.oldImage} alt="Old" width="100" className="mt-2" />
+            )}
+          </div>
+
+          <div className="col-md-4">
             <label className="form-label">Category Name</label>
-            <input
-              type="text"
-              name="name"
-              className="form-control"
-              value={formData.name}
-              onChange={handleChange}
-              required
+            <input type="text" name="name" className="form-control" value={formData?.name} onChange={handleChange} required />
+          </div>
+
+          <div className="col-md-4">
+            <label className="form-label">Select Main Categories</label>
+            <Autocomplete
+              multiple
+              options={subCategoryList}
+              getOptionLabel={(option) => option?.subCategoryName}
+              value={subCategoryList.filter((item) =>
+                formData.subCategoryId.includes(item._id)
+              )}
+              onChange={(e, newValue) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  subCategoryId: newValue.map((item) => item._id),
+                }))
+              }
+              renderInput={(params) => <TextField {...params} placeholder="Choose main categories" />}
             />
           </div>
 
           <div className="col-md-4">
-            <label className="form-label">Category Image</label>
-            <input
-              type="file"
-              name="image"
-              className="form-control"
-              onChange={handleChange}
-            />
-            {formData.oldImage && (
-              <img
-                src={`${formData.oldImage}`}
-                alt="Old"
-                width="100"
-                style={{ marginTop: "10px" }}
-              />
+            <label className="form-label">Category Banner</label>
+            <input type="file" name="banner" className="form-control" accept="image/*" onChange={handleChange} />
+            {formData.oldBanner && (
+              <img src={formData.oldBanner} alt="Old Banner" width="100" className="mt-2" />
             )}
           </div>
-
-          {/* <div className="col-md-4" style={{ marginTop: "40px" }}>
-            <Autocomplete
-              multiple
-              options={productList}
-              value={productList.filter(p => formData.productId.includes(p._id))}
-              getOptionLabel={(option) => option.productName}
-              onChange={(e, newVal) =>
-                setFormData(prev => ({
-                  ...prev,
-                  productId: newVal.map(product => product._id),
-                }))
-              }
-              renderInput={(params) => <TextField {...params} label="Select Products" />}
-            />
-          </div> */}
 
           <div className="col-md-12">
             <label className="form-label">Description</label>
@@ -183,12 +182,8 @@ const EditCategory = () => {
           </div>
 
           <div className="col-12 text-center">
-            <button
-              type="submit"
-              className="btn btn-success"
-              disabled={btnLoading}
-            >
-              {btnLoading ? "Please Wait..." : "Update Category"}
+            <button type="submit" className="btn btn-success" disabled={btnLoading}>
+              {btnLoading ? "Updating..." : "Update Category"}
             </button>
           </div>
         </form>

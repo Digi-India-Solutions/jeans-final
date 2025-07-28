@@ -9,19 +9,38 @@ const ShortUniqueId = require("short-unique-id");
 
 exports.createCategory = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { name, description, status } = req.body;
-
+        const { name, subCategoryId, description, status } = req.body;
+        let bannerUrl = "";
         let imageUrl = "";
-        if (req.file) {
-            // Upload image to Cloudinary
-            imageUrl = await uploadImage(req.file.path);
+        // if (req.file.images) {
+        //     // Upload image to Cloudinary
+        //     imageUrl = await uploadImage(req.file.path);
 
-            // Delete local image file
-            deleteLocalFile(req.file.path);
+        //     // Delete local image file
+        //     deleteLocalFile(req.file.path);
+        // }
+        // if (req.file.banner) {
+        //     // Upload image to Cloudinary
+        //     imageUrl = await uploadImage(req.file.path);
+
+        //     // Delete local image file
+        //     deleteLocalFile(req.file.path);
+        // }
+
+        if (req.files?.image?.[0]) {
+            const localImagePath = req.files.image[0].path;
+            imageUrl = await uploadImage(localImagePath);
+            deleteLocalFile(localImagePath);
+        }
+
+        if (req.files?.banner?.[0]) {
+            const localBannerPath = req.files.banner[0].path;
+            bannerUrl = await uploadImage(localBannerPath);
+            deleteLocalFile(localBannerPath);
         }
 
         // Create new category
-        const newCategory = await Category.create({ name, description, images: imageUrl, status, });
+        const newCategory = await Category.create({ name, description, subCategoryId: subCategoryId, images: imageUrl, categoryBanner: bannerUrl, status, });
 
         res.status(200).json({ success: true, message: "Category created successfully", data: newCategory, });
     } catch (error) {
@@ -35,7 +54,7 @@ exports.getAllCategorys = catchAsyncErrors(async (req, res, next) => {
         const { pageNumber } = req.query;
         const totalCategorys = await Category.countDocuments();
 
-        const categorys = await Category.find({}).sort({ createdAt: -1 })
+        const categorys = await Category.find({}).sort({ createdAt: -1 }).populate("subCategoryId");
 
         res.status(200).json({ success: true, data: categorys, totalCategorys, });
     } catch (error) {
@@ -56,7 +75,7 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 exports.getCategoryByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const categoryID = req.params.id;
-        const category = await Category.findOne({ _id: categoryID })
+        const category = await Category.findOne({ _id: categoryID }).populate("subCategoryId")
         // .populate("productId");
 
         res.status(200).json({ success: true, data: category });
@@ -68,40 +87,65 @@ exports.getCategoryByID = catchAsyncErrors(async (req, res, next) => {
 
 exports.updateCategoryByID = catchAsyncErrors(async (req, res, next) => {
     const categoryID = req.params.id;
-    const { name, description, status, oldImage } = req.body;
+    const { name, description, subCategoryId, status, oldImage, oldBanner } = req.body;
 
     const existingCategory = await Category.findById(categoryID);
     if (!existingCategory) {
         return next(new ErrorHandler("Category not found!", 404));
     }
 
-    let updatedImageUrl = oldImage;
+    let updatedImageUrl = oldImage || existingCategory.images;
+    let updatedBannerUrl = oldBanner || existingCategory.categoryBanner;
 
-    if (req.file) {
-        // Delete previous image from Cloudinary if exists
+    // Upload new image if provided
+    if (req.files?.image?.[0]) {
+        const localImagePath = req.files.image[0].path;
+
+        // Delete old Cloudinary image
         if (existingCategory.images) {
             await deleteImage(existingCategory.images);
         }
 
         // Upload new image to Cloudinary
-        updatedImageUrl = await uploadImage(req.file.path);
+        updatedImageUrl = await uploadImage(localImagePath);
 
-        // Delete local image file
-        deleteLocalFile(req.file.path);
+        // Remove local image file
+        deleteLocalFile(localImagePath);
     }
 
+    // Upload new banner if provided
+    if (req.files?.banner?.[0]) {
+        const localBannerPath = req.files.banner[0].path;
+
+        // Delete old Cloudinary banner
+        if (existingCategory.categoryBanner) {
+            await deleteImage(existingCategory.categoryBanner);
+        }
+
+        // Upload new banner to Cloudinary
+        updatedBannerUrl = await uploadImage(localBannerPath);
+
+        // Remove local banner file
+        deleteLocalFile(localBannerPath);
+    }
+
+    // Update category in DB
     const updatedCategory = await Category.findByIdAndUpdate(
         categoryID,
-        { name, description, status, images: updatedImageUrl, },
+        {
+            name,
+            description,
+            status,
+            subCategoryId: Array.isArray(subCategoryId) ? subCategoryId : [subCategoryId],
+            images: updatedImageUrl,
+            categoryBanner: updatedBannerUrl,
+        },
         { new: true, runValidators: true }
     );
 
-    res.status(200).json({
-        success: true,
-        message: "Category updated successfully",
-        data: updatedCategory,
-    });
+    res.status(200).json({ success: true, message: "Category updated successfully", data: updatedCategory, });
 });
+
 
 exports.deleteCategoryByID = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -114,6 +158,9 @@ exports.deleteCategoryByID = catchAsyncErrors(async (req, res, next) => {
 
         if (categoryData?.images) {
             deleteImage(categoryData.images)
+        }
+         if (categoryData?.categoryBanner) {
+            deleteImage(categoryData?.categoryBanner)
         }
 
         await Category.deleteOne({ _id: categoryID });
