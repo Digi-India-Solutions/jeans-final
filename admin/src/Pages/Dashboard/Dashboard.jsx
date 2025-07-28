@@ -106,14 +106,14 @@ const Dashboard = () => {
           </div>
 
           {/* Sales Chart */}
-          <div className="dashboard-chart mt-5">
+          {/* <div className="dashboard-chart mt-5">
             <h3>Day-by-Day Sales Overview</h3>
             {daySales.length > 0 ? (
               <Line data={daySalesData} />
             ) : (
               <p>No sales data available.</p>
             )}
-          </div>
+          </div> */}
         </>
       )}
     </div>
