@@ -178,7 +178,7 @@ exports.deleteCategoryByID = catchAsyncErrors(async (req, res, next) => {
 exports.getCategoryByMainCategoryID = catchAsyncErrors(async (req, res, next) => {
     try {
         const categoryID = req.params.id;
-        const category = await Category.findOne({ mainCategoryId: categoryID }).populate("mainCategoryId")
+        const category = await Category.find({ mainCategoryId: categoryID }).populate("mainCategoryId")
         // .populate("productId");
 
         res.status(200).json({ success: true, data: category });
