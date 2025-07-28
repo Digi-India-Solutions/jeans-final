@@ -5,7 +5,7 @@ const router = express.Router();
 const upload = require("../../middleware/multer")
 // const multer = require("multer");
 // const { v4: uuidv4 } = require('uuid');
-const { createCategory, getAllCategorys, changeStatus, getCategoryByID, updateCategoryByID, deleteCategoryByID } = require('./categorys-controller');
+const { createCategory, getAllCategorys, changeStatus, getCategoryByID, updateCategoryByID, deleteCategoryByID,getCategoryByMainCategoryID } = require('./categorys-controller');
 
 // const storage = multer.diskStorage({
 //     destination: (req, file, cb) => {
@@ -30,7 +30,7 @@ router.post("/update-category/:id", upload.fields([{ name: "image", maxCount: 1 
 
 router.post("/delete-category/:id", deleteCategoryByID);
 
-router.get("/get_category_by_main_category/:id", getCategoryByID);
+router.get("/get_category_by_main_category/:id", getCategoryByMainCategoryID);
 
 
 module.exports = router;
