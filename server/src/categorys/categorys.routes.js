@@ -30,5 +30,7 @@ router.post("/update-category/:id", upload.fields([{ name: "image", maxCount: 1 
 
 router.post("/delete-category/:id", deleteCategoryByID);
 
+router.get("/get_category_by_main_category/:id", getCategoryByID);
+
 
 module.exports = router;

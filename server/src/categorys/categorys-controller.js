@@ -75,7 +75,7 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 exports.getCategoryByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const categoryID = req.params.id;
-        const category = await Category.findOne({ _id: categoryID }).populate("mainCategoryId")
+        const category = await Category.findOne({ mainCategoryId: categoryID }).populate("mainCategoryId")
         // .populate("productId");
 
         res.status(200).json({ success: true, data: category });
