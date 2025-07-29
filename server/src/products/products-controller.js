@@ -228,3 +228,14 @@ exports.searchProduct = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+
+exports.getProductsByCategory = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { categoryID } = req.params;
+        const products = await Product.find({ categoryId: categoryID }).populate("categoryId")
+      return  res.status(200).json({ success: true, data: products, });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
