@@ -32,5 +32,4 @@ router.post("/delete-category/:id", deleteCategoryByID);
 
 router.get("/get_category_by_main_category/:id", getCategoryByMainCategoryID);
 
-
 module.exports = router;
