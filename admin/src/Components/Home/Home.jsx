@@ -50,6 +50,8 @@ import AllEnquiry from '../../Pages/Enquiry/AllEnquiry'
 import AllMainCategory from "../../Pages/MainCategorys/AllMainMainCategory"
 import AddMainCategory from '../../Pages/MainCategorys/AddMainCategory'
 import EditMainCategory from '../../Pages/MainCategorys/EditMainCategory'
+import AllOrderDetailByUser from '../../Pages/Users/AllOrderDetailByUser'
+import AllCartDetailByUser from '../../Pages/Users/AllCartDetailByUser'
 const Home = () => {
 
   const login = sessionStorage.getItem("login")
@@ -102,6 +104,9 @@ const Home = () => {
 
                 {/* --- Orders --- */}
                 <Route path={"/all-users"} element={<AllUsers />} />
+                <Route path={"/all-order-detail-by-user/:id"} element={<AllOrderDetailByUser />} />
+                <Route path={"/all-cart-detail-by-user/:id"} element={<AllCartDetailByUser />} />
+
 
                 {/* --- faq --- */}
                 <Route path={"/all-faq"} element={<AllFaq />} />   {/* // All Vouchers */}
