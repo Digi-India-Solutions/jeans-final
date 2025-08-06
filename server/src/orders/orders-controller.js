@@ -242,9 +242,10 @@ exports.getOrderByID = catchAsyncErrors(async (req, res, next) => {
         const order = await Order.findById(orderID)
             .populate({
                 path: "products.subProduct",
-                populate: {
-                    path: "productId",
-                }
+                populate: [
+                    { path: "productId" },
+                    { path: "sizes" }
+                ]
             })
             .populate("userId", "name email , phone");
         console.log(order);
@@ -285,7 +286,13 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
         // const { pageNumber } = req.query;
         const userID = req.params.id;
 
-        const orders = await Order.find({ userId: userID }).sort({ createdAt: -1 }).populate("userId", "name email , phone")
+        const orders = await Order.find({ userId: userID }).sort({ createdAt: -1 }).populate({
+            path: "products.subProduct",
+            populate: [
+                { path: "productId" },
+                { path: "sizes" }
+            ]
+        }).populate("userId", "name email , phone")
         // .populate("products.subProduct");
         // console.log("orders:==>", !orders[0].products.length);
         if (!orders || orders.length === 0) {
