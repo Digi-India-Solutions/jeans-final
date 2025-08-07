@@ -187,7 +187,7 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
 
 exports.getAllUser = catchAsyncErrors(async (req, res, next) => {
     try {
-        const users = await User.find();
+        const users = await User.find().sort({ createdAt: -1 });
         res.status(200).json({ success: true, data: users });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
@@ -196,7 +196,7 @@ exports.getAllUser = catchAsyncErrors(async (req, res, next) => {
 
 exports.getUserById = catchAsyncErrors(async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await User.findById(req.params.id).sort({ createdAt: -1 }) ;
 
         if (!user) {
             return next(new ErrorHandler('User not found', 404));

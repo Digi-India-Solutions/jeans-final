@@ -1,6 +1,7 @@
 // import React, { useEffect, useState } from "react";
 // import Swal from "sweetalert2";
 // import { getData, postData } from "../../services/FetchNodeServices";
+// import { Link, useNavigate } from "react-router-dom";
 
 // const FILTER_OPTIONS = [
 //   { label: "Last 30 Days", value: 30 },
@@ -13,9 +14,15 @@
 //   const [users, setUsers] = useState([]);
 //   const [allUsers, setAllUsers] = useState([]);
 //   const [loading, setLoading] = useState(false);
-//   const [filterDays, setFilterDays] = useState(null);
+//   const [searchQuery, setSearchQuery] = useState('');
+//   const [filterDays, setFilterDays] = useState("");
+//   const navigate = useNavigate();
 
-//   // Fetch users
+//   useEffect(() => {
+//     fetchUsers();
+//   }, []);
+
+//   // Fetch all users
 //   const fetchUsers = async () => {
 //     try {
 //       const response = await getData("api/user/get-all-user");
@@ -82,11 +89,11 @@
 //     }
 //   };
 
-//   // Handle bulk notification
+//   // Send bulk order notification
 //   const handleOrderClick = async (usersList) => {
 //     setLoading(true);
 //     const orderData = usersList.map((user) => ({
-//       _id: user?._id,
+//       _id: user._id,
 //       name: user.name,
 //       email: user.email,
 //       phone: user.phone,
@@ -98,15 +105,20 @@
 //     const response = await postData("api/user/bulk-order-notification", orderData);
 //     setLoading(false);
 //     if (response?.success) {
-//       Swal.fire("Success!", response?.message || "Order notification sent!", "success");
+//       Swal.fire("Success!", response.message || "Order notification sent!", "success");
 //     } else {
 //       Swal.fire("Error!", "Failed to send notification!", "error");
 //     }
 //   };
 
-//   // Filter users by no order in last N days
+//   // Filter users with no orders
 //   const handleFilterChange = async (days) => {
 //     setFilterDays(days);
+//     if (!days) {
+//       setUsers(allUsers);
+//       return;
+//     }
+
 //     const response = await getData(`api/user/get-users-without-orders/${days}`);
 //     if (response?.status) {
 //       setUsers(response?.data);
@@ -115,19 +127,40 @@
 //     }
 //   };
 
-//   useEffect(() => {
-//     fetchUsers();
-//   }, []);
+//   // Helper: format address
+//   const formatAddress = (address) => {
+//     return [
+//       address?.street,
+//       address?.city,
+//       address?.state,
+//       address?.zipCode,
+//     ]
+//       .filter(Boolean)
+//       .join(", ") || "-";
+//   };
+
+//   const handleSearch = (e) => {
+//     const query = e.target.value.toLowerCase();
+//     setSearchQuery(query);
+
+//     const filtered = allUsers.filter(user =>
+//       user?.name?.toLowerCase().includes(query) ||
+//       user?.email?.toLowerCase().includes(query) ||
+//       user?.phone?.toLowerCase().includes(query)
+//     );
+//     setAllUsers(filtered);
+//   };
 
 //   return (
-//     <>
+//     <div>
+//       {/* Header */}
 //       <div className="bread d-flex justify-content-between align-items-center mb-3">
 //         <h4 className="fw-bold">All Users</h4>
 //         <div className="d-flex gap-2">
 //           <select
 //             className="form-select"
 //             style={{ width: 200 }}
-//             value={filterDays || ""}
+//             value={filterDays}
 //             onChange={(e) => handleFilterChange(e.target.value)}
 //           >
 //             <option value="">-- Filter: No Orders In --</option>
@@ -137,17 +170,35 @@
 //               </option>
 //             ))}
 //           </select>
-//           <button className="btn btn-primary" onClick={() => handleOrderClick(users)}>
+//           <button
+//             className="btn btn-primary"
+//             onClick={() => handleOrderClick(users)}
+//             disabled={loading}
+//           >
 //             {loading ? "Sending..." : "Send Order Notification"}
 //           </button>
+//           <div className="search">
+//             <label htmlFor="search">Search</label>&nbsp;
+//             <input
+//               type="text"
+//               name="search"
+//               id="search"
+//               value={searchQuery}
+//               onChange={handleSearch}
+//             />
+//           </div>
 //         </div>
+
+
+
 //       </div>
 
+//       {/* User Table */}
 //       <section className="main-table">
-//         <div className="table-responsive mt-3">
+//         <div className="table-responsive">
 //           <table className="table table-bordered table-hover align-middle">
-//             <thead className="table-dark">
-//               <tr style={{ textAlign: 'center' }}>
+//             <thead className="table-dark text-center">
+//               <tr>
 //                 <th>Sr.No.</th>
 //                 <th>Name</th>
 //                 <th>Email</th>
@@ -167,24 +218,15 @@
 //                     <td>{user.name || "-"}</td>
 //                     <td>{user.email || "-"}</td>
 //                     <td>{user.phone || "-"}</td>
-//                     <td>
-//                       {[
-//                         user?.address?.street,
-//                         user?.address?.city,
-//                         user?.address?.state,
-//                         user?.address?.zipCode,
-//                       ]
-//                         .filter(Boolean)
-//                         .join(", ") || "-"}
-//                     </td>
+//                     <td>{formatAddress(user.address)}</td>
 //                     <td>{user.role || "User"}</td>
-//                     <td>
+//                     <td className="text-center">
 //                       <span
 //                         className={`badge px-3 py-2 text-white fw-bold ${user.isActive ? "bg-success" : "bg-danger"}`}
 //                         style={{ cursor: "pointer", fontSize: "0.9rem" }}
 //                         onClick={() => toggleStatus(user._id, user.isActive)}
 //                       >
-//                         <i className={`fa ${user.isActive ? "fa-toggle-on" : "fa-toggle-off"} me-1`}></i>
+//                         <i className={`fa ${user.isActive ? "fa-toggle-on" : "fa-toggle-off"} me-1`} />
 //                         {user.isActive ? "Active" : "Inactive"}
 //                       </span>
 //                     </td>
@@ -192,28 +234,30 @@
 //                       {new Date(user.createdAt).toLocaleDateString()}{" "}
 //                       {new Date(user.createdAt).toLocaleTimeString()}
 //                     </td>
-//                     <td >
-//                       <button
-//                         style={{ marginRight: '5px' }}
-//                         className="btn btn-sm btn-outline-primary"
-//                         onClick={() => deleteUser(user._id)}
-//                       >
-//                         <i className="fa fa-trash me-1"></i> Order Details
-//                       </button>
-//                       <button
-//                         style={{ marginRight: '5px' }}
-//                         className="btn btn-sm btn-outline-primary"
-//                         onClick={() => deleteUser(user._id)}
-//                       >
-//                         <i className="fa fa-trash me-1"></i> Cheack Cart
-//                       </button>
-//                       <button
-//                         className="btn btn-sm btn-outline-danger"
-//                         onClick={() => deleteUser(user._id)}
-//                       >
-//                         <i className="fa fa-trash me-1"></i> Delete
-//                       </button>
+//                     <td  >
+//                       <div className="" style={{ display: 'flex', gap: 5 }} >
+//                         <button
+//                           className="btn btn-sm btn-outline-info"
+//                           onClick={() => navigate(`/all-order-detail-by-user/${user?._id}`, { state: { user } })}
 
+//                         >
+//                           {/* <Link to={`/all-order-detail-by-user/${user?._id}`} style={{ textDecoration: 'none' }}> */}
+//                           <i className="fa fa-list me-1"></i> Order Details
+//                           {/* </Link> */}
+//                         </button>
+//                         <button
+//                           className="btn btn-sm btn-outline-warning"
+//                           onClick={() => navigate(`/all-cart-detail-by-user/${user?._id}`, { state: { user } })}
+//                         >
+//                           <i className="fa fa-shopping-cart me-1"></i> Check Cart
+//                         </button>
+//                         <button
+//                           className="btn btn-sm btn-outline-danger"
+//                           onClick={() => deleteUser(user?._id)}
+//                         >
+//                           <i className="fa fa-trash me-1"></i> Delete
+//                         </button>
+//                       </div>
 //                     </td>
 //                   </tr>
 //                 ))
@@ -228,16 +272,17 @@
 //           </table>
 //         </div>
 //       </section>
-//     </>
+//     </div>
 //   );
 // };
 
 // export default AllUsers;
 
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import { getData, postData } from "../../services/FetchNodeServices";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const FILTER_OPTIONS = [
   { label: "Last 30 Days", value: 30 },
@@ -247,32 +292,32 @@ const FILTER_OPTIONS = [
 ];
 
 const AllUsers = () => {
-  const [users, setUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filterDays, setFilterDays] = useState("");
   const navigate = useNavigate();
 
+  // Fetch all users on mount
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Fetch all users
   const fetchUsers = async () => {
     try {
       const response = await getData("api/user/get-all-user");
       if (response.success) {
-        setUsers(response.data);
         setAllUsers(response.data);
+        setUsers(response.data);
       } else {
-        console.error("Failed to fetch users:", response.message);
+        Swal.fire("Error", response.message, "error");
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      Swal.fire("Error", "Unable to fetch users", "error");
     }
   };
 
-  // Delete user
   const deleteUser = async (userId) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -299,7 +344,6 @@ const AllUsers = () => {
     }
   };
 
-  // Toggle user status
   const toggleStatus = async (userId, currentStatus) => {
     const result = await Swal.fire({
       title: "Change Status?",
@@ -324,8 +368,11 @@ const AllUsers = () => {
     }
   };
 
-  // Send bulk order notification
   const handleOrderClick = async (usersList) => {
+    if (!usersList.length) {
+      return Swal.fire("Warning!", "No users to notify.", "warning");
+    }
+
     setLoading(true);
     const orderData = usersList.map((user) => ({
       _id: user._id,
@@ -337,16 +384,20 @@ const AllUsers = () => {
       createdAt: user.createdAt,
     }));
 
-    const response = await postData("api/user/bulk-order-notification", orderData);
-    setLoading(false);
-    if (response?.success) {
-      Swal.fire("Success!", response.message || "Order notification sent!", "success");
-    } else {
-      Swal.fire("Error!", "Failed to send notification!", "error");
+    try {
+      const response = await postData("api/user/bulk-order-notification", orderData);
+      Swal.fire(
+        response.success ? "Success!" : "Error!",
+        response.message || "Notification status unknown.",
+        response.success ? "success" : "error"
+      );
+    } catch (error) {
+      Swal.fire("Error!", "Failed to send notifications.", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Filter users with no orders
   const handleFilterChange = async (days) => {
     setFilterDays(days);
     if (!days) {
@@ -354,15 +405,18 @@ const AllUsers = () => {
       return;
     }
 
-    const response = await getData(`api/user/get-users-without-orders/${days}`);
-    if (response?.status) {
-      setUsers(response?.data);
-    } else {
-      Swal.fire("Error!", response.message || "Could not fetch filtered users.", "error");
+    try {
+      const response = await getData(`api/user/get-users-without-orders/${days}`);
+      if (response.status) {
+        setUsers(response.data);
+      } else {
+        Swal.fire("Error!", response.message || "Could not fetch users.", "error");
+      }
+    } catch (error) {
+      Swal.fire("Error!", "Failed to apply filter.", "error");
     }
   };
 
-  // Helper: format address
   const formatAddress = (address) => {
     return [
       address?.street,
@@ -374,12 +428,25 @@ const AllUsers = () => {
       .join(", ") || "-";
   };
 
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    const filtered = allUsers.filter((user) =>
+      user?.name?.toLowerCase().includes(query) ||
+      user?.email?.toLowerCase().includes(query) ||
+      user?.phone?.toLowerCase().includes(query)
+    );
+
+    setUsers(filtered);
+  };
+
   return (
     <div>
       {/* Header */}
       <div className="bread d-flex justify-content-between align-items-center mb-3">
         <h4 className="fw-bold">All Users</h4>
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 align-items-center">
           <select
             className="form-select"
             style={{ width: 200 }}
@@ -393,6 +460,7 @@ const AllUsers = () => {
               </option>
             ))}
           </select>
+
           <button
             className="btn btn-primary"
             onClick={() => handleOrderClick(users)}
@@ -400,10 +468,22 @@ const AllUsers = () => {
           >
             {loading ? "Sending..." : "Send Order Notification"}
           </button>
+
+          <div className="search d-flex align-items-center">
+            <input
+              type="text"
+              name="search"
+              id="search"
+              value={searchQuery}
+              onChange={handleSearch}
+              className="form-control"
+              placeholder="Name, Email, Phone"
+            />
+          </div>
         </div>
       </div>
 
-      {/* User Table */}
+      {/* Table */}
       <section className="main-table">
         <div className="table-responsive">
           <table className="table table-bordered table-hover align-middle">
@@ -435,6 +515,7 @@ const AllUsers = () => {
                         className={`badge px-3 py-2 text-white fw-bold ${user.isActive ? "bg-success" : "bg-danger"}`}
                         style={{ cursor: "pointer", fontSize: "0.9rem" }}
                         onClick={() => toggleStatus(user._id, user.isActive)}
+                        title="Click to toggle status"
                       >
                         <i className={`fa ${user.isActive ? "fa-toggle-on" : "fa-toggle-off"} me-1`} />
                         {user.isActive ? "Active" : "Inactive"}
@@ -444,20 +525,17 @@ const AllUsers = () => {
                       {new Date(user.createdAt).toLocaleDateString()}{" "}
                       {new Date(user.createdAt).toLocaleTimeString()}
                     </td>
-                    <td  >
-                      <div className="" style={{ display: 'flex', gap: 5 }} >
+                    <td>
+                      <div className="d-flex gap-1">
                         <button
                           className="btn btn-sm btn-outline-info"
                           onClick={() => navigate(`/all-order-detail-by-user/${user?._id}`, { state: { user } })}
-
                         >
-                          {/* <Link to={`/all-order-detail-by-user/${user?._id}`} style={{ textDecoration: 'none' }}> */}
                           <i className="fa fa-list me-1"></i> Order Details
-                          {/* </Link> */}
                         </button>
                         <button
                           className="btn btn-sm btn-outline-warning"
-                          onClick={() =>navigate(`/all-cart-detail-by-user/${user?._id}`, { state: { user } })}
+                          onClick={() => navigate(`/all-cart-detail-by-user/${user?._id}`, { state: { user } })}
                         >
                           <i className="fa fa-shopping-cart me-1"></i> Check Cart
                         </button>
