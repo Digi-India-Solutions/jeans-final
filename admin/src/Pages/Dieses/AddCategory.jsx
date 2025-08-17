@@ -100,7 +100,7 @@ const AddCategory = () => {
       <div className="d-form">
         <form className="row g-3" onSubmit={handleSubmit}>
           <div className="col-md-4">
-            <label htmlFor="image" className="form-label">Category Image *</label>
+            <label htmlFor="image" className="form-label">Category Image (140 x 140) *</label>
             <input type="file" name="image" className="form-control" id="image" accept="image/*" onChange={handleChange} required />
             {formData.image && <img src={URL.createObjectURL(formData.image)} alt="Preview" width="100" className="mt-2" />}
           </div>

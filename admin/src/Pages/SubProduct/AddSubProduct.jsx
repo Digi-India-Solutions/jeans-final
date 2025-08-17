@@ -248,7 +248,7 @@ const AddSubProduct = () => {
                             </div>
 
                             <div className="col-md-4">
-                                <label>Images*</label>
+                                <label>Images (140 x 140) *</label>
                                 <input
                                     type="file"
                                     multiple

@@ -196,7 +196,7 @@ exports.getAllUser = catchAsyncErrors(async (req, res, next) => {
 
 exports.getUserById = catchAsyncErrors(async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id).sort({ createdAt: -1 }) ;
+        const user = await User.findById(req.params.id).sort({ createdAt: -1 });
 
         if (!user) {
             return next(new ErrorHandler('User not found', 404));
@@ -229,11 +229,14 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
         const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body
 
         let imageUrl = "";
-        if (req.file) {
-            imageUrl = await uploadImage(req.file.path);
 
+        if (req.file) {
+            // console.log("DDDDDQQQQQQQQ=>qq", req.file)
+            imageUrl = await uploadImage(req.file.path);
             deleteLocalFile(req.file.path);
         }
+
+        // console.log("DDDDDQQQQQQQQ=>", imageUrl)
 
         const updatedUser = await User.findByIdAndUpdate(userId, { name, shopname, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
 
