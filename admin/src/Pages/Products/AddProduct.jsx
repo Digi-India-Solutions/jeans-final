@@ -110,7 +110,7 @@ const AddProduct = () => {
       <div className="d-form">
         <form className="row g-3 mt-2" onSubmit={handleSubmit}>
           <div className="col-md-4">
-            <label className="form-label">Product Image*</label>
+            <label className="form-label">Product Image (140 x 140)*</label>
             <input type="file" className="form-control" multiple onChange={handleFileChange} style={{ height: '60px' }} required />
           </div>
 
