@@ -8,7 +8,7 @@ cloudnary.config({
 
 
 const uploadImage = async (file) => {
-    // console.log('fileURL----------', file)
+    console.log('fileURL----------', file)
     try {
         const imageurl = await cloudnary.uploader.upload(file)
         // console.log('imageurl----------', imageurl)
