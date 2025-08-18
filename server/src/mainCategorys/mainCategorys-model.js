@@ -4,7 +4,7 @@ const mainCategorySchema = new mongoose.Schema({
     // productId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     mainCategoryName: { type: String, required: true },
     // description: String,
-    // images: [String],
+    images: [String],
     status: { type: Boolean, default: true },
     // uniqueCategoryId: { type: String, unique: true },
     createdAt: {
