@@ -52,6 +52,7 @@ import AddMainCategory from '../../Pages/MainCategorys/AddMainCategory'
 import EditMainCategory from '../../Pages/MainCategorys/EditMainCategory'
 import AllOrderDetailByUser from '../../Pages/Users/AllOrderDetailByUser'
 import AllCartDetailByUser from '../../Pages/Users/AllCartDetailByUser'
+import Test from '../../Pages/Test/Test'
 const Home = () => {
 
   const login = sessionStorage.getItem("login")
@@ -148,6 +149,9 @@ const Home = () => {
                 <Route path={"all-enquiry"} element={<AllEnquiry />} />
                 {/* <Route path={"add-enquiry"} element={<AddEnquiry />} />
                 <Route path={"edit-enquiry/:id"} element={<EditEnquiry />} /> */}
+
+                {/* notifiction test */}
+                <Route path={"test"} element={<Test />} />
               </Routes>
             </div>
           </>

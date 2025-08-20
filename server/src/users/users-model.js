@@ -48,6 +48,11 @@ const userSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    fcmToken: {
+        type: String,
+        // trim: true,
+        // default: ""
+    },
     isUser: {
         type: Boolean,
         default: true,
