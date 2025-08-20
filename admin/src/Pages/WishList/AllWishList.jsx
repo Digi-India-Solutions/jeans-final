@@ -104,6 +104,7 @@ const AllWishList = () => {
                             <th>Product Image</th>
                             <th>User Name</th>
                             <th>User Email</th>
+                            <th>User Number</th>
                             <th>Status</th>
                             <th>Delete</th>
                         </tr>
@@ -136,6 +137,7 @@ const AllWishList = () => {
                                     </td>
                                     <td>{wishList?.userId?.name}</td>
                                     <td>{wishList?.userId?.email}</td>
+                                    <td>{wishList?.userId?.phone}</td>
                                     {/* <td>
                                         <input
                                             type="checkbox"
