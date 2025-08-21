@@ -29,7 +29,6 @@ const AllSBanner = () => {
                 setIsLoading(false);
             }
         };
-
         fetchBanners();
     }, []);
 
@@ -114,6 +113,7 @@ const AllSBanner = () => {
                             <th scope="col">Sr.No.</th>
                             <th scope="col">Name</th>
                             <th scope="col">Image</th>
+                            <th scope='col'>Pages</th>
                             <th scope="col">Show in home page</th>
                             <th scope="col">Edit</th>
                             <th scope="col">Delete</th>
@@ -136,6 +136,7 @@ const AllSBanner = () => {
                                             style={{ width: '100px', height: 'auto' }}
                                         />
                                     </td>
+                                    <td>{banner?.url}</td>
                                     <td>
                                         <input
                                             type="checkbox"

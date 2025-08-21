@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { postData } from "../../services/FetchNodeServices.js";
+import { Autocomplete, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 
 const AddBanner = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const AddBanner = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const selectUrl = ['jeans', 'shirts', 'franchise', 'allproducts']
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -42,6 +44,7 @@ const AddBanner = () => {
       const submitData = new FormData();
       submitData.append("name", formData.bannerName);
       submitData.append("images", bannerImage);
+      submitData.append("url", formData?.url);
       submitData.append("isActive", formData.bannerStatus);
 
       const response = await postData("api/banner/create", submitData);
@@ -77,46 +80,43 @@ const AddBanner = () => {
 
       <div className="d-form">
         <form className="row g-3" onSubmit={handleSubmit}>
-          <div className="col-md-6">
+          <div className="col-md-4">
             <label htmlFor="bannerName" className="form-label">
               Shop Banner Name
             </label>
-            <input
-              type="text"
-              name="bannerName"
-              value={formData.bannerName}
-              onChange={handleChange}
-              className="form-control"
-              id="bannerName"
-              required
-            />
+            <input type="text" name="bannerName" value={formData.bannerName} onChange={handleChange} className="form-control" id="bannerName" required />
           </div>
 
-          <div className="col-md-6">
+          <div className="col-md-4">
             <label htmlFor="bannerImage" className="form-label">
               Shop Banner Image
             </label>
-            <input
-              type="file"
-              name="bannerImage"
-              className="form-control"
-              id="bannerImage"
-              onChange={handleImageChange}
-              accept="image/*"
-              required
-            />
+            <input type="file" name="bannerImage" className="form-control" id="bannerImage" onChange={handleImageChange} accept="image/*" required />
           </div>
 
+          <div className="col-md-4">
+            <label htmlFor="bannerImage" className="form-label">
+              Shop Banner (Page)
+            </label>
+            <FormControl sx={{ minWidth: 290, }} size="small">
+              {/* <InputLabel id="demo-select-small-label">Select Url</InputLabel> */}
+              <Select
+                labelId="demo-select-small-label"
+                id="demo-select-small"
+                value={formData.url || ""}
+                options={selectUrl}
+                // label="Select Url"
+                onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
+                fullWidth
+              >
+                <MenuItem value=""><em>None</em></MenuItem>
+                {selectUrl.map((url) => <MenuItem value={url}>{url}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </div>
           <div className="col-12">
             <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="bannerStatus"
-                id="bannerStatus"
-                checked={formData.bannerStatus}
-                onChange={handleChange}
-              />
+              <input className="form-check-input" type="checkbox" name="bannerStatus" id="bannerStatus" checked={formData.bannerStatus} onChange={handleChange} />
               <label className="form-check-label" htmlFor="bannerStatus">
                 Active
               </label>

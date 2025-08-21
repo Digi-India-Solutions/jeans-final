@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getData, postData, serverURL } from '../../services/FetchNodeServices';
+import { FormControl, MenuItem, Select } from '@mui/material';
 
 const EditBanner = () => {
     const { id } = useParams();
@@ -11,10 +12,12 @@ const EditBanner = () => {
         bannerName: '',
         bannerImage: null,
         bannerStatus: false,
+        url: '',
         oldImage: '',
     });
     const [previewImage, setPreviewImage] = useState('');
     const [btnLoading, setBtnLoading] = useState(false);
+    const selectUrl = ['jeans', 'shirts', 'franchise', 'allproducts']
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,6 +30,7 @@ const EditBanner = () => {
                     setFormData({
                         bannerName: banner?.name || '',
                         bannerImage: banner?.images,
+                        url: banner?.url || '',
                         bannerStatus: banner?.isActive || false,
                         oldImage: banner?.images || '', // ensure boolean value
                     });
@@ -70,6 +74,7 @@ const EditBanner = () => {
         submitData.append('name', formData?.bannerName);
         if (formData?.bannerImage) submitData.append('images', formData?.bannerImage);
         submitData.append('oldImages', formData?.oldImage);
+        submitData.append('url', formData?.url);
         submitData.append('isActive', formData?.bannerStatus ? "true" : "false");
 
         try {
@@ -105,7 +110,7 @@ const EditBanner = () => {
 
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <label htmlFor="bannerName" className="form-label">Banner Name</label>
                         <input
                             type="text"
@@ -114,9 +119,9 @@ const EditBanner = () => {
                             onChange={handleChange}
                             className="form-control"
                             id="bannerName"
-                            required                        />
+                            required />
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <label htmlFor="bannerImage" className="form-label">Banner Image</label>
                         <input
                             type="file"
@@ -125,6 +130,26 @@ const EditBanner = () => {
                             id="bannerImage"
                             onChange={handleImageChange}
                         />
+                    </div>
+                    <div className="col-md-4">
+                        <label htmlFor="bannerImage" className="form-label">
+                            Shop Banner (Page)
+                        </label>
+                        <FormControl sx={{ minWidth: 290, }} size="small">
+                            {/* <InputLabel id="demo-select-small-label">Select Url</InputLabel> */}
+                            <Select
+                                labelId="demo-select-small-label"
+                                id="demo-select-small"
+                                value={formData.url || ""}
+                                options={selectUrl}
+                                // label="Select Url"
+                                onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
+                                fullWidth
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                {selectUrl.map((url) => <MenuItem value={url}>{url}</MenuItem>)}
+                            </Select>
+                        </FormControl>
                     </div>
                     <div className="col-md-6">
                         {previewImage && (

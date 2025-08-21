@@ -42,7 +42,7 @@ exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
         // console.log("DDDDDDD", req.body)
-        const { fullName, mobile, email, otp, password, fcmToken } = req.body;
+        const { fullName, mobile, email, otp, password } = req.body;
 
         if (!email || !otp || !password) {
             return res.status(200).json({ status: false, message: "All fields are required" });
@@ -67,7 +67,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 
         const hash = await bcrypt.hash(password, 10);
 
-        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, fcmToken });
+        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, });
         sendEmailByUserForRequastActiveAccount({ email, fullName, mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
         sendWhatsAppByUserForRequastActiveAccount({ name: fullName, phone: mobile, });
@@ -130,9 +130,13 @@ exports.sendResetPasswordEmail = catchAsyncErrors(async (req, res, next) => {
             { expiresIn: process.env.JWT_EXPIRES }
         );
 
-        const mailData = { email: email, token: token, user: user, };
+        const mailData = {
+            email: email,
+            token: token,
+            user: user,
+        };
 
-        await sendResetPassword(mailData);
+        // await sendResetPassword(mailData);
         res.status(200).json({ status: true, token: token, email: email, message: "Reset password email sent successfully" });
 
     } catch (error) {
@@ -222,30 +226,40 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body
+        const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body;
 
-        let imageUrl = "";
+        // Check if user exists first
+        const exist = await User.findById(userId);
+        if (!exist) {
+            return next(new ErrorHandler("User Not Found", 404));
+        }
 
-        if (req.file) {
-            // console.log("DDDDDQQQQQQQQ=>qq", req.file)
+        let imageUrl = exist.photo || "";
+
+        // Handle new photo upload if provided
+        if (req.file?.path) {
             imageUrl = await uploadImage(req.file.path);
             deleteLocalFile(req.file.path);
         }
 
-        // console.log("DDDDDQQQQQQQQ=>", imageUrl)
+        // Prepare updated data
+        const updateData = {
+            name, email, phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, },
+        };
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, shopname, email, phone, photo: imageUrl, address: { street, city, state, zipCode, country, }, });
+        // Update and return new document
+        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true });
 
         if (!updatedUser) {
-            return next(new ErrorHandler("User Not Found", 404));
+            return next(new ErrorHandler("User Update Failed", 400));
         }
 
-        sendResponse(res, 200, "User Updated Successfully", updatedUser);
+        res.status(200).json({ success: true, message: "User Updated Successfully!", user: updatedUser, });
 
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+        return next(new ErrorHandler(error.message || "Internal Server Error", 500));
     }
-})
+});
 
 exports.changePassword = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -371,59 +385,6 @@ exports.toggleStatusUserId = catchAsyncErrors(async (req, res, next) => {
 })
 
 
-// exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { minDays = 60, maxDays = 80 } = req.body;
-
-//         // Calculate date range
-//         const fromDate = dayjs().subtract(maxDays, "day").toDate();
-//         const toDate = dayjs().subtract(minDays, "day").toDate();
-
-//         // Find users who placed orders in the range
-//         const recentOrderUsers = await Order.distinct("userId", {
-//             createdAt: { $gte: fromDate, $lte: toDate }
-//         });
-
-//         // Find users who DID NOT place any order in last X days
-//         const allUsers = await User.find({ isActive: true });
-//         const inactiveUsers = allUsers.filter(
-//             (user) => !recentOrderUsers.includes(user._id.toString())
-//         );
-
-//         const response = await fetch("https://fcm.googleapis.com/fcm/send", {
-//             method: "POST",
-//             headers: {
-//                 "Authorization": "key=BK-BxzYUygiOwN78gFik2c3IHAXO8mWb7J3_ewyn9mhitLkmcUF3CKrO_T5sIeycMgw7r92TgI0wC0gsBxMA7uY", // from Firebase project settings > Cloud Messaging
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({
-//                 to: token,  // device FCM token
-//                 notification: {
-//                     title:"Order Notification",
-//                     body:'Order Notification TEXT ',
-//                     icon: "https://yourdomain.com/icon.png",
-//                 },
-//             }),
-//         });
-
-//         // Send notification logic (you can replace this with email/SMS/etc)
-//         for (const user of inactiveUsers) {
-//             console.log("user", user);
-//             await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
-//             await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
-
-//         }
-
-//         return res.status(200).json({
-//             success: true,
-//             message: `${inactiveUsers.length} user(s) notified who haven't ordered in last ${minDays}-${maxDays} days.`,
-
-//         });
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// });
-
 exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
     try {
         const { minDays = 60, maxDays = 80 } = req.body;
@@ -432,63 +393,32 @@ exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
         const fromDate = dayjs().subtract(maxDays, "day").toDate();
         const toDate = dayjs().subtract(minDays, "day").toDate();
 
-        // Users who placed orders between (maxDays - minDays)
+        // Find users who placed orders in the range
         const recentOrderUsers = await Order.distinct("userId", {
             createdAt: { $gte: fromDate, $lte: toDate }
         });
 
-        // Get active users who did NOT order recently
-        const inactiveUsers = await User.find({
-            isActive: true,
-            _id: { $nin: recentOrderUsers }
-        }).select("name email phone fcmToken");
+        // Find users who DID NOT place any order in last X days
+        const allUsers = await User.find({ isActive: true });
+        const inactiveUsers = allUsers.filter(
+            (user) => !recentOrderUsers.includes(user._id.toString())
+        );
 
-        if (!inactiveUsers.length) {
-            return res.status(200).json({
-                success: true,
-                message: "No inactive users found in this range."
-            });
-        }
-
-        // Send notifications (FCM + Email + WhatsApp)
+        // Send notification logic (you can replace this with email/SMS/etc)
         for (const user of inactiveUsers) {
-            // Firebase FCM push
-            if (user.fcmToken) {
-                await fetch("https://fcm.googleapis.com/fcm/send", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `key=${process.env.FCM_SERVER_KEY}`, // store in .env
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        to: user.fcmToken,
-                        notification: {
-                            title: "We Miss You!",
-                            body: `Hey ${user.name}, it's been a while since your last order. Check out our new deals!`,
-                            icon: "https://yourdomain.com/icon.png",
-                        },
-                    }),
-                });
-            }
-
-            // Email + WhatsApp notifications
-            await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone, });
-
-            await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone, });
+            console.log("user", user);
+            await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
+            await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
         }
 
         return res.status(200).json({
             success: true,
             message: `${inactiveUsers.length} user(s) notified who haven't ordered in last ${minDays}-${maxDays} days.`,
-            notifiedUsers: inactiveUsers.map(u => ({ id: u._id, name: u.name, email: u.email, phone: u.phone }))
         });
-
     } catch (error) {
-        console.error("bulkOrderNotification Error:", error);
         return next(new ErrorHandler(error.message, 500));
     }
 });
-
 
 // exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
 //     try {
@@ -531,5 +461,120 @@ exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
     } catch (error) {
         console.error("Error in getUsersWithoutOrders:", error);
         return res.status(500).json({ status: false, message: "Server Error" });
+    }
+});
+
+
+
+const { GoogleAuth } = require("google-auth-library");
+const admin = require("firebase-admin");
+const path = require("path");
+
+// ✅ Correct path to your service account
+const serviceAccountPath = path.join(__dirname, "../../firebase-service-account.json");
+
+// ✅ Initialize Firebase only once
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(require(serviceAccountPath)),
+    });
+}
+
+// 🔑 Function to get OAuth2 access token
+async function getAccessToken() {
+    const auth = new GoogleAuth({
+        keyFile: serviceAccountPath, // service account JSON file
+        scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
+    });
+    const client = await auth.getClient();
+    const accessToken = await client.getAccessToken();
+    return accessToken.token;
+}
+
+exports.bulkNotification = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { minDays = 60, maxDays = 80 } = req.body;
+        const projectId = "anibhavicreation-95213"; // Firebase Project ID
+
+        // 1️⃣ Get OAuth2 token
+        const accessToken = await getAccessToken();
+
+        // 2️⃣ Calculate date range
+        // const fromDate = dayjs().subtract(maxDays, "day").toDate();
+        // const toDate = dayjs().subtract(minDays, "day").toDate();
+
+        // 3️⃣ Find users who placed orders within the date range
+        // const recentOrderUsers = await Order.distinct("userId", {
+        //     createdAt: { $gte: fromDate, $lte: toDate },
+        // });
+
+        // 4️⃣ Find active users who did NOT order recently
+        // const inactiveUsers = await User.find({
+        //     isActive: true,
+        //     _id: { $nin: recentOrderUsers },
+        //     fcmToken: { $exists: true, $ne: null }, // must have FCM token
+        // }).select("name email phone fcmToken");
+
+        // if (!inactiveUsers.length) {
+        //     return res.status(200).json({
+        //         success: true,
+        //         message: "No inactive users found in this range.",
+        //     });
+        // }
+
+        // 5️⃣ Send notifications to inactive users
+        const inactiveUsers = await User.find({ isActive: true, fcmToken: { $exists: true, $ne: null } }).select("name email phone fcmToken");
+
+        const results = [];
+
+        for (const user of inactiveUsers) {
+            try {
+                // await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
+                // await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
+
+                const fcmResponse = await fetch(
+                    `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+                    {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            message: {
+                                token: user.fcmToken,
+                                notification: {
+                                    title: "We Miss You!",
+                                    body: `Hey ${user.name}, it's been a while since your last order. Check out our new deals 🎉`,
+                                    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPpAh63HncAuJOC6TxWkGLYpS0WwNXswz9MA&s",
+                                },
+                                data: {
+                                    userId: String(user._id),
+                                    click_action: "FLUTTER_NOTIFICATION_CLICK",
+                                },
+                            },
+                        }),
+                    }
+                );
+                console.log("hhhh>=>", fcmResponse)
+
+                const fcmResult = await fcmResponse.json();
+                results.push({ user: user.email, status: fcmResult });
+
+            } catch (err) {
+                console.error(`❌ FCM error for ${user.email}:`, err.message);
+                results.push({ user: user.email, status: "failed" });
+            }
+        }
+
+        // 6️⃣ Send response
+        return res.status(200).json({
+            success: true,
+            message: `${inactiveUsers.length} user(s) notified who haven't ordered in last ${minDays}-${maxDays} days.`,
+            results,
+        });
+    } catch (error) {
+        console.error("bulkOrderNotification Error:", error);
+        return next(new ErrorHandler(error.message, 500));
     }
 });

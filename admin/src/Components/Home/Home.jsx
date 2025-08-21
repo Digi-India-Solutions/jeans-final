@@ -53,6 +53,9 @@ import EditMainCategory from '../../Pages/MainCategorys/EditMainCategory'
 import AllOrderDetailByUser from '../../Pages/Users/AllOrderDetailByUser'
 import AllCartDetailByUser from '../../Pages/Users/AllCartDetailByUser'
 import Test from '../../Pages/Test/Test'
+import AllNotification from "../../Pages/Notification/AllNotification"
+import AddNotification from "../../Pages/Notification/AddNotification"
+import EditNotification from "../../Pages/Notification/EditNotification"
 const Home = () => {
 
   const login = sessionStorage.getItem("login")
@@ -152,6 +155,9 @@ const Home = () => {
 
                 {/* notifiction test */}
                 <Route path={"test"} element={<Test />} />
+                <Route path={"add-notification"} element={<AddNotification />} />
+                <Route path={"edit-notification/:id"} element={<EditNotification />} />
+                <Route path={"all-notification"} element={<AllNotification />} />
               </Routes>
             </div>
           </>

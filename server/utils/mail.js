@@ -241,9 +241,8 @@ exports.sendResetPassword = async (data) => {
     const { email, token, user } = data;
     // ADMIN_BASE_URL
     console.log("token_data:==", email, token);
-    const baseUrl =
-        user === "admin" ? process.env.ADMIN_BASE_URL : process.env.BASE_URL;
-    const resetLink = baseUrl + `/Pages/reset-password/${token}`;
+    const baseUrl = user === "admin" ? process.env.ADMIN_BASE_URL : process.env.BASE_URL;
+    const resetLink = `https://app.anibhavi.creation/pages/reset-password/${token}`;
 
     const body = `
     <!DOCTYPE html>

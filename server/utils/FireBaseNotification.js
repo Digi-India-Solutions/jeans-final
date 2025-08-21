@@ -1,22 +1,13 @@
-app.post("/send-notification", async (req, res) => {
-  const { title, body, token } = req.body;
+const { GoogleAuth } = require("google-auth-library");
 
-  const response = await fetch("https://fcm.googleapis.com/fcm/send", {
-    method: "POST",
-    headers: {
-      "Authorization": "key=YOUR_SERVER_KEY",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      to: token,  // device FCM token
-      notification: {
-        title,
-        body,
-        icon: "https://yourdomain.com/icon.png",
-      },
-    }),
+async function getAccessToken() {
+  const auth = new GoogleAuth({
+    keyFile: "firebase-service-account.json", // path to your service account
+    scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
   });
+  const client = await auth.getClient();
+  const accessToken = await client.getAccessToken();
+  return accessToken.token;
+}
 
-  const data = await response.json();
-  res.json(data);
-});
+module.exports = { getAccessToken };
