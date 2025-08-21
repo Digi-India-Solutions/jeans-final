@@ -7,6 +7,9 @@ const bannerSchema = new Schema({
     required: true,
     trim: true,
   },
+  url:{
+    type: String
+  },
   images: [
     {
       type: String,

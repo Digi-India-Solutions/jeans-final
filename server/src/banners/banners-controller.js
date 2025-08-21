@@ -9,7 +9,7 @@ const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder
 
 exports.createBanners = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { name, isActive } = req.body;
+        const { name, isActive ,url } = req.body;
         console.log('req.body::', req.body)
         console.log('req.FILE::', req.file)
         const existingBanner = await Banner.findOne({ name: name });
@@ -32,7 +32,7 @@ exports.createBanners = catchAsyncErrors(async (req, res, next) => {
 
         // console.log("---------", imageUrls)
 
-        const newBanner = await Banner.create({ name, images: imageUrl, isActive: isActive === "true" || isActive === true, });
+        const newBanner = await Banner.create({ name, images: imageUrl,url: url, isActive: isActive === "true" || isActive === true, });
 
         deleteLocalFile(req.file.path);
         // return sendResponse(res, 200, "Banner Created Successfully", newBanner);
@@ -72,6 +72,7 @@ exports.updateBanner = catchAsyncErrors(async (req, res, next) => {
         const updatedBannerData = {
             name: name || banner.name,
             images: updatedImageUrl,
+            url: req.body.url || banner.url,
             isActive: isActive !== undefined ? isActive === "true" || isActive === true : banner.isActive,
         };
 
@@ -121,7 +122,7 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 //   // Get all
 exports.getAllBanners = catchAsyncErrors(async (req, res, next) => {
     try {
-        const banners = await Banner.find().sort({ position: 1 });
+        const banners = await Banner.find().sort({ createdAt: -1 });
         res.status(200).json({ success: true, data: banners });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

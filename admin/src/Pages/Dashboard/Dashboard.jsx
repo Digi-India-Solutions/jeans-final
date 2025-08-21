@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [products, setProducts] = useState([]);
   const [coupones, setCoupones] = useState([]);
   const [enquiry, setEnquiry] = useState([]);
+  const [notification, setNotification] = useState([]);
   const [orders, setOrders] = useState([]);
   const [daySales, setDaySales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,8 @@ const Dashboard = () => {
           rewardsRes,
           couponsRes,
           enquiryRes,
-          ordersRes
+          ordersRes,
+          notificationRes
         ] = await Promise.all([
           getData("api/user/get-all-user"),
           getData("api/banner"),
@@ -44,7 +46,8 @@ const Dashboard = () => {
           getData("api/reward/get-All-rewards"),
           getData("api/coupon/get-All-coupons"),
           getData("api/enquiry/get_all_enquiry_list"),
-          getData("api/order/get-all-orders")
+          getData("api/order/get-all-orders"),
+          getData("api/notification/get-all-notification")
         ]);
 
         if (usersRes?.success) setUsers(usersRes.data);
@@ -53,8 +56,9 @@ const Dashboard = () => {
         if (wishlistRes?.success) setUserWishlists(wishlistRes.data);
         if (productsRes?.success) setProducts(productsRes.data || []);
         if (rewardsRes?.success) setRewardPoints(rewardsRes.rewards || []);
-        if (couponsRes?.success) setCoupones(couponsRes.coupons);
-        if (enquiryRes?.status === true) setEnquiry(enquiryRes.data);
+        if (couponsRes?.success) setCoupones(couponsRes.coupons || []);
+        if (enquiryRes?.status === true) setEnquiry(enquiryRes.data || []);
+        if (notificationRes?.success) setNotification(notificationRes.data);
         if (ordersRes?.success) {
           setOrders(ordersRes.orders);
           setDaySales(ordersRes.orders); // using same data for now
@@ -103,6 +107,7 @@ const Dashboard = () => {
             <DashboardCard to="/all-users" icon="fa-users" title="All Users" count={users.length} />
             <DashboardCard to="/all-coupen" icon="fa-tags" title="All Coupons" count={coupones.length} />
             <DashboardCard to="/all-enquiry" icon="fa-envelope-open-text" title="All Enquiries" count={enquiry.length} />
+            <DashboardCard to="/all-notification" icon="fa-solid fa-bell" title="All Notification" count={notification?.length} />
           </div>
 
           {/* Sales Chart */}
