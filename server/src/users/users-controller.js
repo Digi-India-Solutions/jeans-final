@@ -42,7 +42,7 @@ exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
         // console.log("DDDDDDD", req.body)
-        const { fullName, mobile, email, otp, password } = req.body;
+        const { fullName, mobile, email, otp, password ,fcmToken } = req.body;
 
         if (!email || !otp || !password) {
             return res.status(200).json({ status: false, message: "All fields are required" });
@@ -67,7 +67,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 
         const hash = await bcrypt.hash(password, 10);
 
-        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, });
+        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId,fcmToken });
         sendEmailByUserForRequastActiveAccount({ email, fullName, mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
         sendWhatsAppByUserForRequastActiveAccount({ name: fullName, phone: mobile, });
@@ -226,7 +226,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body;
+        const { name, email, street, city, state, zipCode, country, phone, shopname ,fcmToken} = req.body;
 
         // Check if user exists first
         const exist = await User.findById(userId);
@@ -244,7 +244,7 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
 
         // Prepare updated data
         const updateData = {
-            name, email, phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, },
+            name, email, phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, },fcmToken
         };
 
         // Update and return new document
@@ -293,10 +293,10 @@ exports.changePassword = catchAsyncErrors(async (req, res, next) => {
 exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone, shopname } = req.body
+        const { name, email, street, city, state, zipCode, country, phone, shopname,fcmToken } = req.body
 
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, shopname, address: { street, city, state, zipCode, country, }, });
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, shopname, address: { street, city, state, zipCode, country, }, fcmToken});
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));
