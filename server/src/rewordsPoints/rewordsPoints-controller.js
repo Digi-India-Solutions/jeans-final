@@ -1,6 +1,6 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
 const RewardPoints = require("./rewordsPoints-model")
-
+const cron = require('node-cron');
 
 exports.getRewardPoints = catchAsyncErrors(async (req, res, next) => {
     const { userId } = req.params;
@@ -98,5 +98,34 @@ exports.deleteRewards = catchAsyncErrors(async (req, res, next) => {
     } catch (error) {
         console.error("Delete reward error:", error);
         return res.status(500).json({ success: false, message: "Server error while deleting reward" });
+    }
+});
+
+exports.clearOldPoints = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const userPoints = await RewardPoints.findOne({ userId });
+
+        if (!userPoints) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        let expiryDate = ""
+        if (userPoints) {
+            expiryDate = new Date(userPoints.updatedAt);
+            expiryDate.setDate(expiryDate.getDate() + 90);
+        }
+        let amount = userPoints.points
+        if (new Date() > expiryDate) {
+            userPoints.points -= amount;
+            userPoints.history.push({ type: 'expired', amount: amount, description: "Points expired " });
+            await userPoints.save();
+        } else {
+            return res.status(200).json({ success: true, message: "No points expired", data: userPoints });
+        }
+
+
+    } catch (err) {
+        console.error("Cleanup error:", err);
+        return res.status(500).json({ success: false, error: "Internal server error" });
     }
 });

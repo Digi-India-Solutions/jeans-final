@@ -129,6 +129,10 @@ const orderSchema = new Schema({
         type: Number,
         default: 0
     },
+    reworPoins: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now,

@@ -34,6 +34,7 @@ const enquiryRoutes = require("./src/enquiry/enquiry-routes");
 const mainCategoryRoutes = require("./src/mainCategorys/mainCategorys.routes");
 const notificationRoutes = require("./src/Notification/notification-routes")
 
+
 app.use("/api/admin", superAdminRoutes);
 app.use("/api/banner", bannerRoutes);
 app.use("/api/product", productRoutes);
@@ -58,6 +59,7 @@ const connectDatabase = require("./db/database");
 
 //connect db
 connectDatabase();
+
 // sendBillingToClient();
 app.use("/", (req, res) => {
   return res.send("app is running")

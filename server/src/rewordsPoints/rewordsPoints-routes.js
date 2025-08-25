@@ -1,6 +1,6 @@
 // routes/rewardPointsRoutes.js
 const express = require("express");
-const { getRewardPoints, addRewardPoints, redeemRewardPoints, getAllRewards, changeStatus, deleteRewards } = require("./rewordsPoints-controller");
+const { getRewardPoints, addRewardPoints, redeemRewardPoints, getAllRewards, changeStatus, deleteRewards,clearOldPoints } = require("./rewordsPoints-controller");
 const router = express.Router();
 
 // Routes
@@ -10,5 +10,6 @@ router.post("/redeem", redeemRewardPoints);
 router.get("/get-All-rewards", getAllRewards)
 router.post("/change-status", changeStatus)
 router.get("/delete-rewards/:id", deleteRewards)
+router.get("/cleanOldPoints/:id", clearOldPoints);
 
 module.exports = router;
