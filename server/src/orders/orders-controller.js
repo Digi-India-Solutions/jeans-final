@@ -191,6 +191,22 @@ exports.verifyPayment = async (req, res) => {
             }
             userPoints.points -= rewardPointsUsed;
             userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
+            await userPoints.save();
+
+            let userPoints2 = await RewardPoints.findOne({ userId });
+            const earnedPoints = Math.floor((order.totalAmount * 2.5) / 100);
+
+            if (!userPoints2) {
+                userPoints2 = new RewardPoints({
+                    userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
+                });
+            } else {
+                userPoints2.points += earnedPoints;
+                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
+            }
+            await userPoints2.save();
         } else {
             // Earn 5% points
             const earnedPoints = Math.floor((order.totalAmount * 2.5) / 100);
