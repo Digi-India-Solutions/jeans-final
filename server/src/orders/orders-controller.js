@@ -26,7 +26,8 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             paymentStatus = paymentMethod === "Online" ? "Failed" : "Pending",
             orderDate = new Date(),
             pendingAmount = 0,
-            recivedAmount = 0
+            recivedAmount = 0,
+            totalAmount,
         } = req.body;
 
         // Validate user
@@ -85,7 +86,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             shippingAddress,
             paymentMethod,
             paymentInfo,
-            totalAmount: grandTotal,
+            totalAmount: totalAmount || grandTotal,
             shippingCost,
             discountCupan,
             cupanCode,
@@ -110,13 +111,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
         return res.status(201).json({
             success: true,
             message: "Order created successfully.",
-            order: {
-                _id: newOrder._id,
-                orderUniqueId,
-                invoiceNumber,
-                totalAmount: grandTotal,
-                userId,
-            },
+            order: { _id: newOrder._id, orderUniqueId, invoiceNumber, totalAmount: grandTotal, userId, pendingAmount, recivedAmount, },
         });
     } catch (error) {
         return next(new ErrorHandler(error.message || "Failed to create order.", 500));
@@ -176,8 +171,9 @@ exports.verifyPayment = async (req, res) => {
         order.paymentInfo = { transactionId: razorpay_payment_id, orderId: razorpay_order_id, paymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, };
         order.recivedAmount = order.totalAmount;
         order.pendingAmount = 0;
-
-        await order.save();
+        const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
+        order.reworPoins = earnedPoints || 0;
+            await order.save();
 
         cart.items = [];
         cart.totalAmount = 0;
@@ -194,7 +190,8 @@ exports.verifyPayment = async (req, res) => {
             await userPoints.save();
 
             let userPoints2 = await RewardPoints.findOne({ userId });
-            const earnedPoints = Math.floor((order.totalAmount * 2.5) / 100);
+
+            const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
 
             if (!userPoints2) {
                 userPoints2 = new RewardPoints({
@@ -208,8 +205,8 @@ exports.verifyPayment = async (req, res) => {
             }
             await userPoints2.save();
         } else {
-            // Earn 5% points
-            const earnedPoints = Math.floor((order.totalAmount * 2.5) / 100);
+            // Earn 4% points
+            const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
 
             if (!userPoints) {
                 userPoints = new RewardPoints({
