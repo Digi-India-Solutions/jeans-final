@@ -101,7 +101,7 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             recivedAmount,
         });
 
-          /////////////ADD POINTS//////////////////////////////
+        /////////////ADD POINTS//////////////////////////////
         let userPoints = await RewardPoints.findOne({ userId });
         if (rewardPointsUsed > 0) {
             if (!userPoints || userPoints?.points < rewardPointsUsed) {
@@ -213,11 +213,11 @@ exports.verifyPayment = async (req, res) => {
         // 4. Update order on success
         order.paymentStatus = "Successfull";
         order.paymentInfo = { transactionId: razorpay_payment_id, orderId: razorpay_order_id, paymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, };
-        order.recivedAmount = order.totalAmount;
-        order.pendingAmount = 0;
+        order.recivedAmount = order.recivedAmount;
+        order.pendingAmount = order.pendingAmount || 0;
         const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
         order.reworPoins = earnedPoints || 0;
-            await order.save();
+        await order.save();
 
         cart.items = [];
         cart.totalAmount = 0;
