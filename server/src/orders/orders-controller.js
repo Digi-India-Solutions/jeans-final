@@ -101,6 +101,50 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
             recivedAmount,
         });
 
+          /////////////ADD POINTS//////////////////////////////
+        let userPoints = await RewardPoints.findOne({ userId });
+        if (rewardPointsUsed > 0) {
+            if (!userPoints || userPoints?.points < rewardPointsUsed) {
+                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+            }
+            userPoints.points -= rewardPointsUsed;
+            userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
+            await userPoints.save();
+
+            let userPoints2 = await RewardPoints.findOne({ userId });
+
+            const earnedPoints = Math.floor((newOrder.totalAmount * 4) / 100);
+
+            if (!userPoints2) {
+                userPoints2 = new RewardPoints({
+                    userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
+                });
+            } else {
+                userPoints2.points += earnedPoints;
+                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
+            }
+            await userPoints2.save();
+        } else {
+            // Earn 4% points
+            const earnedPoints = Math.floor((newOrder.totalAmount * 4) / 100);
+
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
+            }
+        }
+
+        await userPoints.save();
+        //////////////////////////////////////////////////////////////////////////////////////////////
+
         // 🧹 Clear Cart
         // cart.items = [];
         // cart.totalAmount = 0;
@@ -179,49 +223,49 @@ exports.verifyPayment = async (req, res) => {
         cart.totalAmount = 0;
         await cart.save();
 
-        /////////////ADD POINTS//////////////////////////////
-        let userPoints = await RewardPoints.findOne({ userId });
-        if (rewardPointsUsed > 0) {
-            if (!userPoints || userPoints?.points < rewardPointsUsed) {
-                return res.status(400).json({ success: false, message: "Insufficient reward points." });
-            }
-            userPoints.points -= rewardPointsUsed;
-            userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
-            await userPoints.save();
+        // /////////////ADD POINTS//////////////////////////////
+        // let userPoints = await RewardPoints.findOne({ userId });
+        // if (rewardPointsUsed > 0) {
+        //     if (!userPoints || userPoints?.points < rewardPointsUsed) {
+        //         return res.status(400).json({ success: false, message: "Insufficient reward points." });
+        //     }
+        //     userPoints.points -= rewardPointsUsed;
+        //     userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
+        //     await userPoints.save();
 
-            let userPoints2 = await RewardPoints.findOne({ userId });
+        //     let userPoints2 = await RewardPoints.findOne({ userId });
 
-            const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
+        //     const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
 
-            if (!userPoints2) {
-                userPoints2 = new RewardPoints({
-                    userId,
-                    points: earnedPoints,
-                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
-                });
-            } else {
-                userPoints2.points += earnedPoints;
-                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
-            }
-            await userPoints2.save();
-        } else {
-            // Earn 4% points
-            const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
+        //     if (!userPoints2) {
+        //         userPoints2 = new RewardPoints({
+        //             userId,
+        //             points: earnedPoints,
+        //             history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
+        //         });
+        //     } else {
+        //         userPoints2.points += earnedPoints;
+        //         userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
+        //     }
+        //     await userPoints2.save();
+        // } else {
+        //     // Earn 4% points
+        //     const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
 
-            if (!userPoints) {
-                userPoints = new RewardPoints({
-                    userId,
-                    points: earnedPoints,
-                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
-                });
-            } else {
-                userPoints.points += earnedPoints;
-                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
-            }
-        }
+        //     if (!userPoints) {
+        //         userPoints = new RewardPoints({
+        //             userId,
+        //             points: earnedPoints,
+        //             history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
+        //         });
+        //     } else {
+        //         userPoints.points += earnedPoints;
+        //         userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
+        //     }
+        // }
 
-        await userPoints.save();
-        //////////////////////////////////////////////////////////////////////////////////////////////
+        // await userPoints.save();
+        // //////////////////////////////////////////////////////////////////////////////////////////////
 
         sendThankYouEmail({ email: order?.userId?.email, name: order?.userId?.name, phone: order?.userId?.phone });
         sendThankYouEmailAdmin({ email: order?.userId?.email, name: order?.userId?.name, phone: order?.userId?.phone });
