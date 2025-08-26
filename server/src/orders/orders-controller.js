@@ -179,7 +179,7 @@ exports.verifyPayment = async (req, res) => {
         }
 
         // 1.a Prevent verifying the same payment twice
-        if (order?.paymentStatus === "Successfull") {
+        if (order?.paymentStatus === "Complete Payment") {
             return res.status(200).json({ message: "Payment already verified", orderId: order?._id });
         }
 
@@ -211,7 +211,7 @@ exports.verifyPayment = async (req, res) => {
         }
 
         // 4. Update order on success
-        order.paymentStatus = order.pendingAmount === 0 ? "Successfull" : "Partial Payment";
+        order.paymentStatus = order.pendingAmount === 0 ? "Complete Payment" : "Partial Payment";
         order.paymentInfo = { transactionId: razorpay_payment_id, orderId: razorpay_order_id, paymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, };
         order.recivedAmount = order.recivedAmount;
         order.pendingAmount = order.pendingAmount || 0;

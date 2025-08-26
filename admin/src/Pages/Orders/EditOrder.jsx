@@ -179,7 +179,7 @@ const EditOrder = () => {
                                                             disabled={isOrderStatusDisabled}
                                                         >
                                                             <option value="pending">Order Pending</option>
-                                                            <option value="orderConfirmed">Order Confirmed</option>
+                                                            <option value="order Confirmed">Order Confirmed</option>
                                                             <option value="processing">Processing</option>
                                                             <option value="shipped">Shipped</option>
                                                             <option value="delivered">Delivered</option>
@@ -206,7 +206,7 @@ const EditOrder = () => {
                                                             disabled={isPaymentStatusDisabled}
                                                         >
                                                             <option value="Pending">Pending</option>
-                                                            <option value="Successfull">Successfull</option>
+                                                            <option value="Complete Payment">Complete Payment</option>
                                                             <option value="Failed">Failed</option>
                                                             <option value="Partial Payment">Partial Payment</option>
                                                         </select>
