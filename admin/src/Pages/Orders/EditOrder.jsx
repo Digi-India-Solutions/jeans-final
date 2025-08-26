@@ -156,8 +156,18 @@ const EditOrder = () => {
                                                     <td>{new Date(orderData?.createdAt).toLocaleString()}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th scope="row">Final Price</th>
+                                                    <th scope="row">Totale Amount</th>
                                                     <td>₹{orderData?.totalAmount}</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <th scope="row">Pending Amount</th>
+                                                    <td style={{ color: "red" }}>₹{orderData?.pendingAmount}</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <th scope="row">Recived Amount</th>
+                                                    <td style={{ color: "green" }}>₹{orderData?.recivedAmount}</td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Order Status</th>
@@ -198,6 +208,7 @@ const EditOrder = () => {
                                                             <option value="Pending">Pending</option>
                                                             <option value="Successfull">Successfull</option>
                                                             <option value="Failed">Failed</option>
+                                                            <option value="Partial Payment">Partial Payment</option>
                                                         </select>
                                                     </td>
                                                 </tr>

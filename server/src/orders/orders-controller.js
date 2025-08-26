@@ -211,10 +211,11 @@ exports.verifyPayment = async (req, res) => {
         }
 
         // 4. Update order on success
-        order.paymentStatus = "Successfull";
+        order.paymentStatus = order.pendingAmount === 0 ? "Successfull" : "Partial Payment";
         order.paymentInfo = { transactionId: razorpay_payment_id, orderId: razorpay_order_id, paymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, };
         order.recivedAmount = order.recivedAmount;
         order.pendingAmount = order.pendingAmount || 0;
+
         const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
         order.reworPoins = earnedPoints || 0;
         await order.save();
