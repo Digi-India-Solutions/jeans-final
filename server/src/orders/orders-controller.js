@@ -330,7 +330,11 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
         }
         if (orderStatus) order.orderStatus = orderStatus;
         if (paymentStatus) order.paymentStatus = paymentStatus;
-
+        if (paymentStatus === 'Complete Payment') {
+            order.orderStatus = 'delivered';
+            order.recivedAmount = order.totalAmount;
+            order.pendingAmount = 0;
+        }
         await order.save();
 
         res.status(200).json({ success: true, message: "status updated successfully", updatedOrder: order, });
