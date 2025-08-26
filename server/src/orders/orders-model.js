@@ -74,12 +74,12 @@ const orderSchema = new Schema({
     orderStatus: {
         type: String,
         default: 'pending',
-        enum: ['processing', 'pending', 'orderConfirmed', 'shipped', 'delivered', 'cancelled'],
+        enum: ['processing', 'pending', 'order Confirmed', 'shipped', 'delivered', 'cancelled'],
     },
     paymentStatus: {
         type: String,
         default: 'Pending',
-        enum: ['Pending', 'Successfull', 'Failed', 'Partial Payment'],
+        enum: ['Pending', 'Complete Payment', 'Failed', 'Partial Payment'],
     },
     paymentInfo: {
         transactionId: {
