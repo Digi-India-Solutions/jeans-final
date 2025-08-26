@@ -79,7 +79,7 @@ const orderSchema = new Schema({
     paymentStatus: {
         type: String,
         default: 'Pending',
-        enum: ['Pending', 'Successfull', 'Failed'],
+        enum: ['Pending', 'Successfull', 'Failed', 'Partial Payment'],
     },
     paymentInfo: {
         transactionId: {
