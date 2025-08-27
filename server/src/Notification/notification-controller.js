@@ -124,9 +124,99 @@ exports.deleteNotification = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+// const { GoogleAuth } = require("google-auth-library");
+// const admin = require("firebase-admin");
+// const path = require("path");
+
+// // ✅ Correct path to your service account
+// const serviceAccountPath = path.join(__dirname, "../../firebase-service-account.json");
+
+// // ✅ Initialize Firebase only once
+// if (!admin.apps.length) {
+//     admin.initializeApp({
+//         credential: admin.credential.cert(require(serviceAccountPath)),
+//     });
+// }
+
+// // 🔑 Function to get OAuth2 access token
+// async function getAccessToken() {
+//     const auth = new GoogleAuth({
+//         keyFile: serviceAccountPath, // service account JSON file
+//         scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
+//     });
+//     const client = await auth.getClient();
+//     const accessToken = await client.getAccessToken();
+//     return accessToken.token;
+// }
+
+// exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const projectId = "anibhavicreation-95213";
+//         const accessToken = await getAccessToken();
+//         const notificationExist = Notification.find({ _id: req.params.id });
+//         if (!notificationExist) {
+//             return res.status(404).json({ success: false, message: "Notification not found" });
+//         }
+//         const inactiveUsers = await User.find({ fcmToken: { $exists: true, $ne: null }, }).select("name email phone fcmToken");
+//         console.log("notificationExist==>", notificationExist, req.params.id);
+//         if (!inactiveUsers.length) {
+//             return res.status(200).json({ success: true, message: "No inactive users found in this range.", });
+//         }
+
+//         // 5️⃣ Send notifications to inactive users
+//         const results = [];
+//         for (const user of inactiveUsers) {
+//             try {
+//                 const fcmResponse = await fetch(
+//                     `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+//                     {
+//                         method: "POST",
+//                         headers: {
+//                             Authorization: `Bearer ${accessToken}`,
+//                             "Content-Type": "application/json",
+//                         },
+//                         body: JSON.stringify({
+//                             message: {
+//                                 token: user.fcmToken,
+//                                 notification: {
+//                                     title: notificationExist.title || "We Miss You!",
+//                                     body: notificationExist.body || `Hey ${user.name}, it's been a while since your last order. Check out our new deals 🎉`,
+//                                     icon: notificationExist.image || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPpAh63HncAuJOC6TxWkGLYpS0WwNXswz9MA&s",
+//                                 },
+//                                 data: {
+//                                     userId: String(user._id),
+//                                     click_action: "FLUTTER_NOTIFICATION_CLICK",
+//                                 },
+//                             },
+//                         }),
+//                     }
+//                 );
+//                 // console.log("hhhh>=>", fcmResponse)
+
+//                 const fcmResult = await fcmResponse.json();
+//                 results.push({ user: user.email, status: fcmResult });
+
+//             } catch (err) {
+//                 console.error(`❌ FCM error for ${user.email}:`, err.message);
+//                 results.push({ user: user.email, status: "failed" });
+//             }
+//         }
+
+//         // 6️⃣ Send response
+//         return res.status(200).json({
+//             success: true, message: `${inactiveUsers.length} user(s) notification sent successfully`, results,
+//         });
+//     } catch (error) {
+//         console.error("bulkOrderNotification Error:", error);
+//         return next(new ErrorHandler(error.message, 500));
+//     }
+// })
+
+
 const { GoogleAuth } = require("google-auth-library");
 const admin = require("firebase-admin");
 const path = require("path");
+const fetch = require("node-fetch"); // only if Node <18
 
 // ✅ Correct path to your service account
 const serviceAccountPath = path.join(__dirname, "../../firebase-service-account.json");
@@ -141,7 +231,7 @@ if (!admin.apps.length) {
 // 🔑 Function to get OAuth2 access token
 async function getAccessToken() {
     const auth = new GoogleAuth({
-        keyFile: serviceAccountPath, // service account JSON file
+        keyFile: serviceAccountPath,
         scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
     });
     const client = await auth.getClient();
@@ -151,23 +241,31 @@ async function getAccessToken() {
 
 exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
     try {
-        const projectId = "anibhavicreation-95213"; // Firebase Project ID
+        // ✅ Use project_id from service account JSON
+        const serviceAccount = require(serviceAccountPath);
+        const projectId = serviceAccount?.project_id; // ✅ Correct value
         const accessToken = await getAccessToken();
-        const notificationExist = Notification.findById( req.params.id );
-        if(!notificationExist){
+
+        // ✅ Get notification by ID
+        const notificationExist = await Notification.findById(req.params.id);
+
+        if (!notificationExist) {
             return res.status(404).json({ success: false, message: "Notification not found" });
         }
-        const inactiveUsers = await User.find({ fcmToken: { $exists: true, $ne: null }, }).select("name email phone fcmToken");
-        // console.log("notificationExist==>", notificationExist, req.params.id);
+
+        // ✅ Get all users with FCM token
+        const inactiveUsers = await User.find({
+            fcmToken: { $exists: true, $ne: null },
+        }).select("name email phone fcmToken");
+
         if (!inactiveUsers.length) {
-            return res.status(200).json({ success: true, message: "No inactive users found in this range.", });
+            return res.status(200).json({ success: true, message: "No inactive users found." });
         }
 
-        // 5️⃣ Send notifications to inactive users
-        const results = [];
-        for (const user of inactiveUsers) {
-            try {
-                const fcmResponse = await fetch(
+        // ✅ Send notifications in parallel (faster)
+        const results = await Promise.allSettled(
+            inactiveUsers.map(async (user) => {
+                const response = await fetch(
                     `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
                     {
                         method: "POST",
@@ -180,8 +278,12 @@ exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
                                 token: user.fcmToken,
                                 notification: {
                                     title: notificationExist.title || "We Miss You!",
-                                    body: notificationExist.body || `Hey ${user.name}, it's been a while since your last order. Check out our new deals 🎉`,
-                                    icon: notificationExist.image || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPpAh63HncAuJOC6TxWkGLYpS0WwNXswz9MA&s",
+                                    body:
+                                        notificationExist.body ||
+                                        `Hey ${user.name}, it's been a while since your last order. Check out our new deals 🎉`,
+                                    image:
+                                        notificationExist.image ||
+                                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPpAh63HncAuJOC6TxWkGLYpS0WwNXswz9MA&s",
                                 },
                                 data: {
                                     userId: String(user._id),
@@ -191,23 +293,31 @@ exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
                         }),
                     }
                 );
-                // console.log("hhhh>=>", fcmResponse)
 
-                const fcmResult = await fcmResponse.json();
-                results.push({ user: user.email, status: fcmResult });
+                console.log("XXXXXXXX:==>A", response)
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`FCM Error (${response.status}): ${errorText}`);
+                }
 
-            } catch (err) {
-                console.error(`❌ FCM error for ${user.email}:`, err.message);
-                results.push({ user: user.email, status: "failed" });
-            }
-        }
+                return { user: user.email, status: await response.json() };
+            })
+        );
 
-        // 6️⃣ Send response
+        // ✅ Format results
+        const formattedResults = results.map((r, i) =>
+            r.status === "fulfilled"
+                ? r.value
+                : { user: inactiveUsers[i].email, status: "failed", error: r.reason.message }
+        );
+
         return res.status(200).json({
-            success: true, message: `${inactiveUsers.length} user(s) notification sent successfully`, results,
+            success: true,
+            message: `${inactiveUsers.length} user(s) notification processed`,
+            results: formattedResults,
         });
     } catch (error) {
-        console.error("bulkOrderNotification Error:", error);
+        console.error("resendNotification Error:", error);
         return next(new ErrorHandler(error.message, 500));
     }
-})
+});
