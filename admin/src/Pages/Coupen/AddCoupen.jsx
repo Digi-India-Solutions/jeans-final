@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -6,43 +6,49 @@ import { postData } from "../../services/FetchNodeServices";
 
 const AddCoupon = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState({ couponCode: "", discount: "", couponTitle: "" });
-
+    const [formData, setFormData] = useState({ couponCode: "", discount: "", couponTitle: "", minCartAmount: "", maxDiscountAmount: "", });
     const navigate = useNavigate();
 
-    // Handle form data change
+    // Input fields config
+    const fields = [
+        { name: "couponCode", label: "Coupon Code", type: "text" },
+        { name: "discount", label: "Coupon Discount", type: "text" },
+        { name: "couponTitle", label: "Coupon Title", type: "text" },
+        { name: "minCartAmount", label: "Min Cart Amount", type: "text" },
+        { name: "maxDiscountAmount", label: "Max Discount Amount", type: "text" },
+    ];
+
+    // Handle change
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+        if (name === "minCartAmount" || name === "maxDiscountAmount" || name === "discount") {
+            const numericValue = value.replace(/[^0-9]/g, "");
+            setFormData((prev) => ({ ...prev, [name]: numericValue }));
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
-    // Handle form submission
+    // Handle submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Validate form fields
-        if (!formData?.couponCode || !formData?.discount) {
-            toast.error("Please fill all fields");
+        if (!formData.couponCode || !formData.discount) {
+            toast.error("Please fill all required fields");
             setIsLoading(false);
-            return;  // Stop execution if validation fails
+            return;
         }
 
-        let body = {
-            couponCode: formData?.couponCode,
-            discount: formData?.discount,
-            couponTitle: formData?.couponTitle
-        };
-
         try {
-            const response = await postData("api/coupon/create-coupon", body);
-            if (response?.success === true) {
+            const response = await postData("api/coupon/create-coupon", formData);
+            if (response?.success) {
                 toast.success(response?.message || "Coupon created successfully");
                 navigate("/all-coupen");
             }
         } catch (error) {
-            const errorMessage = error?.response?.data?.message || "Error adding coupon";
-            toast.error(errorMessage);
+            toast.error(error?.response?.data?.message || "Error adding coupon");
             console.error("Error adding coupon:", error);
         } finally {
             setIsLoading(false);
@@ -57,7 +63,7 @@ const AddCoupon = () => {
                     <h4>Add Coupon</h4>
                 </div>
                 <div className="links">
-                    <Link to="/all-coupons" className="add-new">
+                    <Link to="/all-coupen" className="add-new">
                         Back <i className="fa-regular fa-circle-left"></i>
                     </Link>
                 </div>
@@ -65,49 +71,12 @@ const AddCoupon = () => {
 
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
-                    <div className="col-md-4">
-                        <label htmlFor="couponCode" className="form-label">
-                            Coupon Code
-                        </label>
-                        <input
-                            type="text"
-                            name="couponCode"
-                            className="form-control"
-                            id="couponCode"
-                            value={formData.couponCode}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="col-md-4">
-                        <label htmlFor="discount" className="form-label">
-                            Coupon Discount
-                        </label>
-                        <input
-                            type="text"
-                            name="discount"
-                            className="form-control"
-                            id="discount"
-                            value={formData.discount}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="col-md-4">
-                        <label htmlFor="discount" className="form-label">
-                            Coupon Title
-                        </label>
-                        <input
-                            type="text"
-                            name="couponTitle"
-                            className="form-control"
-                            id="couponTitle"
-                            value={formData.couponTitle}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    {fields.map(({ name, label, type }) => (
+                        <div className="col-md-4" key={name}>
+                            <label htmlFor={name} className="form-label"> {label} </label>
+                            <input type={type} name={name} id={name} className="form-control" value={formData[name]} onChange={handleChange} required />
+                        </div>
+                    ))}
 
                     <div className="col-md-12 mt-3">
                         <button type="submit" className="btn btn-success" disabled={isLoading}>

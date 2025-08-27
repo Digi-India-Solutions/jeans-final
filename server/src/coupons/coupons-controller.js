@@ -3,7 +3,7 @@ const Coupon = require("./coupons-model")
 
 exports.createCoupon = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { couponCode, discount, couponTitle } = req.body;
+        const { couponCode, discount, couponTitle, minCartAmount, maxDiscountAmount } = req.body;
         console.log(couponCode, discount, couponTitle)
 
         const existingCoupon = await Coupon.findOne({ couponCode });
@@ -11,7 +11,7 @@ exports.createCoupon = catchAsyncErrors(async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Coupon code already exists." });
         }
 
-        const newCoupon = new Coupon({ couponCode, discount, couponTitle });
+        const newCoupon = new Coupon({ couponCode, discount, couponTitle, minCartAmount, maxDiscountAmount });
         await newCoupon.save();
 
         res.status(201).json({ success: true, message: "Coupon created successfully", coupon: newCoupon });
@@ -84,7 +84,7 @@ exports.getCouponById = catchAsyncErrors(async (req, res, next) => {
 exports.updateCoupon = catchAsyncErrors(async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { discount, couponCode, couponTitle } = req.body;
+        const { discount, couponCode, couponTitle, minCartAmount, maxDiscountAmount } = req.body;
 
         if (!couponCode || typeof couponCode !== 'string') {
             return res.status(400).json({ message: "Invalid coupon code." });
@@ -96,7 +96,7 @@ exports.updateCoupon = catchAsyncErrors(async (req, res, next) => {
 
         const updatedCoupon = await Coupon.findOneAndUpdate(
             { _id: id },
-            { discount, couponCode, couponTitle, updatedAt: Date.now() },
+            { discount, couponCode, couponTitle, minCartAmount, maxDiscountAmount, updatedAt: Date.now() },
             { new: true } // Return the updated document
         );
 
@@ -113,14 +113,17 @@ exports.updateCoupon = catchAsyncErrors(async (req, res, next) => {
 
 exports.getCouponByCode = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { couponCode } = req.body;
+        const { couponCode,totalAmount} = req.body;
 
         if (!couponCode) {
             return res.status(400).json({ success: false, message: "Coupon code is required." });
         }
+        if(!totalAmount){
+            return res.status(400).json({ success: false, message: "Total amount is required." });
+        }
 
         console.log("Searching exact couponCode:", couponCode);
-        
+
         // couponCode = couponCode.trim().toUpperCase(); // case-insensitive handling
         // const coupon = await Coupon.findOne({ couponCode: { $regex: new RegExp(`^${couponCode}$`, 'i') } });
 
@@ -128,6 +131,10 @@ exports.getCouponByCode = catchAsyncErrors(async (req, res, next) => {
 
         if (!coupon) {
             return res.status(404).json({ success: false, message: "Coupon not found." });
+        }
+
+        if (totalAmount < coupon.minCartAmount) {
+            return res.status(400).json({ success: false, message: "Minimum cart amount not met." });
         }
 
         return res.status(200).json({ success: true, coupon });

@@ -125,6 +125,8 @@ const AllCoupon = () => {
                             <th scope="col">Coupon Title</th>
                             <th scope="col">Coupon Code</th>
                             <th scope="col">Discount</th>
+                            <th scope="col">Min Cart Amount</th>
+                            <th scope="col">Max Discount Amount</th>
                             <th scope="col">Show Top in Home Page</th>
                             <th scope="col">Edit</th>
                             <th scope="col">Delete</th>
@@ -138,6 +140,8 @@ const AllCoupon = () => {
                                     <td>{coupon?.couponTitle}</td>
                                     <td>{coupon?.couponCode}</td>
                                     <td>{coupon?.discount}%</td>
+                                    <td>{'\u20B9 '} {coupon?.minCartAmount}</td>
+                                    <td>{'\u20B9 '} {coupon?.maxDiscountAmount}</td>
 
                                     <td>
                                         <input
