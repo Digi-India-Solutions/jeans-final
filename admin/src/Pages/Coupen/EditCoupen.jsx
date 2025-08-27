@@ -1,31 +1,37 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getData, postData } from "../../services/FetchNodeServices";
 
-const EditCoupen = () => {
+const EditCoupon = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-console.log("dd",id)
-    // Initialize the state with default values
-    const [formData, setFormData] = useState({
-        couponCode: "",
-        discount: "",
-        couponTitle:""
-    });
+
+    const [formData, setFormData] = useState({ couponCode: "", discount: "", couponTitle: "", minCartAmount: "", maxDiscountAmount: "", });
     const [btnLoading, setBtnLoading] = useState(false);
 
+    // Input fields config
+    const fields = [
+        { name: "couponCode", label: "Coupon Code", type: "text" },
+        { name: "discount", label: "Coupon Discount", type: "text" },
+        { name: "couponTitle", label: "Coupon Title", type: "text" },
+        { name: "minCartAmount", label: "Min Cart Amount", type: "number" },
+        { name: "maxDiscountAmount", label: "Max Discount Amount", type: "number" },
+    ];
+
+    // Fetch coupon data on mount
     useEffect(() => {
         const fetchCoupon = async () => {
             try {
                 const response = await getData(`api/coupon/get-coupon-by-id/${id}`);
                 if (response?.success) {
                     setFormData({
-                        couponCode: response?.coupon?.couponCode,
-                        discount: response?.coupon?.discount,
-                        couponTitle: response?.coupon?.couponTitle
+                        couponCode: response?.coupon?.couponCode || "",
+                        discount: response?.coupon?.discount || "",
+                        couponTitle: response?.coupon?.couponTitle || "",
+                        minCartAmount: response?.coupon?.minCartAmount || "",
+                        maxDiscountAmount: response?.coupon?.maxDiscountAmount || "",
                     });
                 }
             } catch (error) {
@@ -36,34 +42,31 @@ console.log("dd",id)
         fetchCoupon();
     }, [id]);
 
-    // Handle input changes
+    // Handle input change
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
+
+        if (name === "minCartAmount" || name === "maxDiscountAmount" || name === "discount") {
+            const numericValue = value.replace(/[^0-9]/g, ""); // only numbers
+            setFormData((prev) => ({ ...prev, [name]: numericValue }));
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
-    // Handle form submission
+    // Handle submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setBtnLoading(true);
 
-        let body = {
-            couponCode: formData?.couponCode,
-            discount: formData?.discount,
-            couponTitle: formData?.couponTitle
-        }
-
         try {
-            const response = await postData(`api/coupon/update-coupon/${id}`, body);
-            if (response?.success === true) {
-                toast.success(response.message);
+            const response = await postData(`api/coupon/update-coupon/${id}`, formData);
+            if (response?.success) {
+                toast.success(response.message || "Coupon updated successfully");
                 navigate("/all-coupen");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Error updating coupon");
+            toast.error(error?.response?.data?.message || "Error updating coupon");
             console.error("Error updating coupon:", error);
         } finally {
             setBtnLoading(false);
@@ -78,7 +81,7 @@ console.log("dd",id)
                     <h4>Edit Coupon</h4>
                 </div>
                 <div className="links">
-                    <Link to="/all-coupons" className="add-new">
+                    <Link to="/all-coupen" className="add-new">
                         Back <i className="fa-regular fa-circle-left"></i>
                     </Link>
                 </div>
@@ -86,56 +89,15 @@ console.log("dd",id)
 
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
-                    <div className="col-md-4">
-                        <label htmlFor="couponCode" className="form-label">
-                            Coupon Code
-                        </label>
-                        <input
-                            type="text"
-                            name="couponCode"
-                            className="form-control"
-                            id="couponCode"
-                            value={formData.couponCode}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    {fields.map(({ name, label, type }) => (
+                        <div className="col-md-4" key={name}>
+                            <label htmlFor={name} className="form-label">{label}</label>
+                            <input type={type} name={name} id={name} className="form-control" value={formData[name]} onChange={handleChange} required />
+                        </div>
+                    ))}
 
-                    <div className="col-md-4">
-                        <label htmlFor="discount" className="form-label">
-                            Discount
-                        </label>
-                        <input
-                            type="text"
-                            name="discount"
-                            className="form-control"
-                            id="discount"
-                            value={formData.discount}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="col-md-4">
-                        <label htmlFor="discount" className="form-label">
-                            Coupon Title
-                        </label>
-                        <input
-                            type="text"
-                            name="couponTitle"
-                            className="form-control"
-                            id="couponTitle"
-                            value={formData.couponTitle}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="col-12 text-center">
-                        <button
-                            type="submit"
-                            className={`${btnLoading ? "not-allowed" : "allowed"}`}
-                            disabled={btnLoading}
-                        >
+                    <div className="col-12 text-center mt-3">
+                        <button type="submit" className="btn btn-success" disabled={btnLoading}>
                             {btnLoading ? "Please Wait..." : "Update Coupon"}
                         </button>
                     </div>
@@ -145,4 +107,4 @@ console.log("dd",id)
     );
 };
 
-export default EditCoupen;
+export default EditCoupon;
