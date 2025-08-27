@@ -529,8 +529,8 @@ exports.bulkNotification = catchAsyncErrors(async (req, res, next) => {
 
         for (const user of inactiveUsers) {
             try {
-                // await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
-                // await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
+                await sendOrderNotification({ email: user.email, name: user.name, mobile: user.phone });
+                await sendOrderNotificationByAdminOnWhatsapp({ email: user.email, name: user.name, mobile: user.phone });
 
                 const fcmResponse = await fetch(
                     `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,

@@ -16,6 +16,7 @@ const AllNotification = () => {
         const fetchNotifications = async () => {
             try {
                 const response = await getData("api/notification/get-all-notification");
+                console.log("SSSSSSXXXXXXXSSSSSSS:-->", response);
                 if (response?.success) {
                     setNotifications(response?.data || []);
                 }
@@ -115,11 +116,7 @@ const AllNotification = () => {
                                     <td>{n?.body}</td>
                                     <td>
                                         {n?.image && (
-                                            <img
-                                                src={n.image}
-                                                alt="notification"
-                                                style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "4px" }}
-                                            />
+                                            <img src={n.image} alt="notification" style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "4px" }} />
                                         )}
                                     </td>
                                     <td className="text-center">
@@ -138,9 +135,9 @@ const AllNotification = () => {
                                         <button
                                             className="btn btn-sm btn-danger"
                                             disabled={deleteActionLoading === n._id}
-                                            onClick={() => handleDelete(n._id)}
+                                            onClick={() => handleDelete(n?._id)}
                                         >
-                                            {deleteActionLoading === n._id ? "Deleting..." : "Delete"}
+                                            {deleteActionLoading === n?._id ? "Deleting..." : "Delete"}
                                         </button>
                                     </td>
                                 </tr>
