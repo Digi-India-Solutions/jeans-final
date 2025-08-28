@@ -6,16 +6,16 @@ import { postData } from "../../services/FetchNodeServices";
 
 const AddCoupon = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState({ couponCode: "", discount: "", couponTitle: "", minCartAmount: "", maxDiscountAmount: "", });
+    const [formData, setFormData] = useState({ couponCode: "", discount: "", couponTitle: "", minCartAmount: "",  });
     const navigate = useNavigate();
 
     // Input fields config
     const fields = [
         { name: "couponCode", label: "Coupon Code", type: "text" },
-        { name: "discount", label: "Coupon Discount", type: "text" },
+        { name: "discount", label: "Coupon Amount", type: "text" },
         { name: "couponTitle", label: "Coupon Title", type: "text" },
         { name: "minCartAmount", label: "Min Cart Amount", type: "text" },
-        { name: "maxDiscountAmount", label: "Max Discount Amount", type: "text" },
+        // { name: "maxDiscountAmount", label: "Max Discount Amount", type: "text" },
     ];
 
     // Handle change

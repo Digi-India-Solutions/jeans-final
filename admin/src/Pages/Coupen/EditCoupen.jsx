@@ -14,10 +14,10 @@ const EditCoupon = () => {
     // Input fields config
     const fields = [
         { name: "couponCode", label: "Coupon Code", type: "text" },
-        { name: "discount", label: "Coupon Discount", type: "text" },
+        { name: "discount", label: "Coupon Amount", type: "text" },
         { name: "couponTitle", label: "Coupon Title", type: "text" },
         { name: "minCartAmount", label: "Min Cart Amount", type: "number" },
-        { name: "maxDiscountAmount", label: "Max Discount Amount", type: "number" },
+        // { name: "maxDiscountAmount", label: "Max Discount Amount", type: "number" },
     ];
 
     // Fetch coupon data on mount
@@ -31,7 +31,7 @@ const EditCoupon = () => {
                         discount: response?.coupon?.discount || "",
                         couponTitle: response?.coupon?.couponTitle || "",
                         minCartAmount: response?.coupon?.minCartAmount || "",
-                        maxDiscountAmount: response?.coupon?.maxDiscountAmount || "",
+                        // maxDiscountAmount: response?.coupon?.maxDiscountAmount || "",
                     });
                 }
             } catch (error) {
