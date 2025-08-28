@@ -11,7 +11,7 @@ exports.createCoupon = catchAsyncErrors(async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Coupon code already exists." });
         }
 
-        const newCoupon = new Coupon({ couponCode, discount, couponTitle, minCartAmount, maxDiscountAmount });
+        const newCoupon = new Coupon({ couponCode, discount, couponTitle, minCartAmount });
         await newCoupon.save();
 
         res.status(201).json({ success: true, message: "Coupon created successfully", coupon: newCoupon });
@@ -96,7 +96,7 @@ exports.updateCoupon = catchAsyncErrors(async (req, res, next) => {
 
         const updatedCoupon = await Coupon.findOneAndUpdate(
             { _id: id },
-            { discount, couponCode, couponTitle, minCartAmount, maxDiscountAmount, updatedAt: Date.now() },
+            { discount, couponCode, couponTitle, minCartAmount, updatedAt: Date.now() },
             { new: true } // Return the updated document
         );
 
