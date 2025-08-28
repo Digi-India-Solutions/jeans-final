@@ -393,7 +393,8 @@ exports.sendEmailByUserForRequastActiveAccount = async ({ email, fullName, mobil
             <h1 class="title">Activation Request Sent</h1>
             <p class="message">Hi ${fullName},</p>
             <p class="message">We have received your request to activate your account. Our team will review your details and activate your account shortly.</p>
-            <p class="message">If you have any urgent queries, feel free to reach out to us.</p>
+            <p class="message">If you have any urgent queries, feel free to reach out to us. </p>
+            <p class="message">Contact Number: 8506854624 </p>
             <p class="footer">All rights reserved © 2024 | The Anibhavi Creation</p>
         </div>
     </body>
@@ -573,9 +574,11 @@ exports.sendEmailActiveUserAccount = async ({ email, fullName, isActive }) => {
             ${isActive
             ? `<p class="message">Great news! Your account has been <strong>successfully activated</strong> by our admin team. 🎉</p>
                        <p class="message">You can now log in and start using all of our features.</p>
-                       <p class="message">If you have any questions or need assistance, please don't hesitate to contact our support team.</p>`
+                       <p class="message">If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+                       <p class="message">Contact Number: 8506854624 </p>`
             : `<p class="message">We regret to inform you that your account has been <strong>deactivated</strong> by our admin team.</p>
-                       <p class="message">If you believe this was a mistake or need assistance, please contact our support team.</p>`
+                       <p class="message">If you believe this was a mistake or need assistance, please contact our support team.</p>
+                       <p class="message">Contact Number: 8506854624 </p>`
         }
             <p class="footer">— The Anibhavi Creation</p>
         </div>
