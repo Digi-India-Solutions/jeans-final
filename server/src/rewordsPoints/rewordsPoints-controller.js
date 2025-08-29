@@ -1,6 +1,7 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
-const RewardPoints = require("./rewordsPoints-model")
+const { RewardPoints, UserSignupPoint } = require("./rewordsPoints-model");
 const cron = require('node-cron');
+// const UserSignupPoint = require("./rewordsPoints-model")
 
 exports.getRewardPoints = catchAsyncErrors(async (req, res, next) => {
     const { userId } = req.params;
@@ -129,3 +130,45 @@ exports.clearOldPoints = catchAsyncErrors(async (req, res, next) => {
         return res.status(500).json({ success: false, error: "Internal server error" });
     }
 });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+exports.addFistTimeSignupReward = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const reward = await UserSignupPoint.create(req.body);
+        res.status(201).json({ success: true, data: reward });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+})
+
+
+exports.getFistTimeSignupReward = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const rewards = await UserSignupPoint.find().sort({ createdAt: -1 });
+        res.json({ success: true, data: rewards });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+})
+
+// Update Reward
+exports.updateFistTimeSignupReward = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const reward = await UserSignupPoint.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json({ success: true, data: reward });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// // Delete Reward
+// export const deleteFistTimeSignupReward = async (req, res) => {
+//     try {
+//         await UserSignupPoint.findByIdAndDelete(req.params.id);
+//         res.json({ success: true, message: "Reward deleted" });
+//     } catch (err) {
+//         res.status(400).json({ success: false, message: err.message });
+//     }
+// };
+
