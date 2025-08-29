@@ -140,6 +140,7 @@ const Home = () => {
                 <Route path={"/all-wishlist"} element={<AllWishList />} />
                 <Route path={"all-rewardPoint"} element={<AllRewardPoint />} />
                 <Route path={"View-Details"} element={<ViewDetails />} />
+
                 {/* all-HomePage-Videos-Url */}
                 <Route path={"add-videos"} element={<AddVideos />} />
                 <Route path={"all-videos"} element={<AllVideios />} />

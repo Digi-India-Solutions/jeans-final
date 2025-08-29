@@ -42,7 +42,7 @@ exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
         // console.log("DDDDDDD", req.body)
-        const { fullName, mobile, email, otp, password ,fcmToken } = req.body;
+        const { fullName, mobile, email, otp, password, fcmToken } = req.body;
 
         if (!email || !otp || !password) {
             return res.status(200).json({ status: false, message: "All fields are required" });
@@ -67,12 +67,32 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 
         const hash = await bcrypt.hash(password, 10);
 
-        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId,fcmToken });
+        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, fcmToken });
         sendEmailByUserForRequastActiveAccount({ email, fullName, mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
         sendWhatsAppByUserForRequastActiveAccount({ name: fullName, phone: mobile, });
         sendWhatsAppByAdminForRequastActiveAccount({ email, name: fullName, phone: mobile, });
 
+        const UserPoint = await UserSignupPoint.find();
+        if (UserPoint.length > 0) {
+            const point = UserPoint[0].points;
+            /////////////ADD POINTS//////////////////////////////
+            let userPoints = await RewardPoints.findOne({ userId: newUser?._id });
+            const earnedPoints = point;
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId: newUser?._id,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Fist Time Signup`, }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Fist Time Signup`, });
+            }
+            await userPoints.save();
+            //////////////////////////////////////////////////////////////////////////////////////////////
+        }
+        
         sendToken(newUser, 200, res, "User Created Successfully");
 
     } catch (error) {
@@ -226,7 +246,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone, shopname ,fcmToken} = req.body;
+        const { name, email, street, city, state, zipCode, country, phone, shopname, fcmToken } = req.body;
 
         // Check if user exists first
         const exist = await User.findById(userId);
@@ -244,7 +264,7 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
 
         // Prepare updated data
         const updateData = {
-            name, email, phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, },fcmToken
+            name, email, phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, }, fcmToken
         };
 
         // Update and return new document
@@ -293,10 +313,10 @@ exports.changePassword = catchAsyncErrors(async (req, res, next) => {
 exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone, shopname,fcmToken } = req.body
+        const { name, email, street, city, state, zipCode, country, phone, shopname, fcmToken } = req.body
 
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, shopname, address: { street, city, state, zipCode, country, }, fcmToken});
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, shopname, address: { street, city, state, zipCode, country, }, fcmToken });
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));
@@ -469,6 +489,7 @@ exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
 const { GoogleAuth } = require("google-auth-library");
 const admin = require("firebase-admin");
 const path = require("path");
+const { UserSignupPoint, RewardPoints } = require("../rewordsPoints/rewordsPoints-model");
 
 // ✅ Correct path to your service account
 const serviceAccountPath = path.join(__dirname, "../../firebase-service-account.json");
