@@ -111,9 +111,9 @@ exports.sendResetPasswordSuperAdmin = async (data) => {
     <body>
         <div style="margin: 0 auto">
             <div class="container">
-                <div class="logo">
-                  <img src="http://localhost:3000/images/anibhavi-logo.png" style="width: 180px;">
-                </div>
+                // <div class="logo">
+                //   <img src="https://api.sddipl.com/images/anibhavi-logo.png" style="width: 180px;">
+                // </div>
                 <div class="title">Reset Password</div>
                 <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
                 <div class="message">
@@ -216,17 +216,17 @@ exports.sendOtpForUserSignup = async (data) => {
         <div class="container">
             <div class="logo">
                 <img src="https://localhost:3000/images/logo.avif" style="width: 180px;"
-                    alt="Oredo GPS Logo">
+                    alt="Anibhavi Creation">
             </div>
             <div class="title">Verify your Email</div>
             <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
             <div class="message">
-                Oredo GPS has received a request to verify <strong>${email}</strong>.
+                Anibhavi Creation has received a request to verify <strong>${email}</strong>.
                 <br><br>
                 Use this code to safely verify your email:
             </div>
             <div class="code">${otp}</div>
-           <p class="footer">All rights reserved © 2024 | Oredo Gps Solutions Private Limited | 6-67, Yerrakunta, Chandrayangutta, Hyderabad, Telangana 500005</p>
+          <p class="footer">All rights reserved © 2024 | Anibhavi Creation | 18-13-6/80, Rajiv Gandhi Nagar, Dastagirnagar, Chandrayangutta- 500005 Hyderabad, Telangana</p>
         </div>
     </div>
 </body>
@@ -444,7 +444,7 @@ exports.sendEmailByUserForRequastActiveAccount = async ({ email, fullName, mobil
             <p class="info"><strong>Email:</strong> ${email}</p>
             <p class="info"><strong>Mobile:</strong> ${mobile}</p>
             <p class="info">The above user has requested account activation. Please review and activate the account if everything is in order.</p>
-            <p class="footer">Admin Portal | Oredo Gps Solutions Pvt Ltd</p>
+            <p class="footer">Admin Portal | The Anibhavi Creation Pvt Ltd</p>
         </div>
     </body>
     </html>`;
