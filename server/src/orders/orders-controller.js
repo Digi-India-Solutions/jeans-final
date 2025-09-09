@@ -1,7 +1,7 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
 const Order = require("./orders-model");
 const User = require("../users/users-model");
-const RewardPoints = require("../rewordsPoints/rewordsPoints-model");
+const { RewardPoints } = require("../rewordsPoints/rewordsPoints-model");
 const ShortUniqueId = require("short-unique-id");
 const ErrorHandler = require("../../utils/ErrorHandler");
 const Cart = require("../addToCard/card-model");

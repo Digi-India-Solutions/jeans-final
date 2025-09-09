@@ -9,7 +9,7 @@ const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder
 
 exports.createBanners = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { name, isActive ,url } = req.body;
+        const { name, isActive, url } = req.body;
         console.log('req.body::', req.body)
         console.log('req.FILE::', req.file)
         const existingBanner = await Banner.findOne({ name: name });
@@ -32,7 +32,7 @@ exports.createBanners = catchAsyncErrors(async (req, res, next) => {
 
         // console.log("---------", imageUrls)
 
-        const newBanner = await Banner.create({ name, images: imageUrl,url: url, isActive: isActive === "true" || isActive === true, });
+        const newBanner = await Banner.create({ name, images: imageUrl, url: url, isActive: isActive === "true" || isActive === true, position: req.body.position, startDate: req.body.startDate, endDate: req.body.endDate });
 
         deleteLocalFile(req.file.path);
         // return sendResponse(res, 200, "Banner Created Successfully", newBanner);
@@ -73,6 +73,9 @@ exports.updateBanner = catchAsyncErrors(async (req, res, next) => {
             name: name || banner.name,
             images: updatedImageUrl,
             url: req.body.url || banner.url,
+            position: req.body.position || banner.position,
+            startDate: req.body.startDate || banner.startDate,
+            endDate: req.body.endDate || banner.endDate,
             isActive: isActive !== undefined ? isActive === "true" || isActive === true : banner.isActive,
         };
 
@@ -91,10 +94,10 @@ exports.deleteBanner = catchAsyncErrors(async (req, res, next) => {
         const banner = await Banner.findById(req.params.id);
         if (!banner) return res.status(404).json({ success: false, message: "Banner not found" });
 
-        if(banner.images){
+        if (banner.images) {
             deleteImage(banner.images)
         }
-        
+
         await banner.deleteOne();
         res.status(200).json({ success: true, message: "Banner deleted" });
     } catch (err) {

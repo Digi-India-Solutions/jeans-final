@@ -15,41 +15,58 @@ const AddNotification = () => {
 
     const navigate = useNavigate();
 
-    // Handle text inputs
+    // Handle text input change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle file input
+    // Handle file upload with validation
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setFormData((prev) => ({ ...prev, image: file }));
         if (file) {
+            if (!file.type.startsWith("image/")) {
+                toast.error("Only image files are allowed");
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error("Image size should be less than 2MB");
+                return;
+            }
+            setFormData((prev) => ({ ...prev, image: file }));
             setPreview(URL.createObjectURL(file));
         }
     };
 
-    // Handle form submission
+    // Handle form submit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Validation
-        if (!formData.title || !formData.body || !formData.image) {
+        // Basic validation
+        if (!formData.title.trim() || !formData.body.trim()) {
             toast.error("Please fill all fields");
             setIsLoading(false);
             return;
         }
 
         try {
-            // Prepare multipart form data
-            const form = new FormData();
-            form.append("title", formData.title);
-            form.append("body", formData.body);
-            form.append("image", formData.image);
+            let response;
+            if (formData?.image) {
+                // Send as multipart if image exists
+                const form = new FormData();
+                form.append("title", formData.title);
+                form.append("body", formData.body);
+                form.append("image", formData.image);
 
-            const response = await postData("api/notification/create-notification", form);
+                response = await postData("api/notification/create-notification", form, true);
+            } else {
+                // Otherwise send simple JSON
+                response = await postData("api/notification/create-notification-without-image", {
+                    title: formData.title,
+                    body: formData.body,
+                });
+            }
 
             if (response?.success) {
                 toast.success(response?.message || "Notification created successfully");
@@ -60,7 +77,7 @@ const AddNotification = () => {
                 toast.error(response?.message || "Failed to create notification");
             }
         } catch (error) {
-            toast.error(error?.response?.data?.message || "Error adding notification");
+            toast.error("Error adding notification");
             console.error("Error adding notification:", error);
         } finally {
             setIsLoading(false);
@@ -71,52 +88,43 @@ const AddNotification = () => {
         <>
             <ToastContainer />
             <div className="bread d-flex justify-content-between align-items-center mb-3">
-                <div className="head">
-                    <h4>Add Notification</h4>
-                </div>
-                <div className="links">
-                    <Link to="/all-notification" className="btn btn-outline-secondary">
-                        <i className="fa-regular fa-circle-left"></i> Back
-                    </Link>
-                </div>
+                <h4>Add Notification</h4>
+                <Link to="/all-notification" className="btn btn-outline-secondary">
+                    <i className="fa-regular fa-circle-left"></i> Back
+                </Link>
             </div>
 
-            <div className="d-form">
+            <div className="card shadow p-4">
                 <form className="row g-3" onSubmit={handleSubmit}>
                     {/* Title */}
                     <div className="col-md-4">
-                        <label htmlFor="title" className="form-label">
-                            Notification Title
-                        </label>
-                        <input type="text" name="title" className="form-control" id="title" value={formData.title} onChange={handleChange} required />
+                        <label htmlFor="title" className="form-label">Title</label>
+                        <input type="text" name="title" id="title" className="form-control" value={formData.title} onChange={handleChange} placeholder="Enter notification title" required />
                     </div>
 
                     {/* Body */}
                     <div className="col-md-4">
-                        <label htmlFor="body" className="form-label">
-                            Notification Body
-                        </label>
-                        <input type="text" name="body" className="form-control" id="body" value={formData.body} onChange={handleChange} required />
+                        <label htmlFor="body" className="form-label">Body</label>
+                        <input type="text" name="body" id="body" className="form-control" value={formData.body} onChange={handleChange} placeholder="Enter notification message" required />
                     </div>
 
-                    {/* Image */}
+                    {/* Image Upload */}
                     <div className="col-md-4">
-                        <label htmlFor="image" className="form-label">
-                            Notification Image
-                        </label>
-                        <input type="file" name="image" accept="image/*" className="form-control" id="image" onChange={handleFileChange} required />
+                        <label htmlFor="image" className="form-label">Image (optional)</label>
+                        <input type="file" id="image" name="image" accept="image/*" className="form-control" onChange={handleFileChange} />
                         {preview && (
-                            <img src={preview} alt="preview" className="mt-2" style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "6px" }} />
+                            <div className="mt-2">
+                                <img src={preview} alt="preview" style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "8px", border: "1px solid #ccc", }} />
+                            </div>
                         )}
                     </div>
 
                     {/* Submit Button */}
-                    <div className="col-md-12 mt-3">
+                    <div className="col-44 mt-3">
                         <button type="submit" className="btn btn-success" disabled={isLoading}>
                             {isLoading ? (
                                 <>
-                                    <span className="spinner-border spinner-border-sm me-2"></span>
-                                    Saving...
+                                    <span className="spinner-border spinner-border-sm me-2"></span>Saving...
                                 </>
                             ) : (
                                 "Add Notification"

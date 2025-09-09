@@ -92,7 +92,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
             await userPoints.save();
             //////////////////////////////////////////////////////////////////////////////////////////////
         }
-        
+
         sendToken(newUser, 200, res, "User Created Successfully");
 
     } catch (error) {
@@ -460,8 +460,8 @@ exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
 
 exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
     try {
-        const days = parseInt(req.params.days);
-
+        const days = parseInt(req.params?.days);
+        console.log("days:=>", days);
         if (isNaN(days) || days <= 0) {
             return res.status(400).json({ status: false, message: "Invalid number of days" });
         }
@@ -474,17 +474,15 @@ exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
 
         const usersWithoutOrders = await User.find({ _id: { $nin: Array.from(orderedUserIds) } });
 
-        const formattedUsers = usersWithoutOrders.map(user => ({ _id: user._id, name: user.name, email: user.email, phone: user.phone, isActive: user.isActive, createdAt: user?.createdAt, }));
-
-        return res.status(200).json({ status: true, data: formattedUsers });
+        const formattedUsers = usersWithoutOrders.map(user => ({ _id: user._id, name: user.name, email: user.email, phone: user.phone, isActive: user.isActive, createdAt: user?.createdAt, address: user?.address, fcmToken: user?.fcmToken, shopname: user?.shopname, photo: user?.photo, uniqueUserId: user?.uniqueUserId, isUser: user?.isUser }));
+        const RevercFormattedUsers = formattedUsers.reverse();
+        return res.status(200).json({ status: true, data: RevercFormattedUsers, orderData: orderedUserIds });
 
     } catch (error) {
         console.error("Error in getUsersWithoutOrders:", error);
         return res.status(500).json({ status: false, message: "Server Error" });
     }
 });
-
-
 
 const { GoogleAuth } = require("google-auth-library");
 const admin = require("firebase-admin");
@@ -589,11 +587,7 @@ exports.bulkNotification = catchAsyncErrors(async (req, res, next) => {
         }
 
         // 6️⃣ Send response
-        return res.status(200).json({
-            success: true,
-            message: `${inactiveUsers.length} user(s) notified who haven't ordered in last ${minDays}-${maxDays} days.`,
-            results,
-        });
+        return res.status(200).json({ success: true, message: `${inactiveUsers.length} user(s) notified who haven't ordered in last ${minDays}-${maxDays} days.`, results, });
     } catch (error) {
         console.error("bulkOrderNotification Error:", error);
         return next(new ErrorHandler(error.message, 500));

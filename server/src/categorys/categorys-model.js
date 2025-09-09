@@ -7,6 +7,8 @@ const categorySchema = new mongoose.Schema({
     images: [String],
     categoryBanner: [String],
     status: { type: Boolean, default: true },
+    productsCount: { type: Number, default: 0 },
+    slug: String,
     // uniqueCategoryId: { type: String, unique: true },
     createdAt: {
         type: Date,

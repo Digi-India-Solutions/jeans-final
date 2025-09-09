@@ -9,7 +9,7 @@ const ShortUniqueId = require("short-unique-id");
 
 exports.createMainCategory = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { mainCategoryName, status } = req.body;
+        const { mainCategoryName, status, description, slug } = req.body;
 
         // Validation
         if (!mainCategoryName || !status) {
@@ -38,7 +38,8 @@ exports.createMainCategory = catchAsyncErrors(async (req, res, next) => {
         // Create new category
         const newCategory = await MainCategory.create({
             mainCategoryName: mainCategoryName.trim(),
-            // description: description?.trim() || "",
+            description: description?.trim() || "",
+            slug: slug?.trim() || "",
             status,
             images: imageUrl || null,
         });
@@ -93,7 +94,7 @@ exports.getMainCategoryByID = catchAsyncErrors(async (req, res, next) => {
 
 exports.updateMainCategoryByID = catchAsyncErrors(async (req, res, next) => {
     const mainCategoryID = req.params.id;
-    const { mainCategoryName, description, status } = req.body;
+    const { mainCategoryName, description, slug, status } = req.body;
 
     // 1. Check if category exists
     const existingMainCategory = await MainCategory.findById(mainCategoryID);
@@ -120,25 +121,22 @@ exports.updateMainCategoryByID = catchAsyncErrors(async (req, res, next) => {
             return next(new ErrorHandler("Image upload failed: " + error.message, 500));
         }
     }
-console.log("HHHH:==>", updatedImageUrl)
+    console.log("HHHH:==>", updatedImageUrl)
     // 3. Update DB
     const updatedMainCategory = await MainCategory.findByIdAndUpdate(
         mainCategoryID,
         {
             mainCategoryName,
-            // description,
+            description,
             status,
+            slug,
             images: updatedImageUrl,
         },
         { new: true, runValidators: true }
     );
 
     // 4. Send response
-    res.status(200).json({
-        success: true,
-        message: "MainCategory updated successfully",
-        data: updatedMainCategory,
-    });
+    res.status(200).json({ success: true, message: "MainCategory updated successfully", data: updatedMainCategory, });
 });
 
 exports.deleteMainCategoryByID = catchAsyncErrors(async (req, res, next) => {

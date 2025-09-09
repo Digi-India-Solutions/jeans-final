@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const mainCategorySchema = new mongoose.Schema({
     // productId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     mainCategoryName: { type: String, required: true },
-    // description: String,
+    description: String,
+    slug: String,
     images: [String],
     status: { type: Boolean, default: true },
     // uniqueCategoryId: { type: String, unique: true },
+    productsCount: { type: Number, default: 0 },
     createdAt: {
         type: Date,
         default: Date.now,
