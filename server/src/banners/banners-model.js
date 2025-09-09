@@ -7,7 +7,7 @@ const bannerSchema = new Schema({
     required: true,
     trim: true,
   },
-  url:{
+  url: {
     type: String
   },
   images: [
@@ -19,6 +19,22 @@ const bannerSchema = new Schema({
   isActive: {
     type: Boolean,
     default: true,
+  },
+  position: {
+    type: String,
+    required: true,
+  },
+  startDate: {
+    type: String,
+    // required: true,
+  },
+  endDate: {
+    type: String,
+    // required: true,
+  },
+  clicks: {
+    type: Number,
+    default: 0,
   },
   createdAt: {
     type: Date,

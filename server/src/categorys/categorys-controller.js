@@ -9,7 +9,7 @@ const ShortUniqueId = require("short-unique-id");
 
 exports.createCategory = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { name, mainCategoryId, description, status } = req.body;
+        const { name, mainCategoryId, description, status,slug } = req.body;
         let bannerUrl = "";
         let imageUrl = "";
         // if (req.file.images) {
@@ -40,7 +40,7 @@ exports.createCategory = catchAsyncErrors(async (req, res, next) => {
         }
 
         // Create new category
-        const newCategory = await Category.create({ name, description, mainCategoryId: mainCategoryId, images: imageUrl, categoryBanner: bannerUrl, status, });
+        const newCategory = await Category.create({ name, description, mainCategoryId: mainCategoryId, images: imageUrl, categoryBanner: bannerUrl, status,slug });
 
         res.status(200).json({ success: true, message: "Category created successfully", data: newCategory, });
     } catch (error) {
@@ -87,7 +87,7 @@ exports.getCategoryByID = catchAsyncErrors(async (req, res, next) => {
 
 exports.updateCategoryByID = catchAsyncErrors(async (req, res, next) => {
     const categoryID = req.params.id;
-    const { name, description, mainCategoryId, status, oldImage, oldBanner } = req.body;
+    const { name, description, mainCategoryId, status, oldImage, oldBanner ,slug} = req.body;
 
     const existingCategory = await Category.findById(categoryID);
     if (!existingCategory) {
@@ -136,6 +136,7 @@ exports.updateCategoryByID = catchAsyncErrors(async (req, res, next) => {
             name,
             description,
             status,
+            slug,
             mainCategoryId: mainCategoryId,
             images: updatedImageUrl,
             categoryBanner: updatedBannerUrl,

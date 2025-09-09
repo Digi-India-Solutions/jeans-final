@@ -34,6 +34,21 @@ exports.createNotification = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+exports.createNotificationWithoutImage = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { title, body } = req.body;
+        if (!title || !body) {
+            return res.status(400).json({ success: false, message: "All fields required" });
+        }
+        const notification = new Notification({ title, body, });
+
+        await notification.save();
+        res.json({ success: true, message: "Notification created successfully", data: notification });
+    } catch (error) {
+        console.error("Create Notification Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
 // GET All Notifications
 exports.getAllNotifications = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -95,6 +110,43 @@ exports.updateNotificationById = catchAsyncErrors(async (req, res, next) => {
         return res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
 });
+
+// exports.updateNotificationWitoutImageById = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const { title, body } = req.body;
+//         const { id } = req.params;
+//         // Find notification
+//         const notification = await Notification.findById(id);
+//         if (!notification) {
+//             return res.status(404).json({ success: false, message: "Notification not found" });
+//         }
+
+//         if (title) notification.title = title;
+//         if (body) notification.body = body;
+
+//         if (req.file) {
+//             const localImagePath = req.file.path;
+//             if (notification.image) {
+//                 try {
+//                     await deleteImage(notification.image);
+//                 } catch (err) {
+//                     console.warn("Old image deletion failed:", err.message);
+//                 }
+//             }
+//             const uploadedUrl = await uploadImage(localImagePath);
+//             await deleteLocalFile(localImagePath);
+//             notification.image = uploadedUrl;
+//         }
+
+//         await notification.save();
+
+//         return res.status(200).json({ success: true, message: "Notification updated successfully", data: notification, });
+//     } catch (error) {
+//         console.error("Update Notification Error:", error);
+//         return res.status(500).json({ success: false, message: "Server error", error: error.message });
+//     }
+// });
+
 
 
 // DELETE Notification
