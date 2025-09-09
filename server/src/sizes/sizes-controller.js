@@ -8,7 +8,7 @@ const ShortUniqueId = require("short-unique-id");
 
 exports.createSize = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { size, status } = req.body;
+        const { size, status,categoryId } = req.body;
 
         if (!size) {
             return next(new ErrorHandler("Size is required", 400));
@@ -25,7 +25,7 @@ exports.createSize = catchAsyncErrors(async (req, res, next) => {
         // const currentUniqueId = uid.rnd();
         // const uniqueSizeId = `SI${currentUniqueId}`;
 
-        const newSize = await Size.create({ size: size, status: status });
+        const newSize = await Size.create({ size: size, status: status,categoryId:categoryId });
         console.log("existingSizeX:----- : ", newSize);
 
         res.status(201).json({ success: true, message: "Size created successfully", data: newSize, });
@@ -41,7 +41,7 @@ exports.getAllSizes = catchAsyncErrors(async (req, res, next) => {
         const { pageNumber } = req.query;
         const totalSizes = await Size.countDocuments();
 
-        const sizes = await Size.find({}).sort({ createdAt: -1 }).skip((pageNumber - 1) * 15).limit(15)
+        const sizes = await Size.find({}).sort({ createdAt: -1 }).skip((pageNumber - 1) * 15).limit(15).populate("categoryId");
 
         res.status(200).json({ success: true, data: sizes, totalSizes, totalPages: Math.ceil(totalSizes / 15), currentPage: parseInt(pageNumber, 10) });
     } catch (error) {
@@ -63,7 +63,7 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
 exports.getSizeByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const sizeID = req.params.id;
-        const sizes = await Size.findOne({ _id: sizeID })
+        const sizes = await Size.findOne({ _id: sizeID }).populate("categoryId");
 
         sendResponse(res, 200, "Size Fetched Successfully", sizes);
     } catch (error) {
@@ -74,8 +74,8 @@ exports.getSizeByID = catchAsyncErrors(async (req, res, next) => {
 exports.updateSizeByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const sizeID = req.params.id;
-        const { size, status } = req.body;
-        const sizes = await Size.findByIdAndUpdate(sizeID, { size, status }).sort({ createdAt: -1 })
+        const { size, status ,categoryId} = req.body;
+        const sizes = await Size.findByIdAndUpdate(sizeID, { size, status ,categoryId}).sort({ createdAt: -1 }).populate("categoryId")
         res.status(200).json({ massage: "Size Updated Successfully", success: true, data: sizes });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
@@ -94,7 +94,7 @@ exports.deleteSizeByID = catchAsyncErrors(async (req, res, next) => {
 
 exports.getSizes= catchAsyncErrors(async (req, res, next) => {
     try {
-        const sizes = await Size.find({}).sort({ createdAt: -1 })
+        const sizes = await Size.find({}).sort({ createdAt: -1 }).populate("categoryId")
         res.status(200).json({ massage: "Sizes Fetched Successfully", success: true, data: sizes });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
