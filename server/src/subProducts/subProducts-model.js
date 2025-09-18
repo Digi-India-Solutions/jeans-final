@@ -41,24 +41,24 @@
 const mongoose = require('mongoose');
 
 const subProductSchema = new mongoose.Schema({
+    name: { type: String, required: true },
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', unique: false, required: true },
-    productDescription: { type: String, required: true },
-    color: {type:String , required: true},
-    sizes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Size', unique: false,required: true }],
-    price: Number,
-    finalPrice: Number,
-    set: String,
+    description: { type: String, required: true },
+    lotNumber: { type: String, required: true },
+    color: { type: String, required: true },
+    sizes: { type: String, required: true },
+    singlePicPrice: Number,
+    filnalLotPrice: String,
+    barcode: { type: String, required: true },
+    pcsInSet: String,
     subProductImages: [String],
+    dateOfOpening: { type: String },
     status: { type: Boolean, default: true },
+    stock: { type: String, },
+    lotStock: { type: String, },
     isActive: { type: Boolean, default: true },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
+    createdAt: { type: Date, default: Date.now, },
+    updatedAt: { type: Date, default: Date.now, },
 });
 
 subProductSchema.pre('save', function (next) {

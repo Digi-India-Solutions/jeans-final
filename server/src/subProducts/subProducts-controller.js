@@ -15,7 +15,8 @@ const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder
 exports.createSubProduct = catchAsyncErrors(async (req, res, next) => {
     try {
         console.log("FILES", req.files);
-        console.log("BODY", req.body);
+        console.log("BODY==>", req.body);
+        const { selectedSizes } = req.body;
         const data = req.body;
         const productImages = [];
         const files = req?.files || [];
@@ -25,9 +26,9 @@ exports.createSubProduct = catchAsyncErrors(async (req, res, next) => {
             productImages.push(uploadedImage);
             deleteLocalFile(file.path);
         }
-        const sizes = JSON.parse(data.sizes)
+        // const sizes = JSON.parse(data.sizes)
 
-        const newSubProduct = new SubProduct({ ...data, sizes: sizes, productId: data.productID, subProductImages: productImages });
+        const newSubProduct = new SubProduct({ ...data, sizes: selectedSizes, subProductImages: productImages });
         await newSubProduct.save();
         return res.status(201).json({ success: true, message: 'SubProduct created successfully' });
 
@@ -44,6 +45,137 @@ exports.getAllSubProducts = catchAsyncErrors(async (req, res, next) => {
         return res.status(200).json({ success: true, data: subProducts });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Something went wrong' });
+    }
+});
+
+// exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const page = parseInt(req.query.page, 10) || 1;
+//         const limit = parseInt(req.query.limit, 10) || 10;
+//         const skip = (page - 1) * limit;
+//         const search = req.query.search?.trim() || "";
+//         console.log("search===>", search)
+//         // 🔎 Build search query
+//         let query = {};
+//         if (search) {
+//             query = {
+//                 $or: [
+//                     { name: { $regex: search, $options: "i" } },
+//                     { lotNumber: { $regex: search, $options: "i" } },
+//                     { 'productId.productName': { $regex: search, $options: "i" } },
+//                     { barcode: { $regex: search, $options: "i" } },
+//                     { stock: { $regex: search, $options: "i" } },
+//                     // { status: { $regex: search, $options: "i" } },
+//                     { description: { $regex: search, $options: "i" } },
+//                     { singlePicPrice: !isNaN(Number(search)) ? Number(search) : undefined }
+//                 ].filter(Boolean)
+//             };
+//         }
+
+//         // 📊 Count total documents with query
+//         const totalSubProducts = await SubProduct.countDocuments(query);
+
+//         // 📦 Fetch paginated + populated sub-products
+//         const subProducts = await SubProduct.find(query)
+//             .populate([
+//                 {
+//                     path: "productId",
+//                     populate: { path: "categoryId" } // Populate category inside product
+//                 },
+//                 // { path: "sizes" } // Populate sizes
+//             ])
+//             .sort({ createdAt: -1 })
+//             .skip(skip)
+//             .limit(limit);
+//         console.log("subProducts==>", subProducts ,subProducts.length)
+//         // ✅ Return response
+//         return res.status(200).json({
+//             success: true,
+//             data: subProducts,
+//             pagination: {
+//                 totalSubProducts,
+//                 totalPages: Math.ceil(totalSubProducts / limit),
+//                 currentPage: page,
+//                 limit
+//             }
+//         });
+//     } catch (error) {
+//         return next(new ErrorHandler(error.message, 500));
+//     }
+// });
+
+exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search?.trim() || "";
+
+        // 🔎 Build search query
+        let query = {};
+        if (search) {
+            const numericSearch = !isNaN(Number(search)) ? Number(search) : null;
+
+            query = {
+                $or: [
+                    { name: { $regex: search, $options: "i" } },
+                    { lotNumber: { $regex: search, $options: "i" } },
+                    { "productId.productName": { $regex: search, $options: "i" } },
+                    { barcode: { $regex: search, $options: "i" } },
+                    { stock: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } },
+                    ...(numericSearch !== null ? [{ singlePicPrice: numericSearch }] : [])
+                ]
+            };
+        }
+
+        // 📊 Count total documents with query
+        const totalSubProducts = await SubProduct.countDocuments(query);
+
+        // 📦 Fetch paginated + populated sub-products
+        const subProducts = await SubProduct.find(query)
+            .populate([
+                {
+                    path: "productId",
+                    populate: { path: "categoryId" }
+                },
+                { path: "sizes" }
+            ])
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean(); // return plain JS objects
+
+        // 🛠 Normalize fields before sending
+        // const normalizedSubProducts = subProducts.map(sp => ({
+        //     ...sp,
+        //     sizes: (() => {
+        //         try {
+        //             if (Array.isArray(sp.sizes)) return sp.sizes;
+        //             if (typeof sp.sizes === "string") {
+        //                 // try JSON parse
+        //                 try {
+        //                     return JSON.parse(sp.sizes);
+        //                 } catch {
+        //                     // fallback comma-separated
+        //                     return sp.sizes.split(",").map(s => s.trim());
+        //                 }
+        //             }
+        //             return [];
+        //         } catch {
+        //             return [];
+        //         }
+        //     })()
+        // }));
+
+        // ✅ Return response
+        return res.status(200).json({
+            success: true,
+            data: subProducts,
+            pagination: { totalSubProducts, totalPages: Math.ceil(totalSubProducts / limit), currentPage: page, limit }
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
     }
 });
 
@@ -82,6 +214,7 @@ exports.getSubProductByID = catchAsyncErrors(async (req, res, next) => {
 exports.updateSubProductByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const data = req.body;
+        const { selectedSizes } = req.body
 
         const existingProduct = await SubProduct.findById(req.params.id);
         if (!existingProduct) {
@@ -109,18 +242,7 @@ exports.updateSubProductByID = catchAsyncErrors(async (req, res, next) => {
             uploadedImages.push(...newImages);
         }
 
-        // Handle sizes
-        let sizes = [];
-        if (data.sizes) {
-            try {
-                sizes = Array.isArray(data.sizes) ? data.sizes : JSON.parse(data.sizes);
-            } catch (err) {
-                return res.status(400).json({ success: false, message: "Invalid sizes format" });
-            }
-        }
-
-        // Prepare updated fields
-        const updatedFields = { ...data, sizes, productId: data.productId || data.productID, };
+        const updatedFields = { ...data, sizes: selectedSizes, };
 
         if (uploadedImages.length > 0) {
             updatedFields.subProductImages = uploadedImages;

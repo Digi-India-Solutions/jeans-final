@@ -1,5 +1,5 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
-const Order = require("./orders-model");
+const { Order, AdminOrder } = require("./orders-model");
 const User = require("../users/users-model");
 const { RewardPoints } = require("../rewordsPoints/rewordsPoints-model");
 const ShortUniqueId = require("short-unique-id");
@@ -163,6 +163,62 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+const generateOrderNumber = () => {
+    const now = new Date();
+    return `ORD-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+};
+
+exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const {
+            customer,
+            items,
+            subtotal,
+            pointsRedeemed = 0,
+            pointsRedemptionValue = 0,
+            total,
+            status = "Pending",
+            paymentType,
+            paidAmount = 0,
+            balanceAmount = 0,
+            payments = [],
+            paymentMethod,
+            orderType = "Offline",
+            orderDate = new Date().toISOString().split("T")[0], // YYYY-MM-DD
+            trackingId = "",
+            deliveryVendor = "",
+            pointsEarned = 0,
+            pointsEarnedValue = 0,
+        } = req.body;
+
+        // ✅ Validate required fields
+        if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
+            return next(new ErrorHandler("Customer info and at least 1 item are required.", 400));
+        }
+
+        // ✅ Generate unique order number
+        const orderNumber = generateOrderNumber();
+
+        // ✅ Create status history
+        const statusHistory = [
+            { status, date: orderDate, updatedBy: "System" },
+        ];
+
+
+        // ✅ Create new order
+        const newOrder = await AdminOrder.create({
+            orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
+            status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
+            orderDate, trackingId, deliveryVendor, pointsEarned, pointsEarnedValue, statusHistory,
+        });
+
+        res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
+    } catch (err) {
+        return next(new ErrorHandler(err.message || "Failed to create order.", 500));
+    }
+});
+
+
 exports.verifyPayment = async (req, res) => {
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, userId, rewardPointsUsed, orderUniqueId } = req.body;
@@ -278,6 +334,50 @@ exports.verifyPayment = async (req, res) => {
     }
 }
 
+exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const search = req.query.search?.trim() || "";
+
+        const skip = (page - 1) * limit;
+
+        // ✅ Search conditions
+        let query = {};
+        if (search) {
+            query = {
+                $or: [
+                    { "customer.name": { $regex: search, $options: "i" } },
+                    { "customer.email": { $regex: search, $options: "i" } },
+                    { "customer.phone": { $regex: search, $options: "i" } },
+                    { orderNumber: { $regex: search, $options: "i" } },
+                    { paymentMethod: { $regex: search, $options: "i" } },
+                    { status: { $regex: search, $options: "i" } },
+                ],
+            };
+        }
+
+        // ✅ Fetch orders
+        const [orders, totalOrders] = await Promise.all([
+            AdminOrder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("customer.userId"),
+            AdminOrder.countDocuments(query)
+        ]);
+
+        res.status(200).json({
+            success: true,
+            orders,
+            pagination: {
+                totalOrders,
+                currentPage: page,
+                totalPages: Math.ceil(totalOrders / limit),
+                limit,
+            },
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message || "Failed to fetch orders.", 500));
+    }
+});
+
 exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     try {
         const totalOrders = await Order.countDocuments();
@@ -343,6 +443,91 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+exports.changeStatusByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { orderId } = req.params;
+        const { newStatus, trackingId = "", deliveryVendor = "" } = req.body;
+
+        if (!newStatus) {
+            return next(new ErrorHandler("New status is required.", 400));
+        }
+
+        const order = await AdminOrder.findById(orderId);
+        if (!order) {
+            return next(new ErrorHandler("Order not found.", 404));
+        }
+
+        // ✅ Update status
+        order.status = newStatus;
+
+        // ✅ Push into history
+        order.statusHistory.push({
+            status: newStatus,
+            date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+            updatedBy: "Admin",
+        });
+
+        // ✅ If shipped, add tracking details
+        if (newStatus === "Shipped") {
+            order.trackingId = trackingId;
+            order.deliveryVendor = deliveryVendor;
+        }
+
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Order status updated to ${newStatus}.`,
+            order,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message || "Failed to update order status.", 500));
+    }
+});
+
+exports.updateOrderPaymentByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { orderId } = req.params;
+        const { additionalPayment, paymentMethod, notes = "" } = req.body;
+
+        if (!additionalPayment || additionalPayment <= 0) {
+            return next(new ErrorHandler("Additional payment must be greater than 0.", 400));
+        }
+
+        const order = await AdminOrder.findById(orderId);
+        if (!order) {
+            return next(new ErrorHandler("Order not found.", 404));
+        }
+
+        // ✅ Update paid & balance amounts
+        const newPaidAmount = order.paidAmount + additionalPayment;
+        const newBalanceAmount = Math.max(0, order.total - newPaidAmount);
+
+        // ✅ Push into payments history
+        order.payments.push({
+            amount: additionalPayment,
+            method: paymentMethod || order.paymentMethod || "Unknown",
+            notes,
+            date: new Date(),
+        });
+
+        order.paidAmount = newPaidAmount;
+        order.balanceAmount = newBalanceAmount;
+        order.paymentType = newBalanceAmount === 0 ? "Complete Payment" : "Partial Payment";
+        order.paymentMethod = paymentMethod || order.paymentMethod;
+
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Payment updated successfully.",
+            order,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message || "Failed to update payment.", 500));
+    }
+});
+
 exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
     try {
         // const { pageNumber } = req.query;
@@ -369,6 +554,91 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderID = req.params.id;
+        console.log("orderID:=>", orderID);
+        const orderData = await Order.findByIdAndDelete(orderID);
+
+        if (!orderData) {
+            return res.status(204).json({ status: false, message: "Order not found" });
+            // return next(new ErrorHandler("Order not found!", 400));
+        }
+        return res.status(200).json({ status: true, message: "Payment verified successfully", data: orderData });
+        // sendResponse(res, 200, "Order deleted successfully", orderData);
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
+
+
+exports.FilterOrdersByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { page = 1, limit = 12 } = req.query;
+        console.log("GGGG:==>", req.body)
+        const { status, orderType, customerType, paymentType, search } = req.body;
+
+        const query = {};
+
+        // 🔹 Status filter
+        if (status) {
+            query.status = status;
+        }
+
+        // 🔹 Order type filter
+        if (orderType) {
+            query.orderType = orderType;
+        }
+
+        // 🔹 Customer type filter (if exists in schema)
+        if (customerType) {
+            query["customer.type"] = customerType;
+        }
+
+        // 🔹 Payment type filter
+        if (paymentType) {
+            query.paymentType = paymentType;
+        }
+
+        // 🔹 Search filter
+        if (search) {
+            query.$or = [
+                { orderNumber: { $regex: search, $options: "i" } },
+                { "customer.name": { $regex: search, $options: "i" } },
+                { "customer.email": { $regex: search, $options: "i" } },
+                { "customer.phone": { $regex: search, $options: "i" } }
+            ];
+        }
+
+        // Count total orders
+        const totalOrders = await AdminOrder.countDocuments(query);
+
+        // Fetch paginated orders
+        const orders = await AdminOrder.find(query)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .populate("customer.userId", "name email uniqueUserId")
+            .populate("items.productId", "name price images uniqueProductId");
+
+        res.status(200).json({
+            success: true,
+            orders,
+            pagination: {
+                totalOrders,
+                currentPage: page,
+                totalPages: Math.ceil(totalOrders / limit),
+                limit,
+            },
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+
 // exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
 //     try {
 //         const orderID = req.params.id;
@@ -387,24 +657,6 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
 //         return next(new ErrorHandler(error.message, 500));
 //     }
 // })
-
-exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
-    try {
-        const orderID = req.params.id;
-        console.log("orderID:=>", orderID);
-        const orderData = await Order.findByIdAndDelete(orderID);
-
-        if (!orderData) {
-            return res.status(204).json({ status: false, message: "Order not found" });
-            // return next(new ErrorHandler("Order not found!", 400));
-        }
-        return res.status(200).json({ status: true, message: "Payment verified successfully", data: orderData });
-        // sendResponse(res, 200, "Order deleted successfully", orderData);
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-})
 
 
 // exports.searchOrders = catchAsyncErrors(async (req, res, next) => {
@@ -691,3 +943,7 @@ exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
 //         return next(new ErrorHandler(error.message, 500));
 //     }
 // })
+
+
+
+
