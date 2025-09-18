@@ -102,12 +102,9 @@ const AllProduct = () => {
         const updatedStatus = e.target.checked;
 
         try {
-            const response = await postData('api/product/change-Stock-status', {
-                productId,
-                isActive: updatedStatus
-            });
+            const response = await postData('api/product/change-Stock-status', { productId, isActive: updatedStatus });
 
-            if (response.success) {
+            if (response?.success) {
                 const updatedProducts = products.map(product =>
                     product._id === productId ? { ...product, isActive: updatedStatus } : product
                 );
