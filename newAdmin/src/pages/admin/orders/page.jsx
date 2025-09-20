@@ -7,7 +7,7 @@ import { getData, postData } from '../../../services/FetchNodeServices';
 import ProductSelectionModal from './ProductSelectionModal';
 import OrderTable from './OrderTable';
 import { toast } from 'react-toastify';
-import FilteredOrdersCom from './filteredOrdersCom';
+import FilteredOrdersCom from './FilteredOrdersCom';
 
 export default function OrdersManagement() {
   // const [categories] = useState([
@@ -421,6 +421,7 @@ export default function OrdersManagement() {
     });
     setShowStatusUpdateModal(true);
   };
+
 
   const openPaymentUpdate = (order) => {
     setSelectedOrder(order);
