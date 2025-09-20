@@ -7,7 +7,7 @@ const ShortUniqueId = require("short-unique-id");
 exports.createWishList = catchAsyncErrors(async (req, res, next) => {
     try {
         const { productId, userId, status } = req.body;
-
+        console.log("BODY:=>", req.body)
         if (!productId || !userId) {
             return next(new ErrorHandler("Product ID and User ID are required", 400));
         }

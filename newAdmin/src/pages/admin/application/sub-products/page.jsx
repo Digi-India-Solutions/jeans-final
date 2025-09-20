@@ -470,7 +470,7 @@ export default function SubProductsManagement() {
                 </div>
 
                 <div className="text-sm text-gray-600 mb-3">
-                  <p>Parent: {item?.productId.productName}</p>
+                  <p>Parent: {item?.productId?.productName}</p>
                   <p>Pcs in Set: <span className="font-semibold text-blue-600">{item?.pcsInSet}</span></p>
                   <p>Final Lot Price: <span className="font-semibold text-green-600">₹{(item?.singlePicPrice * item?.pcsInSet).toLocaleString()}</span></p>
                 </div>
@@ -523,12 +523,12 @@ export default function SubProductsManagement() {
                     {(() => {
                       let sizes = [];
                       try {
-                        sizes = Array.isArray(item?.sizes) ? item.sizes : JSON.parse(item?.sizes || "[]");
+                        sizes = Array.isArray(item?.sizes) ? item?.sizes : JSON.parse(item?.sizes || "[]");
                       } catch (err) {
                         sizes = [];
                       }
                       console.log("sizes====>", sizes);
-                      return sizes.map((size, index) => (
+                      return sizes?.map((size, index) => (
                         <span
                           key={index}
                           className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
