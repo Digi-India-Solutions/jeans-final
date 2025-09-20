@@ -505,7 +505,7 @@ function SubProductModel({
       
       // Determine endpoint based on edit or create mode
       const endpoint = editingItem 
-        ? `api/subProduct/update-sub-product/${editingItem._id}`
+        ? `api/subProduct/update-sub-product/${editingItem?._id}`
         : "api/subProduct/create-sub-product";
       
       const response = await postData(endpoint, submitFormData);
