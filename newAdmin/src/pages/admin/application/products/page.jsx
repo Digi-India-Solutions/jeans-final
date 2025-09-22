@@ -61,7 +61,7 @@ export default function ProductsManagement() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await getData(`api/product/get-all-products-with-pagination?page=${currentPage}&limit=12&search=${filters.search || filters.category || filters?.status}`);
+      const response = await getData(`api/product/get-all-products-with-pagination?page=${currentPage}&limit=12&search=${filters.search || filters?.category || filters?.status}`);
       if (response.success) {
         setProducts(response.data || []);
         setTotalPages(response?.pagination?.totalPages || 1);
@@ -145,7 +145,13 @@ export default function ProductsManagement() {
     const submitFormData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (key !== 'images') {
-        submitFormData.append(key, value);
+        if (key === 'subcategoryId') {
+          formData?.subcategoryId.forEach(subcategory => {
+            submitFormData.append('subcategoryId', subcategory);
+          })
+        } else {
+          submitFormData.append(key, value);
+        }
       }
     });
 
@@ -201,7 +207,7 @@ export default function ProductsManagement() {
       name: product?.productName || '',
       sku: product.sku || '',
       categoryId: product.mainCategoryId?._id || '',
-      subcategoryId: product?.categoryId?._id || '',
+      subcategoryId: product?.categoryId.map(cat => cat?._id) || product?.subcategoryId?._id || '',
       type: product.type || 'New Arrival',
       price: product?.price?.toString() || '',
       images: product?.images || [],
@@ -281,6 +287,7 @@ export default function ProductsManagement() {
       setFormData(prev => ({ ...prev, subcategoryId: '' }));
     }
   }, [formData.categoryId]);
+  console.log("GGGGGG:==>", filteredProducts);
 
   return (
     <AdminLayout>
@@ -391,17 +398,18 @@ export default function ProductsManagement() {
                     </div>
 
                     <div className="text-sm text-gray-600 mb-3">
-                      <p>{product?.mainCategoryId?.mainCategoryName} &gt; {product.categoryId?.name}</p>
+                      <p>{product?.mainCategoryId?.mainCategoryName} &gt; {`${product?.categoryId.map(cat => cat?.name).join(', ')}`}</p>
+
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                       <div>
                         <span className="text-gray-500">Price:</span>
-                        <p className="font-semibold text-green-600">₹{product.price}</p>
+                        <p className="font-semibold text-green-600">₹{product?.price}</p>
                       </div>
                       <div>
                         <span className="text-gray-500">Type:</span>
-                        <p className="font-semibold text-blue-600">{product.type || 'New Arrival'}</p>
+                        <p className="font-semibold text-blue-600">{product?.type || 'New Arrival'}</p>
                       </div>
                     </div>
 
@@ -518,8 +526,29 @@ export default function ProductsManagement() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {product.sku}
                           </td>
+                          {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {product?.mainCategoryId?.mainCategoryName} &gt; {`${product?.categoryId.map(cat => cat?.name).join(', ')}`}
+                          </td> */}
+                          {/* <div>
+                            {product?.categoryId.map(cat => cat?.name).join(', ')}
+                          </div> */}
+
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {product.mainCategoryId?.mainCategoryName} &gt; {product.categoryId?.name}
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-gray-700">
+                                {product?.mainCategoryId?.mainCategoryName}
+                              </span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {product?.categoryId?.map((cat) => (
+                                  <span
+                                    key={cat?._id}
+                                    className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700"
+                                  >
+                                    {cat?.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             ₹{product.price}
@@ -614,7 +643,7 @@ export default function ProductsManagement() {
                         <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       </div>
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Category</label>
                       <div className="relative">
                         <select
@@ -631,7 +660,66 @@ export default function ProductsManagement() {
                         </select>
                         <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       </div>
+                    </div> */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Sub-Category
+                      </label>
+                      <div className="relative">
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            if (selected && !formData.subcategoryId.includes(selected)) {
+                              setFormData({
+                                ...formData,
+                                subcategoryId: [...formData.subcategoryId, selected],
+                              });
+                            }
+                          }}
+                          className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                          disabled={!formData.categoryId || subCategoriesList.length === 0}
+                        >
+                          <option value="">Select Sub-Category</option>
+                          {subCategoriesList.map((subCat) => (
+                            <option key={subCat?._id} value={subCat?._id}>
+                              {subCat?.name}
+                            </option>
+                          ))}
+                        </select>
+                        <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                      </div>
+
+                      {/* 🔹 Show selected subcategories below */}
+                      {formData.subcategoryId?.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {formData.subcategoryId.map((id) => {
+                            const subCat = subCategoriesList.find((s) => s._id === id);
+                            return (
+                              <span
+                                key={id}
+                                className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1"
+                              >
+                                {subCat?.name || "Unknown"}
+                                <button
+                                  type="button"
+                                  className="ml-1 text-red-500 hover:text-red-700"
+                                  onClick={() =>
+                                    setFormData({
+                                      ...formData,
+                                      subcategoryId: formData?.subcategoryId.filter((subId) => subId !== id),
+                                    })
+                                  }
+                                >
+                                  ✕
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
+
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">

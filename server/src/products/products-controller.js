@@ -206,51 +206,119 @@ exports.updateProductByID = catchAsyncErrors(async (req, res, next) => {
 // });
 
 
+// exports.getAllProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
+//   try {
+//     const page = parseInt(req.query.page, 10) || 1;
+//     const limit = parseInt(req.query.limit, 10) || 10;
+//     const skip = (page - 1) * limit;
+//     const search = req.query.search || "";
+//     let query = {};
+//     console.log("BODY:=>", search)
+//     if (search) {
+//       query = {
+//         $or: [
+//           { productName: { $regex: search, $options: "i" } },
+//           { sku: { $regex: search, $options: "i" } },
+//           { type: { $regex: search, $options: "i" } },
+//           { price: isNaN(Number(search)) ? undefined : Number(search) }, // numeric search
+//           { status: search.toLowerCase() === "true" ? true : search.toLowerCase() === "false" ? false : undefined },
+//           { isActive: search.toLowerCase() === "true" ? true : search.toLowerCase() === "false" ? false : undefined },
+//           // For ObjectId (categoryId) search
+//           { mainCategoryId: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
+//           { categoryId: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
+//         ].filter(Boolean), // remove undefined conditions
+//       };
+//     }
+
+//     // Count total documents
+//     const totalProducts = await Product.countDocuments(query);
+
+
+//     // Get paginated data
+//     const products = await Product.find(query)
+//       .populate("categoryId")
+//       .populate("mainCategoryId")
+//       .sort({ createdAt: -1 })
+//       .skip(skip)
+//       .limit(limit);
+//     console.log("products==>", products);
+//     res.status(200).json({
+//       success: true,
+//       data: products,
+//       pagination: { totalProducts, totalPages: Math.ceil(totalProducts / limit), currentPage: page, limit, },
+//     });
+//   } catch (error) {
+//     return next(new ErrorHandler(error.message, 500));
+//   }
+// });
+
 exports.getAllProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const search = req.query.search || "";
-    const query = {};
-    
+    const search = req.query.search?.trim() || "";
+    console.log("search===>", search)
+    let query = {};
+
     if (search) {
-      query = {
-        $or: [
-          { productName: { $regex: search, $options: "i" } },
-          { sku: { $regex: search, $options: "i" } },
-          { type: { $regex: search, $options: "i" } },
-          { price: isNaN(Number(search)) ? undefined : Number(search) }, // numeric search
-          { status: search.toLowerCase() === "true" ? true : search.toLowerCase() === "false" ? false : undefined },
-          { isActive: search.toLowerCase() === "true" ? true : search.toLowerCase() === "false" ? false : undefined },
-          // For ObjectId (categoryId) search
-          { mainCategoryId: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
-          { categoryId: mongoose.Types.ObjectId.isValid(search) ? search : undefined },
-        ].filter(Boolean), // remove undefined conditions
-      };
+      const conditions = [];
+
+      // Text fields
+      conditions.push({ productName: { $regex: search, $options: "i" } });
+      conditions.push({ sku: { $regex: search, $options: "i" } });
+      conditions.push({ type: { $regex: search, $options: "i" } });
+
+      // Numeric (price)
+      if (!isNaN(Number(search))) {
+        conditions.push({ price: Number(search) });
+      }
+
+      // Boolean search (status, isActive)
+      if (["true", "false"].includes(search.toLowerCase())) {
+        const boolVal = search.toLowerCase() === "true";
+        conditions.push({ status: boolVal });
+        // conditions.push({ isActive: boolVal });
+      }
+
+      // ObjectId search (categoryId / mainCategoryId)
+      if (mongoose.Types.ObjectId.isValid(search)) {
+        const objId = new mongoose.Types.ObjectId(search);
+        conditions.push({ mainCategoryId: objId });
+        conditions.push({ categoryId: { $in: [objId] } });
+      }
+
+      if (conditions.length > 0) {
+        query = { $or: conditions };
+      }
     }
 
-    // Count total documents
+    // Count total products
     const totalProducts = await Product.countDocuments(query);
 
-
-    // Get paginated data
+    // Fetch paginated products
     const products = await Product.find(query)
       .populate("categoryId")
       .populate("mainCategoryId")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    console.log("products==>", products);
+
     res.status(200).json({
       success: true,
       data: products,
-      pagination: { totalProducts, totalPages: Math.ceil(totalProducts / limit), currentPage: page, limit, },
+      pagination: {
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / limit),
+        currentPage: page,
+        limit,
+      },
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
 });
+
 
 exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
 
