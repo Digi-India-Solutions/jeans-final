@@ -212,7 +212,8 @@ exports.getAllProductsWithPagination = catchAsyncErrors(async (req, res, next) =
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
-
+    const query = {};
+    
     if (search) {
       query = {
         $or: [

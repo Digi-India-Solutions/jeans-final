@@ -177,11 +177,11 @@ console.log(editingWishlist)
     });
 
     setEditForm({
-      customerId: wishlist.userId._id || customers.find(c => c?.email === wishlist?.userId?.email)?._id || '',
-      selectedProducts: {
+      customerId: wishlist?.userId?._id || customers.find(c => c?.email === wishlist?.userId?.email)?._id || '',
+      selectedProducts: [{
         productId: wishlist?.productId?._id,
         quantity: wishlist?.quantity || 1
-      }
+      }]
     });
     setShowEditModal(true);
   };
@@ -235,10 +235,10 @@ console.log(editingWishlist)
   };
 
   const updateWishlist = () => {
-    if (!editForm.customerId || editForm.selectedProducts.length === 0) return;
+    if (!editForm?.customerId || editForm?.selectedProducts?.length === 0) return;
 
-    const customer = customers.find(c => c.id === parseInt(editForm.customerId));
-    const items = editForm.selectedProducts
+    const customer = customers.find(c => c?._id === parseInt(editForm.customerId));
+    const items = editForm?.selectedProducts
       .filter(sp => sp.productId)
       .map(sp => {
         const product = products.find(p => p.id === parseInt(sp.productId));
@@ -340,6 +340,7 @@ console.log(editingWishlist)
     );
   });
 
+  console.log("filteredWishlists: ", editForm);
   return (
     <AdminLayout>
       <div className="p-6">
@@ -693,9 +694,9 @@ console.log(editingWishlist)
                                 className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
                               >
                                 <option value="">Select Product</option>
-                                {products.map(product => (
+                                {products?.map(product => (
                                   <option key={product?._id} value={product?._id}>
-                                    {product?.name || product?.productId?.productNam} - ₹{product?.singlePicPrice || product.price} (Stock: {product.stock})
+                                    {product?.name || product?.productId?.productName} - ₹{product?.singlePicPrice || product?.price} (Stock: {product?.stock})
                                   </option>
                                 ))}
                               </select>
@@ -704,7 +705,7 @@ console.log(editingWishlist)
                           </div>
 
                           {/* Product Image Preview */}
-                          {selectedProduc?.productId && (
+                          {selectedProduct?.productId && (
                             <div className="w-12 h-12">
                               <img
                                 src={products.find(p => p._id === parseInt(selectedProduct?.productId))?.images[0] || ''}
@@ -718,7 +719,7 @@ console.log(editingWishlist)
                             <label className="block text-xs text-gray-500 mb-1">Quantity</label>
                             <input
                               type="number"
-                              value={selectedProduct.quantity}
+                              value={selectedProduct?.quantity}
                               onChange={(e) => updateProductInForm(editForm, setEditForm, index, 'quantity', parseInt(e.target.value) || 1)}
                               min="1"
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-center"

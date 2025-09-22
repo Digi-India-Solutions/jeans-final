@@ -6,6 +6,7 @@ const { createSubProduct, getAllProducts,getAllProductsWithPagination, typeProdu
 router.post("/create-product", upload.array( 'productImages'), createSubProduct);
 
 router.get("/get-all-products-with-pagination", getAllProductsWithPagination);
+
 router.get("/get-all-products", getAllProducts);
 
 router.post("/change-type", typeProducts);
