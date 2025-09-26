@@ -356,9 +356,13 @@ const adminOrderSchema = new Schema({
         method: { type: String, required: true }, // e.g. Bank Transfer, UPI
         amount: { type: Number, required: true },
         // date: { type: Date, required: true },
-        
     }],
-
+    paymentInfo: {
+        transactionId: String,
+        razorpayOrderId: String,
+        paymentId: String,
+        razorpaySignature: String,
+    },
     paymentMethod: { type: String }, // Cash / Bank Transfer / Online
     orderType: { type: String, default: "Offline" },
 
