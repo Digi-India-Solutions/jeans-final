@@ -155,7 +155,12 @@ export default function WishlistManagement() {
   }, [])
 
   const handleViewDetails = (wishlist) => {
-    setSelectedWishlist(wishlist);
+    setSelectedWishlist({
+      ...wishlist,
+      userId: wishlist.userId,
+      productId: [wishlist?.productId],
+      quantity: wishlist.quantity
+    });
     setShowDetailsModal(true);
   };
 
@@ -166,7 +171,7 @@ export default function WishlistManagement() {
     });
     setShowCreateModal(true);
   };
-console.log(editingWishlist)
+  console.log(editingWishlist)
   const handleEditWishlist = (wishlist) => {
     setEditingWishlist({
       customerId: wishlist.userId._id || customers.find(c => c?.email === wishlist?.userId?.email)?._id || '',
@@ -177,6 +182,7 @@ console.log(editingWishlist)
     });
 
     setEditForm({
+      wishlistId: wishlist._id,
       customerId: wishlist?.userId?._id || customers.find(c => c?.email === wishlist?.userId?.email)?._id || '',
       selectedProducts: [{
         productId: wishlist?.productId?._id,
@@ -189,7 +195,7 @@ console.log(editingWishlist)
   const addProductToForm = (form, setForm) => {
     setForm({
       ...form,
-      selectedProducts: [...form.selectedProducts, { productId: '', quantity: 1 }]
+      selectedProducts: [...form?.selectedProducts, { productId: '', quantity: 1 }]
     });
   };
 
@@ -228,58 +234,44 @@ console.log(editingWishlist)
       // Reset form and close modal
       setShowCreateModal(false);
       setCreateForm({ customerId: "", selectedProducts: [] });
+      fetchWishlists()
+
+    } catch (error) {
+      console.error("Error creating wishlist: ", error);
+    }
+  };
+  // console.log("editttt:=>", editForm)
+  const updateWishlist = async () => {
+    if (!editForm?.customerId || editForm?.selectedProducts?.length === 0) return;
+
+    try {
+      // Loop through selectedProducts and post data
+      const responses = await Promise.all(
+        editForm?.selectedProducts?.map(item =>
+          postData(`api/wishlist/update-wishlist/${editForm?.wishlistId}`, {
+            productId: item?.productId,
+            userId: editForm?.customerId,
+            status: true,
+            quantity: item?.quantity || 1,
+          })
+        )
+      );
+      console.log("DDDDDDDD:=>", responses[0])
+      if (responses[0].success === true) {
+        setShowEditModal(false);
+        setEditingWishlist(null);
+        setEditForm({ customerId: '', selectedProducts: [] });
+        fetchWishlists()
+      }
 
     } catch (error) {
       console.error("Error creating wishlist: ", error);
     }
   };
 
-  const updateWishlist = () => {
-    if (!editForm?.customerId || editForm?.selectedProducts?.length === 0) return;
-
-    const customer = customers.find(c => c?._id === parseInt(editForm.customerId));
-    const items = editForm?.selectedProducts
-      .filter(sp => sp.productId)
-      .map(sp => {
-        const product = products.find(p => p.id === parseInt(sp.productId));
-        const existingItem = editingWishlist.items.find(item => item.productId === product._id);
-        return {
-          id: existingItem?.id || Date.now() + Math.random(),
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          addedDate: existingItem?.addedDate || new Date().toISOString().split('T')[0],
-          quantity: sp.quantity
-        };
-      });
-
-    const totalValue = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    setWishlists(wishlists.map(wishlist =>
-      wishlist.id === editingWishlist._id
-        ? {
-          ...wishlist,
-          customer: {
-            name: customer.name,
-            email: customer.email,
-            type: customer.type
-          },
-          items,
-          totalValue,
-          lastUpdated: new Date().toISOString().split('T')[0]
-        }
-        : wishlist
-    ));
-
-    setShowEditModal(false);
-    setEditingWishlist(null);
-    setEditForm({ customerId: '', selectedProducts: [] });
-  };
-
   const removeFromWishlist = (wishlistId, itemId) => {
     setWishlists(prev => prev.map(wishlist =>
-      wishlist.id === wishlistId
+      wishlist._id === wishlistId
         ? {
           ...wishlist,
           items: wishlist.items.filter(item => item.id !== itemId),
@@ -316,16 +308,25 @@ console.log(editingWishlist)
     }
   };
 
-  const deleteWishlist = (wishlistId) => {
+  const deleteWishlist = async (wishlistId) => {
     if (confirm('Are you sure you want to delete this wishlist?')) {
-      setWishlists(prev => prev.filter(wishlist => wishlist.id !== wishlistId));
+      try {
+        let respons = await getData(`api/wishlist/delete-wishlist/${wishlistId}`)
+        if (respons.success === true) {
+          fetchWishlists()
+          setWishlists(prev => prev.filter(wishlist => wishlist._id !== wishlistId));
 
-      if (selectedWishlist && selectedWishlist.id === wishlistId) {
+        }
+      } catch (error) {
+        console.log(error)
+      }
+      if (selectedWishlist && selectedWishlist._id === wishlistId) {
         setShowDetailsModal(false);
         setSelectedWishlist(null);
       }
     }
   };
+
   const sendWishlistReminder = (wishlist) => {
     alert(`Wishlist reminder sent to ${wishlist.customer.email}`);
   };
@@ -340,7 +341,7 @@ console.log(editingWishlist)
     );
   });
 
-  console.log("filteredWishlists: ", editForm);
+  console.log("GGGGGGG:==>", selectedWishlist)
   return (
     <AdminLayout>
       <div className="p-6">
@@ -403,38 +404,44 @@ console.log(editingWishlist)
 
         {/* Wishlist Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredWishlists.map(wishlist => (
-            <Card key={wishlist?._id} className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900">{wishlist?.userId?.name}</h3>
-                  <p className="text-sm text-gray-600">{wishlist?.userId?.email}</p>
-                  {/* <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${wishlist.customer.type === 'B2B'
+          {filteredWishlists.map(wishlist => {
+
+            const images = wishlist?.productId?.subProductImages?.[0]
+              ? wishlist?.productId?.subProductImages[0].split(",")
+              : [];
+            // console.log("FFFFFFFFFFFFF:=>", images[0])
+            return (
+              <Card key={wishlist?._id} className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{wishlist?.userId?.name}</h3>
+                    <p className="text-sm text-gray-600">{wishlist?.userId?.email}</p>
+                    {/* <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${wishlist.customer.type === 'B2B'
                     ? 'bg-purple-100 text-purple-800'
                     : 'bg-blue-100 text-blue-800'
                     }`}>
                     {wishlist.customer.type}
                   </span> */}
-                </div>
-                <div className="text-right">
-                  {/* <div className="text-lg font-bold text-green-600">₹{wishlist.totalValue.toLocaleString()}</div> */}
-                  <div className="text-sm text-gray-500">{wishlist?.productId?.length} items</div>
-                </div>
-              </div>
-
-              <div className="space-y-2 mb-4">
-                <div key={wishlist?.productId?._id} className="flex items-center space-x-3">
-                  <img
-                    src={wishlist?.productId?.subProductImages[0]}
-                    alt={wishlist?.productId?.name}
-                    className="w-10 h-10 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{wishlist?.productId?.name}</p>
-                    <p className="text-xs text-gray-500">₹{wishlist?.productId?.singlePicPrice}</p>
+                  </div>
+                  <div className="text-right">
+                    {/* <div className="text-lg font-bold text-green-600">₹{wishlist.totalValue.toLocaleString()}</div> */}
+                    <div className="text-sm text-gray-500">{wishlist?.productId?.length} items</div>
                   </div>
                 </div>
-                {/* {wishlist.items.slice(0, 2).map(item => (
+
+                <div className="space-y-2 mb-4">
+                  <div key={wishlist?.productId?._id} className="flex items-center space-x-3">
+                    <img
+                      src={images[0] || wishlist?.productId?.subProductImages[0]}
+                      alt={wishlist?.productId?.name}
+                      className="w-10 h-10 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">{wishlist?.productId?.name}</p>
+                      <p className="text-xs text-gray-500">₹{wishlist?.productId?.singlePicPrice}</p>
+                    </div>
+                  </div>
+                  {/* {wishlist.items.slice(0, 2).map(item => (
                   <div key={item.id} className="flex items-center space-x-3">
                     <img
                       src={item.image}
@@ -447,46 +454,47 @@ console.log(editingWishlist)
                     </div>
                   </div>
                 ))} */}
-                {wishlist?.productId?.length > 2 && (
-                  <div className="text-xs text-gray-500 text-center py-2">
-                    +{wishlist?.productId?.length - 2} more items
-                  </div>
-                )}
-              </div>
+                  {wishlist?.productId?.length > 2 && (
+                    <div className="text-xs text-gray-500 text-center py-2">
+                      +{wishlist?.productId?.length - 2} more items
+                    </div>
+                  )}
+                </div>
 
-              <div className="text-xs text-gray-500 mb-4">
-                Last updated: {wishlist?.updatedAt?.split("T")[0]}
-              </div>
+                <div className="text-xs text-gray-500 mb-4">
+                  Last updated: {wishlist?.updatedAt?.split("T")[0]}
+                </div>
 
-              <div className="flex space-x-2">
-                <Button
-                  onClick={() => handleViewDetails(wishlist)}
-                  className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
-                >
-                  <i className="ri-eye-line mr-1"></i>
-                  View
-                </Button>
-                <Button
-                  onClick={() => handleEditWishlist(wishlist)}
-                  className="bg-green-50 text-green-600 hover:bg-green-100 px-3"
-                >
-                  <i className="ri-edit-line"></i>
-                </Button>
-                <Button
-                  onClick={() => sendWishlistReminder(wishlist)}
-                  className="bg-purple-50 text-purple-600 hover:bg-purple-100 px-3"
-                >
-                  <i className="ri-mail-line"></i>
-                </Button>
-                <Button
-                  onClick={() => deleteWishlist(wishlist?._id)}
-                  className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
-                >
-                  <i className="ri-delete-bin-line"></i>
-                </Button>
-              </div>
-            </Card>
-          ))}
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => handleViewDetails(wishlist)}
+                    className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
+                  >
+                    <i className="ri-eye-line mr-1"></i>
+                    View
+                  </Button>
+                  <Button
+                    onClick={() => handleEditWishlist(wishlist)}
+                    className="bg-green-50 text-green-600 hover:bg-green-100 px-3"
+                  >
+                    <i className="ri-edit-line"></i>
+                  </Button>
+                  <Button
+                    onClick={() => sendWishlistReminder(wishlist)}
+                    className="bg-purple-50 text-purple-600 hover:bg-purple-100 px-3"
+                  >
+                    <i className="ri-mail-line"></i>
+                  </Button>
+                  <Button
+                    onClick={() => deleteWishlist(wishlist?._id)}
+                    className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                  >
+                    <i className="ri-delete-bin-line"></i>
+                  </Button>
+                </div>
+              </Card>)
+          }
+          )}
         </div>
 
         {filteredWishlists.length === 0 && (
@@ -684,55 +692,58 @@ console.log(editingWishlist)
                     </div>
 
                     <div className="space-y-3">
-                      {editForm?.selectedProducts?.map((selectedProduct, index) => (
-                        <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
-                          <div className="flex-1">
-                            <div className="relative">
-                              <select
-                                value={selectedProduct?.productId}
-                                onChange={(e) => updateProductInForm(editForm, setEditForm, index, 'productId', e.target.value)}
-                                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
-                              >
-                                <option value="">Select Product</option>
-                                {products?.map(product => (
-                                  <option key={product?._id} value={product?._id}>
-                                    {product?.name || product?.productId?.productName} - ₹{product?.singlePicPrice || product?.price} (Stock: {product?.stock})
-                                  </option>
-                                ))}
-                              </select>
-                              <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                      {editForm?.selectedProducts?.map((selectedProduct, index) => {
+                        const product = products.find(product => product?._id === selectedProduct.productId);
+                        return (
+                          <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                            <div className="flex-1">
+                              <div className="relative">
+                                <select
+                                  value={selectedProduct?.productId}
+                                  onChange={(e) => updateProductInForm(editForm, setEditForm, index, 'productId', e.target.value)}
+                                  className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
+                                >
+                                  <option value="">Select Product</option>
+                                  {products?.map(product => (
+                                    <option key={product?._id} value={product?._id}>
+                                      {product?.name || product?.productId?.productName} - ₹{product?.singlePicPrice || product?.price} (Stock: {product?.stock})
+                                    </option>
+                                  ))}
+                                </select>
+                                <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                              </div>
                             </div>
-                          </div>
 
-                          {/* Product Image Preview */}
-                          {selectedProduct?.productId && (
-                            <div className="w-12 h-12">
-                              <img
-                                src={products.find(p => p._id === parseInt(selectedProduct?.productId))?.images[0] || ''}
-                                alt="Product"
-                                className="w-full h-full object-cover rounded-lg"
+                            {/* Product Image Preview */}
+                            {selectedProduct.productId && (
+                              <div className="w-12 h-12">
+                                <img
+                                  src={product?.productId?.images[0] || ''}
+                                  alt="Product"
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                              </div>
+                            )}
+
+                            <div className="w-24">
+                              <label className="block text-xs text-gray-500 mb-1">Quantity</label>
+                              <input
+                                type="number"
+                                value={selectedProduct?.quantity}
+                                onChange={(e) => updateProductInForm(editForm, setEditForm, index, 'quantity', parseInt(e.target.value) || 1)}
+                                min="1"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-center"
                               />
                             </div>
-                          )}
-
-                          <div className="w-24">
-                            <label className="block text-xs text-gray-500 mb-1">Quantity</label>
-                            <input
-                              type="number"
-                              value={selectedProduct?.quantity}
-                              onChange={(e) => updateProductInForm(editForm, setEditForm, index, 'quantity', parseInt(e.target.value) || 1)}
-                              min="1"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-center"
-                            />
-                          </div>
-                          <button
-                            onClick={() => removeProductFromForm(editForm, setEditForm, index)}
-                            className="text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center"
-                          >
-                            <i className="ri-delete-bin-line"></i>
-                          </button>
-                        </div>
-                      ))}
+                            <button
+                              onClick={() => removeProductFromForm(editForm, setEditForm, index)}
+                              className="text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center"
+                            >
+                              <i className="ri-delete-bin-line"></i>
+                            </button>
+                          </div>)
+                      }
+                      )}
 
                       {editForm.selectedProducts.length === 0 && (
                         <p className="text-gray-500 text-center py-4">No products added yet</p>
@@ -755,7 +766,7 @@ console.log(editingWishlist)
                   <Button
                     onClick={updateWishlist}
                     className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
-                    disabled={!editForm.customerId || editForm.selectedProducts.length === 0}
+                    disabled={!editForm?.customerId || editForm.selectedProducts.length === 0}
                   >
                     Update Wishlist
                   </Button>
@@ -768,12 +779,13 @@ console.log(editingWishlist)
         {/* Wishlist Details Modal */}
         {showDetailsModal && selectedWishlist && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
+                {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h2 className="text-xl font-semibold">{selectedWishlist.customer.name}'s Wishlist</h2>
-                    <p className="text-gray-600">{selectedWishlist.customer.email}</p>
+                    <h2 className="text-xl font-semibold">{selectedWishlist?.userId?.name}'s Wishlist</h2>
+                    <p className="text-gray-600">{selectedWishlist?.userId?.email}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -786,50 +798,84 @@ console.log(editingWishlist)
                   </button>
                 </div>
 
+                {/* Summary */}
                 <div className="mb-6">
                   <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                     <div>
                       <span className="text-sm text-gray-600">Total Value:</span>
-                      <span className="text-xl font-bold text-green-600 ml-2">₹{selectedWishlist.totalValue.toLocaleString()}</span>
+                      <span className="text-xl font-bold text-green-600 ml-2">
+                        ₹
+                        {(
+                          (Number(selectedWishlist?.quantity) || 0) *
+                          (Number(
+                            Array.isArray(selectedWishlist?.productId)
+                              ? selectedWishlist?.productId[0]?.filnalLotPrice
+                              : selectedWishlist?.productId?.filnalLotPrice
+                          ) || 0)
+                        ).toLocaleString()}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        ({selectedWishlist?.quantity} × ₹
+                        {Number(
+                          Array.isArray(selectedWishlist?.productId)
+                            ? selectedWishlist?.productId[0]?.filnalLotPrice
+                            : selectedWishlist?.productId?.filnalLotPrice
+                        ).toLocaleString()})
+                      </p>
                     </div>
                     <div>
                       <span className="text-sm text-gray-600">Items:</span>
-                      <span className="font-semibold ml-2">{selectedWishlist.items.length}</span>
+                      <span className="font-semibold ml-2">
+                        {Array.isArray(selectedWishlist?.productId)
+                          ? selectedWishlist?.productId.length
+                          : 1}
+                      </span>
                     </div>
                   </div>
                 </div>
 
+                {/* Product Details */}
                 <div className="space-y-4">
-                  {selectedWishlist.items.map(item => (
-                    <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                  {(Array.isArray(selectedWishlist?.productId)
+                    ? selectedWishlist?.productId
+                    : [selectedWishlist?.productId]
+                  ).map(item => (
+                    <div
+                      key={item?._id}
+                      className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                    >
                       <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        src={item?.subProductImages?.[0] || "/placeholder.png"}
+                        alt={item?.name}
+                        className="w-20 h-20 object-cover rounded-lg"
                       />
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{item.name}</h4>
-                        <p className="text-sm text-gray-600">Added on {item.addedDate}</p>
-                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                        <p className="text-lg font-semibold text-green-600">₹{(item.price * item.quantity).toLocaleString()}</p>
+                        <h4 className="font-medium text-gray-900">{item?.name}</h4>
+                        <p className="text-sm text-gray-600">Lot: {item?.lotNumber}</p>
+                        <p className="text-sm text-gray-600">Color: {item?.color}</p>
+                        <p className="text-sm text-gray-600">
+                          Sizes: {item?.sizes ? JSON.parse(item?.sizes).join(", ") : "N/A"}
+                        </p>
+                        <p className="text-sm text-gray-600">Quantity: {selectedWishlist?.quantity}</p>
+                        <p className="text-lg font-semibold text-green-600">
+                          ₹
+                          {(
+                            (Number(selectedWishlist?.quantity) || 0) *
+                            (Number(item?.filnalLotPrice) || 0)
+                          ).toLocaleString()}
+                        </p>
                       </div>
-                      <button
-                        onClick={() => removeFromWishlist(selectedWishlist.id, item.id)}
+                      {/* <button
+                        onClick={() => removeFromWishlist(selectedWishlist?._id, item?._id)}
                         className="text-red-500 hover:text-red-700 p-2"
                       >
                         <i className="ri-delete-bin-line"></i>
-                      </button>
+                      </button> */}
                     </div>
                   ))}
                 </div>
 
-                {selectedWishlist.items.length === 0 && (
-                  <div className="text-center py-8">
-                    <i className="ri-heart-line text-4xl text-gray-400 mb-2"></i>
-                    <p className="text-gray-500">Wishlist is empty</p>
-                  </div>
-                )}
-
+                {/* Footer buttons */}
                 <div className="flex space-x-3 mt-6">
                   <Button
                     onClick={() => sendWishlistReminder(selectedWishlist)}
@@ -852,6 +898,7 @@ console.log(editingWishlist)
             </div>
           </div>
         )}
+
       </div>
     </AdminLayout>
   );

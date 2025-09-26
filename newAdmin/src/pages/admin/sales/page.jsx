@@ -1,13 +1,16 @@
-
 import { useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
+import JeansSalesTab from './JeansSalesTab';
+import ShirtsSalesTab from './ShirtsSalesTab';
+import OverviewTab from './OverviewTab';
+import { getData } from '../../../services/FetchNodeServices';
 
 export default function SalesReports() {
   const [activeTab, setActiveTab] = useState('overview');
   const [dateRange, setDateRange] = useState('thisMonth');
-  const [selectedPeriod, setSelectedPeriod] = useState('Daily');
+  const [selectedPeriod, setSelectedPeriod] = useState('Monthly');
 
   // Sample sales data for Jeans and Shirts with piece counts
   const salesData = {
@@ -44,23 +47,78 @@ export default function SalesReports() {
       ]
     }
   };
+  const [salesDatas, setSalesData] = useState(salesData);
 
-  const categoryDistribution = [
-    { name: 'Jeans', value: 2450000, pieces: 980, percentage: 56.4, color: '#3B82F6' },
-    { name: 'Shirts', value: 1890000, pieces: 1250, percentage: 43.6, color: '#10B981' }
-  ];
-
-  const topProducts = [
+  const topProductsss = [
     { name: 'Premium Skinny Jeans', sales: 485000, units: 194, pieces: 194, growth: 15.2 },
     { name: 'Regular Fit Jeans', sales: 420000, units: 191, pieces: 191, growth: 8.7 },
     { name: 'Formal Cotton Shirts', sales: 380000, units: 200, pieces: 200, growth: 12.1 },
     { name: 'Casual Denim Shirts', sales: 295000, units: 184, pieces: 184, growth: -2.5 },
     { name: 'Bootcut Jeans', sales: 275000, units: 125, pieces: 125, growth: 22.3 }
   ];
+  const [topProducts, setTopProducts] = useState(topProductsss || [])
+  // const categoryDistribution = [
+  //   { name: 'Jeans', value: 2450000, pieces: 980, percentage: 56.4, color: '#3B82F6' },
+  //   { name: 'Shirts', value: 1890000, pieces: 1250, percentage: 43.6, color: '#10B981' }
+  // ];
+
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getData(
+          `api/salesAndReports/get-SalesData?range=${selectedPeriod}`
+        );
+        // console.log("XXXXXXXXXXXX:==>", res.data)
+        if (res?.success === true) {
+          setSalesData(res?.data || salesData);
+        }
+      } catch (err) {
+        console.error("Failed to fetch sales data:", err);
+      }
+    };
+    fetchData();
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    const fetchTopProductData = async () => {
+      try {
+        const res = await getData(
+          `api/salesAndReports/get-top-products?range=${dateRange}`
+        );
+        console.log("XXXXXXXXXXXX:==>", res?.data)
+        if (res?.success === true) {
+          setTopProducts(res?.data || salesData);
+        }
+      } catch (err) {
+        console.error("Failed to fetch sales data:", err);
+      }
+    };
+    fetchTopProductData();
+  }, [dateRange]);
+
 
   const renderChart = () => {
-    const maxValue = Math.max(...salesData.jeans.dailyData.map(d => d.sales), ...salesData.shirts.dailyData.map(d => d.sales));
-    
+    // Determine max value safely
+    const jeansSales = salesDatas?.jeans?.dailyData?.map(d => d?.sales) || [0];
+    const shirtsSales = salesDatas?.shirts?.dailyData?.map(d => d?.sales) || [0];
+    const maxValue = Math.max(...jeansSales, ...shirtsSales, 1);
+    console.log("maxValue==>", maxValue, jeansSales, shirtsSales)
+
+    // Combine dailyData for X-axis if dates differ
+    const allDates = Array.from(
+      new Set([
+        ...salesDatas?.jeans?.dailyData?.map(d => d?.date || ""),
+        ...salesDatas?.shirts?.dailyData?.map(d => d?.date || "")
+      ])
+    ).sort((a, b) => new Date(a) - new Date(b));
+
+    const getSalesForDate = (categoryData, date) => {
+      const item = categoryData.find(d => d?.date === date);
+      return item ? item?.sales : 0;
+    };
+
     return (
       <div className="relative h-64 bg-gray-50 rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
@@ -76,7 +134,7 @@ export default function SalesReports() {
             </div>
           </div>
         </div>
-        
+
         <svg width="100%" height="200" className="overflow-visible">
           {/* Grid lines */}
           {[0, 25, 50, 75, 100].map(y => (
@@ -90,81 +148,81 @@ export default function SalesReports() {
               strokeWidth="1"
             />
           ))}
-          
+
           {/* Jeans sales line */}
           <polyline
             fill="none"
             stroke="#3B82F6"
             strokeWidth="3"
-            points={salesData.jeans.dailyData.map((d, i) => {
-              const x = 50 + (i * 80);
-              const y = 180 - ((d.sales / maxValue) * 140);
-              return `${x},${y}`;
-            }).join(' ')}
+            points={allDates
+              .map((date, i) => {
+                const x = 50 + i * 80;
+                const y = 180 - ((getSalesForDate(salesDatas?.jeans?.dailyData || [], date) / maxValue) * 140);
+                return `${x},${y}`;
+              })
+              .join(" ")}
           />
-          
+
           {/* Shirts sales line */}
           <polyline
             fill="none"
             stroke="#10B981"
             strokeWidth="3"
-            points={salesData.shirts.dailyData.map((d, i) => {
-              const x = 50 + (i * 80);
-              const y = 180 - ((d.sales / maxValue) * 140);
-              return `${x},${y}`;
-            }).join(' ')}
+            points={allDates
+              .map((date, i) => {
+                const x = 50 + i * 80;
+                const y = 180 - ((getSalesForDate(salesDatas?.shirts?.dailyData || [], date) / maxValue) * 140);
+                return `${x},${y}`;
+              })
+              .join(" ")}
           />
-          
+
           {/* Data points */}
-          {salesData.jeans.dailyData.map((d, i) => {
-            const x = 50 + (i * 80);
-            const y = 180 - ((d.sales / maxValue) * 140);
+          {allDates.map((date, i) => {
+            const jeansY = 180 - ((getSalesForDate(salesDatas?.jeans?.dailyData || [], date) / maxValue) * 140);
+            const shirtsY = 180 - ((getSalesForDate(salesDatas?.shirts?.dailyData || [], date) / maxValue) * 140);
             return (
-              <circle
-                key={`jeans-${i}`}
-                cx={x}
-                cy={y}
-                r="4"
-                fill="#3B82F6"
-                className="hover:r-6 cursor-pointer transition-all"
-              >
-                <title>Jeans: ₹{d.sales.toLocaleString()} | {d.pieces} Pcs ({d.date})</title>
-              </circle>
+              <g key={i}>
+                {/* Jeans */}
+                <circle
+                  cx={50 + i * 80}
+                  cy={jeansY}
+                  r="4"
+                  fill="#3B82F6"
+                  className="hover:r-6 cursor-pointer transition-all"
+                >
+                  <title>Jeans: ₹{getSalesForDate(salesDatas?.jeans?.dailyData || [], date).toLocaleString()} | {salesDatas?.jeans?.dailyData?.find(d => d.date === date)?.pieces || 0} Pcs ({date})</title>
+                </circle>
+
+                {/* Shirts */}
+                <circle
+                  cx={50 + i * 80}
+                  cy={shirtsY}
+                  r="4"
+                  fill="#10B981"
+                  className="hover:r-6 cursor-pointer transition-all"
+                >
+                  <title>Shirts: ₹{getSalesForDate(salesDatas?.shirts?.dailyData || [], date).toLocaleString()} | {salesDatas?.shirts?.dailyData?.find(d => d.date === date)?.pieces || 0} Pcs ({date})</title>
+                </circle>
+              </g>
             );
           })}
-          
-          {salesData.shirts.dailyData.map((d, i) => {
-            const x = 50 + (i * 80);
-            const y = 180 - ((d.sales / maxValue) * 140);
-            return (
-              <circle
-                key={`shirts-${i}`}
-                cx={x}
-                cy={y}
-                r="4"
-                fill="#10B981"
-                className="hover:r-6 cursor-pointer transition-all"
-              >
-                <title>Shirts: ₹{d.sales.toLocaleString()} | {d.pieces} Pcs ({d.date})</title>
-              </circle>
-            );
-          })}
-          
+
           {/* X-axis labels */}
-          {salesData.jeans.dailyData.map((d, i) => (
+          {allDates.map((date, i) => (
             <text
               key={i}
-              x={50 + (i * 80)}
+              x={50 + i * 80}
               y="195"
               textAnchor="middle"
               className="text-xs fill-gray-500"
             >
-              {new Date(d.date).getDate()}
+              {new Date(date).getDate()}
             </text>
           ))}
-          
+
           {/* Y-axis labels */}
-          {[0, 25000, 50000, 75000].map((value, i) => (
+          {[0, Math.round(maxValue * 0.25), Math.round(maxValue * 0.5), Math.round(maxValue * 0.75), Math.round(maxValue)].map((value, i) => (
             <text
               key={i}
               x="35"
@@ -172,7 +230,7 @@ export default function SalesReports() {
               textAnchor="end"
               className="text-xs fill-gray-500"
             >
-              ₹{(value / 1000)}k
+              ₹{Math.round(value / 1000)}k
             </text>
           ))}
         </svg>
@@ -180,11 +238,106 @@ export default function SalesReports() {
     );
   };
 
+
+  // const renderPieChart = () => {
+  //   const centerX = 120;
+  //   const centerY = 120;
+  //   const radius = 80;
+  //   let currentAngle = 0;
+
+  //   return (
+  //     <div className="relative">
+  //       <svg width="240" height="240" className="mx-auto">
+  //         {categoryDistribution?.map((category, index) => {
+  //           const angle = (category.percentage / 100) * 2 * Math.PI;
+  //           const x1 = centerX + radius * Math.cos(currentAngle);
+  //           const y1 = centerY + radius * Math.sin(currentAngle);
+  //           const x2 = centerX + radius * Math.cos(currentAngle + angle);
+  //           const y2 = centerY + radius * Math.sin(currentAngle + angle);
+
+  //           const largeArcFlag = angle > Math.PI ? 1 : 0;
+
+  //           const pathData = [
+  //             `M ${centerX} ${centerY}`,
+  //             `L ${x1} ${y1}`,
+  //             `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+  //             'Z'
+  //           ].join(' ');
+
+  //           currentAngle += angle;
+
+  //           return (
+  //             <g key={index}>
+  //               <path
+  //                 d={pathData}
+  //                 fill={category?.color}
+  //                 className="hover:opacity-80 cursor-pointer transition-opacity"
+  //               >
+  //                 <title>{category?.name}: ₹{category?.value.toLocaleString()} | {category?.pieces} Pcs ({category?.percentage}%)</title>
+  //               </path>
+  //             </g>
+  //           );
+  //         })}
+
+  //         {/* Center circle */}
+  //         <circle cx={centerX} cy={centerY} r="35" fill="white" />
+  //         <text x={centerX} y={centerY - 8} textAnchor="middle" className="text-xs font-medium fill-gray-700">
+  //           Total Sales
+  //         </text>
+  //         <text x={centerX} y={centerY + 2} textAnchor="middle" className="text-xs fill-gray-500">
+  //           ₹{(salesDatas?.jeans?.total + salesDatas?.shirts?.total).toLocaleString()}
+  //         </text>
+  //         <text x={centerX} y={centerY + 12} textAnchor="middle" className="text-xs fill-gray-500">
+  //           {(salesDatas?.jeans?.pieces + salesDatas?.shirts?.pieces)} Pcs
+  //         </text>
+  //       </svg>
+
+  //       {/* Legend */}
+  //       <div className="flex justify-center space-x-6 mt-4">
+  //         {categoryDistribution.map((category, index) => (
+  //           <div key={index} className="flex items-center">
+  //             <div
+  //               className="w-4 h-4 rounded-full mr-2"
+  //               style={{ backgroundColor: category.color }}
+  //             ></div>
+  //             <span className="text-sm">
+  //               {category.name} ({category.percentage}%)
+  //             </span>
+  //           </div>
+  //         ))}
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+
   const renderPieChart = () => {
+    if (!salesDatas) return null;
+
     const centerX = 120;
     const centerY = 120;
     const radius = 80;
     let currentAngle = 0;
+
+    // Build category distribution from API response
+    const totalSales = (salesDatas?.jeans?.total || 0) + (salesDatas?.shirts?.total || 0);
+
+    const categoryDistribution = [
+      {
+        name: "Jeans",
+        value: salesDatas?.jeans?.total || 0,
+        pieces: salesDatas?.jeans?.pieces || 0,
+        percentage: totalSales ? ((salesDatas?.jeans?.total / totalSales) * 100).toFixed(1) : 0,
+        color: "#4F46E5", // indigo
+      },
+      {
+        name: "Shirts",
+        value: salesDatas?.shirts?.total || 0,
+        pieces: salesDatas?.shirts?.pieces || 0,
+        percentage: totalSales ? ((salesDatas?.shirts?.total / totalSales) * 100).toFixed(1) : 0,
+        color: "#22C55E", // amber
+      },
+    ];
 
     return (
       <div className="relative">
@@ -195,18 +348,18 @@ export default function SalesReports() {
             const y1 = centerY + radius * Math.sin(currentAngle);
             const x2 = centerX + radius * Math.cos(currentAngle + angle);
             const y2 = centerY + radius * Math.sin(currentAngle + angle);
-            
+
             const largeArcFlag = angle > Math.PI ? 1 : 0;
-            
+
             const pathData = [
               `M ${centerX} ${centerY}`,
               `L ${x1} ${y1}`,
               `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-              'Z'
-            ].join(' ');
-            
+              "Z",
+            ].join(" ");
+
             currentAngle += angle;
-            
+
             return (
               <g key={index}>
                 <path
@@ -214,30 +367,48 @@ export default function SalesReports() {
                   fill={category.color}
                   className="hover:opacity-80 cursor-pointer transition-opacity"
                 >
-                  <title>{category.name}: ₹{category.value.toLocaleString()} | {category.pieces} Pcs ({category.percentage}%)</title>
+                  <title>
+                    {category.name}: ₹{category.value.toLocaleString()} | {category.pieces} Pcs (
+                    {category.percentage}%)
+                  </title>
                 </path>
               </g>
             );
           })}
-          
+
           {/* Center circle */}
           <circle cx={centerX} cy={centerY} r="35" fill="white" />
-          <text x={centerX} y={centerY - 8} textAnchor="middle" className="text-xs font-medium fill-gray-700">
+          <text
+            x={centerX}
+            y={centerY - 8}
+            textAnchor="middle"
+            className="text-xs font-medium fill-gray-700"
+          >
             Total Sales
           </text>
-          <text x={centerX} y={centerY + 2} textAnchor="middle" className="text-xs fill-gray-500">
-            ₹{(salesData.jeans.total + salesData.shirts.total).toLocaleString()}
+          <text
+            x={centerX}
+            y={centerY + 2}
+            textAnchor="middle"
+            className="text-xs fill-gray-500"
+          >
+            ₹{totalSales.toLocaleString()}
           </text>
-          <text x={centerX} y={centerY + 12} textAnchor="middle" className="text-xs fill-gray-500">
-            {(salesData.jeans.pieces + salesData.shirts.pieces)} Pcs
+          <text
+            x={centerX}
+            y={centerY + 12}
+            textAnchor="middle"
+            className="text-xs fill-gray-500"
+          >
+            {(salesDatas?.jeans?.pieces || 0) + (salesDatas?.shirts?.pieces || 0)} Pcs
           </text>
         </svg>
-        
+
         {/* Legend */}
         <div className="flex justify-center space-x-6 mt-4">
           {categoryDistribution.map((category, index) => (
             <div key={index} className="flex items-center">
-              <div 
+              <div
                 className="w-4 h-4 rounded-full mr-2"
                 style={{ backgroundColor: category.color }}
               ></div>
@@ -251,6 +422,7 @@ export default function SalesReports() {
     );
   };
 
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -263,7 +435,7 @@ export default function SalesReports() {
             <div className="relative">
               <select
                 value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
+                onChange={(e) => { setDateRange(e.target.value), setSelectedPeriod(e.target.value) }}
                 className="px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
               >
                 <option value="today">Today</option>
@@ -289,33 +461,21 @@ export default function SalesReports() {
         <div className="flex space-x-1 mb-6">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'overview'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <i className="ri-dashboard-line mr-2"></i>
             Overview
           </button>
           <button
             onClick={() => setActiveTab('jeans')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'jeans'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'jeans' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <i className="ri-shirt-line mr-2"></i>
             Jeans Sales
           </button>
           <button
             onClick={() => setActiveTab('shirts')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'shirts'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'shirts' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
           >
             <i className="ri-t-shirt-line mr-2"></i>
             Shirts Sales
@@ -326,59 +486,8 @@ export default function SalesReports() {
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <i className="ri-shirt-line text-2xl text-blue-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Jeans Sales</p>
-                    <p className="text-lg font-bold text-gray-900">₹{(salesData.jeans.total / 100000).toFixed(1)}L | {salesData.jeans.pieces} Pcs</p>
-                    <p className="text-sm text-green-600">+{salesData.jeans.growth}% from last month</p>
-                  </div>
-                </div>
-              </Card>
 
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <i className="ri-t-shirt-line text-2xl text-green-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Shirts Sales</p>
-                    <p className="text-lg font-bold text-gray-900">₹{(salesData.shirts.total / 100000).toFixed(1)}L | {salesData.shirts.pieces} Pcs</p>
-                    <p className="text-sm text-green-600">+{salesData.shirts.growth}% from last month</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-purple-100 rounded-full">
-                    <i className="ri-shopping-cart-line text-2xl text-purple-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                    <p className="text-lg font-bold text-gray-900">{(salesData.jeans.orders + salesData.shirts.orders).toLocaleString()}</p>
-                    <p className="text-sm text-green-600">+10.2% from last month</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-yellow-100 rounded-full">
-                    <i className="ri-money-dollar-circle-line text-2xl text-yellow-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-lg font-bold text-gray-900">₹{((salesData.jeans.total + salesData.shirts.total) / 100000).toFixed(1)}L | {(salesData.jeans.pieces + salesData.shirts.pieces)} Pcs</p>
-                    <p className="text-sm text-green-600">+10.7% from last month</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <OverviewTab salesData={salesData} dateRange={dateRange} setDateRange={setDateRange} />
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -391,11 +500,10 @@ export default function SalesReports() {
                       <button
                         key={period}
                         onClick={() => setSelectedPeriod(period)}
-                        className={`px-3 py-1 text-xs rounded-full ${
-                          selectedPeriod === period
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
+                        className={`px-3 py-1 text-xs rounded-full ${selectedPeriod === period
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
                       >
                         {period}
                       </button>
@@ -436,11 +544,10 @@ export default function SalesReports() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8">
-                              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                                index === 0 ? 'bg-yellow-500' :
+                              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${index === 0 ? 'bg-yellow-500' :
                                 index === 1 ? 'bg-gray-400' :
-                                index === 2 ? 'bg-orange-500' : 'bg-blue-500'
-                              }`}>
+                                  index === 2 ? 'bg-orange-500' : 'bg-blue-500'
+                                }`}>
                                 {index + 1}
                               </div>
                             </div>
@@ -456,11 +563,10 @@ export default function SalesReports() {
                           <div className="text-sm text-gray-900">{product.units}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            product.growth >= 0 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.growth >= 0
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                            }`}>
                             {product.growth >= 0 ? '+' : ''}{product.growth}%
                           </span>
                         </td>
@@ -475,118 +581,12 @@ export default function SalesReports() {
 
         {/* Jeans Sales Tab */}
         {activeTab === 'jeans' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <i className="ri-money-dollar-circle-line text-2xl text-blue-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Revenue & Pieces</p>
-                    <p className="text-lg font-bold text-gray-900">₹{(salesData.jeans.total / 100000).toFixed(1)}L | {salesData.jeans.pieces} Pcs</p>
-                    <p className="text-sm text-green-600">+{salesData.jeans.growth}% growth</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <i className="ri-shopping-bag-line text-2xl text-green-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Orders</p>
-                    <p className="text-2xl font-bold text-gray-900">{salesData.jeans.orders}</p>
-                    <p className="text-sm text-blue-600">Jeans orders</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-purple-100 rounded-full">
-                    <i className="ri-calculator-line text-2xl text-purple-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
-                    <p className="text-2xl font-bold text-gray-900">₹{salesData.jeans.avgOrder}</p>
-                    <p className="text-sm text-gray-600">Per order</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Jeans Sales Performance</h3>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl text-blue-500 mb-2">📊</div>
-                  <p className="text-gray-600">Detailed jeans sales analytics</p>
-                  <p className="text-sm text-gray-500">Track performance by product variants</p>
-                  <p className="text-sm text-gray-500 mt-1">Total: ₹{(salesData.jeans.total / 100000).toFixed(1)}L | {salesData.jeans.pieces} Pcs</p>
-                </div>
-              </div>
-            </Card>
-          </div>
+          <JeansSalesTab setSalesData={setSalesData} salesData={salesDatas} />
         )}
 
         {/* Shirts Sales Tab */}
         {activeTab === 'shirts' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <i className="ri-money-dollar-circle-line text-2xl text-green-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Revenue & Pieces</p>
-                    <p className="text-lg font-bold text-gray-900">₹{(salesData.shirts.total / 100000).toFixed(1)}L | {salesData.shirts.pieces} Pcs</p>
-                    <p className="text-sm text-green-600">+{salesData.shirts.growth}% growth</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <i className="ri-shopping-bag-line text-2xl text-blue-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Orders</p>
-                    <p className="text-2xl font-bold text-gray-900">{salesData.shirts.orders}</p>
-                    <p className="text-sm text-green-600">Shirts orders</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-yellow-100 rounded-full">
-                    <i className="ri-calculator-line text-2xl text-yellow-600"></i>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
-                    <p className="text-2xl font-bold text-gray-900">₹{salesData.shirts.avgOrder}</p>
-                    <p className="text-sm text-gray-600">Per order</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Shirts Sales Performance</h3>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl text-green-500 mb-2">📈</div>
-                  <p className="text-gray-600">Detailed shirts sales analytics</p>
-                  <p className="text-sm text-gray-500">Track performance by shirt categories</p>
-                  <p className="text-sm text-gray-500 mt-1">Total: ₹{(salesData.shirts.total / 100000).toFixed(1)}L | {salesData.shirts.pieces} Pcs</p>
-                </div>
-              </div>
-            </Card>
-          </div>
+          <ShirtsSalesTab setSalesData={setSalesData} salesData={salesDatas} />
         )}
       </div>
     </AdminLayout>

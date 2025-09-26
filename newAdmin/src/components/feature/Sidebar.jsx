@@ -20,6 +20,7 @@ const menuItems = [
       { title: 'Coupons', path: '/admin/application/coupons' },
       { title: 'User Management', path: '/admin/application/users' },
       { title: 'Videos', path: '/admin/application/videos' },
+      // { title: 'Cart', path: '/admin/application/cart' },
       { title: 'Wishlist', path: '/admin/application/wishlist' },
       { title: 'Client Rewards', path: '/admin/application/rewards' },
       { title: 'Notifications', path: '/admin/application/notifications' },

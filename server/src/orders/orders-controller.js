@@ -189,6 +189,8 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             deliveryVendor = "",
             pointsEarned = 0,
             pointsEarnedValue = 0,
+            orderNote,
+            transportName,
         } = req.body;
 
         // ✅ Validate required fields
@@ -203,13 +205,62 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
         const statusHistory = [
             { status, date: orderDate, updatedBy: "System" },
         ];
+        console.log("FFFFFFFF:==>", req.body)
 
+        // /////////////ADD POINTS//////////////////////////////
+        let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
+        if (pointsRedeemed > 0) {
+            if (!userPoints || userPoints?.points < pointsRedeemed) {
+                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+            }
+            userPoints.points -= pointsRedeemed;
+            userPoints.history.push({ type: "redeemed", amount: pointsRedeemed, description: `Points redeemed for Order ${orderNumber}`, });
+            await userPoints.save();
+
+            let userPoints2 = await RewardPoints.findOne({ userId: customer?.userId });
+
+            let earnedPoints = Math.floor((total * 4) / 100);
+            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
+
+            if (!userPoints2) {
+                userPoints2 = new RewardPoints({
+                    userId: customer?.userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
+                });
+            } else {
+                userPoints2.points += earnedPoints;
+                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
+            }
+            await userPoints2.save();
+        } else {
+            // Earn 4% points
+            let earnedPoints = Math.floor((total * 4) / 100);
+            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId: customer?.userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
+            }
+        }
+
+        await userPoints.save();
+        // //////////////////////////////////////////////////////////////////////////////////////////////
+
+        let pointsEarneds = pointsEarned > 5000 ? 5000 : pointsEarned
+        let pointsEarnedValues = pointsEarneds / 2
 
         // ✅ Create new order
         const newOrder = await AdminOrder.create({
             orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
             status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
-            orderDate, trackingId, deliveryVendor, pointsEarned, pointsEarnedValue, statusHistory,
+            orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
+            transportName, orderNote
         });
 
         res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
@@ -359,7 +410,7 @@ exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, ne
 
         // ✅ Fetch orders
         const [orders, totalOrders] = await Promise.all([
-            AdminOrder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("customer.userId"),
+            AdminOrder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
             AdminOrder.countDocuments(query)
         ]);
 
@@ -525,6 +576,37 @@ exports.updateOrderPaymentByAdmin = catchAsyncErrors(async (req, res, next) => {
         });
     } catch (err) {
         return next(new ErrorHandler(err.message || "Failed to update payment.", 500));
+    }
+});
+
+exports.updateOrderNoteByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { orderId } = req.params;
+        const { orderNote } = req.body;
+        // console.log("DDDDDD:==>", orderNote)
+        // 🔹 Validate input
+        if (!orderNote || orderNote.trim().length < 3) {
+            return next(
+                new ErrorHandler("Order note must be at least 3 characters long.", 400)
+            );
+        }
+
+        // 🔹 Find the order
+        const order = await AdminOrder.findById(orderId);
+        if (!order) {
+            return next(new ErrorHandler("Order not found.", 404));
+        }
+
+        // 🔹 Update note
+        order.orderNote = orderNote.trim();
+        await order.save();
+
+        res.status(200).json({ success: true, message: "Order note updated successfully.", order, });
+
+    } catch (err) {
+        return next(
+            new ErrorHandler(err.message || "Failed to update order note.", 500)
+        );
     }
 });
 

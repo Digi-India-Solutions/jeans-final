@@ -42,7 +42,7 @@ exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
         // console.log("DDDDDDD", req.body)
-        const { fullName, mobile, email, otp, password, fcmToken } = req.body;
+        const { fullName, mobile, email, otp, password, fcmToken ,address } = req.body;
 
         if (!email || !otp || !password) {
             return res.status(200).json({ status: false, message: "All fields are required" });
@@ -67,7 +67,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 
         const hash = await bcrypt.hash(password, 10);
 
-        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, fcmToken });
+        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, fcmToken ,address });
         sendEmailByUserForRequastActiveAccount({ email, fullName, mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
         sendWhatsAppByUserForRequastActiveAccount({ name: fullName, phone: mobile, });

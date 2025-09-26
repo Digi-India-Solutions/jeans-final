@@ -32,7 +32,8 @@ const faqRoutes = require("./src/faq/faq-routes")
 const reviewRoutes = require("./src/Reviews/review-routes")
 const enquiryRoutes = require("./src/enquiry/enquiry-routes");
 const mainCategoryRoutes = require("./src/mainCategorys/mainCategorys.routes");
-const notificationRoutes = require("./src/Notification/notification-routes")
+const notificationRoutes = require("./src/Notification/notification-routes");
+const salesAndReportsRoutes = require("./src/SalesAndReports/salesAndReports-routes")
 
 
 app.use("/api/admin", superAdminRoutes);
@@ -54,6 +55,7 @@ app.use("/api/review", reviewRoutes)
 app.use("/api/enquiry", enquiryRoutes);
 app.use("/api/mainCategory", mainCategoryRoutes)
 app.use("/api/notification", notificationRoutes)
+app.use("/api/salesAndReports", salesAndReportsRoutes)
 
 const connectDatabase = require("./db/database");
 

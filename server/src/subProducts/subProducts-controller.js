@@ -38,7 +38,6 @@ exports.createSubProduct = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-
 exports.getAllSubProducts = catchAsyncErrors(async (req, res, next) => {
     try {
         const subProducts = await SubProduct.find().populate([{ path: "productId", populate: { path: "categoryId", } }, { path: "sizes" }]);
