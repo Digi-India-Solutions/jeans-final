@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../../../components/base/Button';
 import { getData, postData } from '../../../services/FetchNodeServices';
+import CreateUserModel from './CreateUserModels.jsx';
 
 function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
+    const [showUserModal, setShowUserModal] = useState(false)
 
 
     const removeItemFromOrder = (index) => {
@@ -182,6 +184,13 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         });
     };
 
+    const calculateMaxRedeemablePoints = (cartValue) => {
+        // Max 30% of cart value can be redeemed
+        const maxValue = cartValue * 0.3;
+        return Math.floor(maxValue / 0.5); // Convert to points (1 point = ₹0.50)
+    };
+
+
     const handleRedeemPointsChange = (points) => {
         const cartValue = getTotalValue();
         const maxRedeemable = calculateMaxRedeemablePoints(cartValue);
@@ -256,6 +265,8 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
             status: 'Pending',
             paymentType: balanceAmount === 0 ? 'Complete Payment' : 'Partial Payment',
             paidAmount,
+            orderNote: newOrderForm?.orderNote,
+            transportName: newOrderForm?.transportName,
             balanceAmount,
             payments: newOrderForm.payments.filter(p => parseFloat(p.amount) > 0),
             paymentMethod: newOrderForm.payments[0]?.method || 'Cash',
@@ -313,7 +324,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
 
     useEffect(() => {
         fetchCustomers();
-    }, [])
+    }, [showUserModal])
 
     const normalizeSizes = (sizes) => {
         if (!sizes) return [];
@@ -337,8 +348,24 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         return [];
     };
 
+    const fetchRewordByUserId = async (Id) => {
+        try {
+            const response = await getData(`api/reward/get-all-rewards-by-id/${Id}`)
 
-    console.log("FFFFFFFFF:==>", newOrderForm.items)
+            if (response?.success === true) {
+                // console.log("FFFFFFFFF:==>", response.data.points)
+                setNewOrderForm({ ...newOrderForm, customerAvailablePoints: response?.data?.points })
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    useEffect(() => {
+        fetchRewordByUserId(newOrderForm?.customerId)
+    }, [newOrderForm?.customerId])
+
+    console.log("FFFFFFFFF:==>", newOrderForm, getTotalValue())
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
@@ -386,7 +413,16 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 </select>
                                                 <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                             </div>
+                                            <Button
+                                                type="button"
+                                                onClick={() => setShowUserModal(true)}
+                                                className="bg-green-600 text-white hover:bg-green-700 px-3 py-2 flex items-center justify-center w-10 h-10 mt-2"
+                                                title="Add New User"
+                                            >
+                                                <i className="ri-user-add-line"></i>
+                                            </Button>
                                         </div>
+
                                         {/* <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Customer Type</label>
                                             <div className="relative">
@@ -425,9 +461,10 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                 </div>
 
                                 {/* Order Information */}
+
                                 <div>
                                     <h3 className="font-medium mb-3">Order Information</h3>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-3 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
                                             <div className="relative">
@@ -441,6 +478,28 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 </select>
                                                 <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Order Note</label>
+                                            <input
+                                                type="text"
+                                                value={newOrderForm.orderNote}
+                                                onChange={(e) => setNewOrderForm({ ...newOrderForm, orderNote: e.target.value })}
+                                                placeholder="Special instructions..."
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                                maxLength="200"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Transport Name</label>
+                                            <input
+                                                type="text"
+                                                value={newOrderForm.transportName}
+                                                onChange={(e) => setNewOrderForm({ ...newOrderForm, transportName: e.target.value })}
+                                                placeholder="Transport company..."
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                                maxLength="100"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -589,7 +648,9 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         )}
                                     </div>
                                 </div>
-
+                                <div>
+                                    <CreateUserModel fetchCustomers={fetchCustomers} showUserModal={showUserModal} setShowUserModal={setShowUserModal} />
+                                </div>
                                 {/* Enhanced Redeem Points Section */}
                                 {newOrderForm?.customerAvailablePoints > 0 && getTotalValue() > 0 && (
                                     <div>

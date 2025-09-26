@@ -29,7 +29,7 @@ export default function UsersManagement() {
     name: '', email: '', phone: '', status: true, password: '', street: '', city: '', state: '', zipCode: '', country: '', shopname: ''
   });
 
-  const [otpData, setOtpData] = useState({    email: '',    otp: '',    countdown: 0  });
+  const [otpData, setOtpData] = useState({ email: '', otp: '', countdown: 0 });
 
   // Fetch all users on mount
   useEffect(() => {
@@ -218,6 +218,13 @@ export default function UsersManagement() {
         mobile: formData.phone,
         otp: otpData.otp,
         password: formData.password,
+        address: {
+          street: formData.password,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country,
+        }
       };
 
       const response = await postData("api/user/verify-otp-for-user-signup", userData);

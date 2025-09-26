@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { createOrder, createOrderByAdmin, getAllOrdersByAdminWithPagination, getAllOrders, getOrderByID, changeStatus,changeStatusByAdmin, getAllOrdersByUser, verifyPayment, deleteOrderByID, updateOrderPaymentByAdmin, FilterOrdersByAdmin } = require("./orders-controller");
+const { createOrder, createOrderByAdmin, getAllOrdersByAdminWithPagination, updateOrderNoteByAdmin, getAllOrders, getOrderByID, changeStatus, changeStatusByAdmin, getAllOrdersByUser, verifyPayment, deleteOrderByID, updateOrderPaymentByAdmin, FilterOrdersByAdmin } = require("./orders-controller");
 
 
 router.post("/create-order", createOrder);
@@ -21,6 +21,8 @@ router.post("/change-status/:id", changeStatus)
 router.post("/change-status-by-admin/:orderId", changeStatusByAdmin)
 
 router.post("/update-order-payment-by-admin/:orderId", updateOrderPaymentByAdmin)
+
+router.post("/update-order-notes-by-admin/:orderId", updateOrderNoteByAdmin)
 
 // router.post("/update-order/:id", updateOrderByID);
 

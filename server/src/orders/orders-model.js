@@ -355,6 +355,8 @@ const adminOrderSchema = new Schema({
     payments: [{
         method: { type: String, required: true }, // e.g. Bank Transfer, UPI
         amount: { type: Number, required: true },
+        // date: { type: Date, required: true },
+        
     }],
 
     paymentMethod: { type: String }, // Cash / Bank Transfer / Online
@@ -364,6 +366,9 @@ const adminOrderSchema = new Schema({
     trackingId: { type: String, default: "" },
     deliveryVendor: { type: String, default: "" },
 
+    orderNote: { type: String, default: "" },
+    transportName: { type: String, default: "" },
+
     pointsEarned: { type: Number, default: 0 },
     pointsEarnedValue: { type: Number, default: 0 },
 
@@ -371,6 +376,7 @@ const adminOrderSchema = new Schema({
         status: { type: String, required: true },
         date: { type: String, required: true }, // format: YYYY-MM-DD
         updatedBy: { type: String, default: "System" },
+        notes: { type: String, default: '' }
     }],
 }, { timestamps: true });
 

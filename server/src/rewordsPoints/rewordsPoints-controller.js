@@ -1,4 +1,5 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
+const User = require("../users/users-model");
 const { RewardPoints, UserSignupPoint } = require("./rewordsPoints-model");
 const cron = require('node-cron');
 // const UserSignupPoint = require("./rewordsPoints-model")
@@ -53,6 +54,27 @@ exports.redeemRewardPoints = catchAsyncErrors(async (req, res, next) => {
     res.status(200).json({ success: true, message: "Points redeemed", data: userPoints });
 });
 
+exports.changePointsByAdmin = catchAsyncErrors(async (req, res, next) => {
+    const { points, reason, type } = req.body;
+    const rewordsPointsId = req.params.id;
+    console.log(rewordsPointsId, req.body)
+
+    let userPoints = await RewardPoints.findOne({ _id: rewordsPointsId });
+    console.log("userPoints=>", userPoints)
+
+    if (userPoints && type === 'earned') {
+        userPoints.points += Number(points);
+        userPoints.history.push({ type, amount: points, description: `Admin:=> ${reason}` });
+    } else {
+        userPoints.points -= Number(points);
+        userPoints.history.push({ type, amount: points, description: `Admin:=> ${reason}` });
+    }
+
+    await userPoints.save();
+
+    res.status(200).json({ success: true, message: "Points added", data: userPoints });
+});
+
 exports.getAllRewards = catchAsyncErrors(async (req, res, next) => {
     try {
         const rewards = await RewardPoints.find().populate("userId")
@@ -62,6 +84,28 @@ exports.getAllRewards = catchAsyncErrors(async (req, res, next) => {
         }
 
         res.status(200).json({ success: true, rewards });
+    } catch (error) {
+        console.error("Error fetching rewards:", error);
+        return res.status(500).json({ success: false, message: "Server error while fetching rewards" });
+    }
+});
+
+exports.getAllRewardsWithPagination = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
+
+        const rewards = await RewardPoints.find().populate("userId").sort({ createdAt: -1 }).skip(skip).limit(limit)
+
+        const totalRecords = await RewardPoints.countDocuments(rewards);
+
+        if (!rewards || rewards.length === 0) {
+            return res.status(404).json({ success: false, message: "No rewards found." });
+        }
+
+        res.status(200).json({ success: true, count: rewards.length, totalRecords, totalPages: Math.ceil(totalRecords / limit), currentPage: page, rewards, });
+
     } catch (error) {
         console.error("Error fetching rewards:", error);
         return res.status(500).json({ success: false, message: "Server error while fetching rewards" });
@@ -171,4 +215,53 @@ exports.updateFistTimeSignupReward = catchAsyncErrors(async (req, res, next) => 
 //         res.status(400).json({ success: false, message: err.message });
 //     }
 // };
+
+
+// controllers/rewardController.js
+
+exports.searchRewordByAdminWithPagination = catchAsyncErrors(async (req, res, next) => {
+    try {
+        // Query params
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search?.trim() || "";
+
+        // 🔍 Search filter
+        let filter = {};
+        if (search) {
+            // First find users matching search
+            const users = await User.find({
+                $or: [
+                    { name: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } },
+                    { phone: { $regex: search, $options: "i" } },
+                    { shopname: { $regex: search, $options: "i" } },
+                    { uniqueUserId: { $regex: search, $options: "i" } },
+                ],
+            }).select("_id");
+
+            const userIds = users.map((u) => u?._id);
+
+            filter = {
+                $or: [
+                    { userId: { $in: userIds } },
+                    { "history.description": { $regex: search, $options: "i" } }, // also allow searching in history descriptions
+                ],
+            };
+        }
+
+        // Fetch reward records
+        const rewards = await RewardPoints.find(filter).populate("userId").sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+        const totalRecords = await RewardPoints.countDocuments(filter);
+
+        res.status(200).json({ success: true, count: rewards.length, totalRecords, totalPages: Math.ceil(totalRecords / limit), currentPage: page, rewards, });
+
+    } catch (err) {
+        console.error("Error in searchRewordByAdminWithPagination:", err);
+        res.status(500).json({ success: false, message: "Failed to fetch rewards", error: err.message, });
+    }
+});
+
 

@@ -182,6 +182,7 @@ import UserRolesManagement from "../pages/admin/user-roles/page";
 
 // Challan Management
 import ChallanCreate from "../pages/admin/challan/create/page";
+import CartsManagement from "../pages/admin/application/cart/page"
 
 // Check login status
 const login = sessionStorage.getItem("login");
@@ -215,6 +216,7 @@ const adminRoutes: RouteObject[] = [
           { path: "products", element: <ProductsManagement /> },
           { path: "sub-products", element: <SubProductsManagement /> },
           { path: "users", element: <UsersManagement /> },
+          { path: "cart", element: <CartsManagement /> },
           { path: "wishlist", element: <WishlistManagement /> },
           { path: "sizes", element: <SizesManagement /> },
           { path: "coupons", element: <CouponsManagement /> },

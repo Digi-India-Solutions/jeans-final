@@ -2,7 +2,7 @@ import React from 'react'
 import Button from '../../../components/base/Button';
 
 function OrderTable({ filteredOrders, getStatusColor, getPaymentTypeColor, setSelectedOrder,
-    canUpdateStatus, setShowOrderModal, openStatusUpdate, openPaymentUpdate, updateOrderStatus ,totalPages, currentPage ,setCurrentPage}) {
+    canUpdateStatus, setShowOrderModal, openStatusUpdate, openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote }) {
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
@@ -19,6 +19,9 @@ function OrderTable({ filteredOrders, getStatusColor, getPaymentTypeColor, setSe
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Delivered Pcs
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Tracking
@@ -40,6 +43,16 @@ function OrderTable({ filteredOrders, getStatusColor, getPaymentTypeColor, setSe
                                     <div className="text-xs text-gray-400">
                                         {order?.items?.length} set{order?.items?.length > 1 ? 's' : ''}
                                     </div>
+                                    {order.orderNote && (
+                                        <div className="text-xs text-blue-600 mt-1" title={order.orderNote}>
+                                            Note: {order.orderNote.length > 20 ? order.orderNote.substring(0, 20) + '...' : order.orderNote}
+                                        </div>
+                                    )}
+                                    {order.transportName && (
+                                        <div className="text-xs text-purple-600">
+                                            Transport: {order.transportName}
+                                        </div>
+                                    )}
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -79,6 +92,12 @@ function OrderTable({ filteredOrders, getStatusColor, getPaymentTypeColor, setSe
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-center">
+                                    <div className="text-lg font-bold text-blue-600">{order?.deliveredPcs || 0}</div>
+                                    <div className="text-xs text-gray-500">pieces</div>
+                                </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
                                 {order?.trackingId ? (
                                     <div>
                                         <div className="text-sm font-medium text-gray-900">{order?.trackingId}</div>
@@ -99,6 +118,12 @@ function OrderTable({ filteredOrders, getStatusColor, getPaymentTypeColor, setSe
                                             className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
                                         >
                                             View
+                                        </Button>
+                                        <Button
+                                            onClick={() => openEditOrderNote(order)}
+                                            className="bg-purple-50 text-purple-600 hover:bg-purple-100 text-xs px-1 py-1"
+                                        >
+                                            Note
                                         </Button>
                                         {canUpdateStatus(order?.status) && (
                                             <Button

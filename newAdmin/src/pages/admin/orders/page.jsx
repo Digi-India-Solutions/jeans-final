@@ -8,60 +8,11 @@ import ProductSelectionModal from './ProductSelectionModal';
 import OrderTable from './OrderTable';
 import { toast } from 'react-toastify';
 import FilteredOrdersCom from './FilteredOrdersCom';
+import CreateNotesModel from './CreateNotesModel';
 
 export default function OrdersManagement() {
-  // const [categories] = useState([
-  //   { id: 1, name: 'Jeans' },
-  //   { id: 2, name: 'Shirts' },
-  //   { id: 3, name: 'Accessories' }
-  // ]);
-
-  // const [subProducts] = useState([
-  //   {
-  //     id: 1,
-  //     name: 'Premium Skinny Jeans Set',
-  //     parentProduct: 'Premium Blue Jeans',
-  //     singlePicPrice: 450,
-  //     pcsInSet: 5,
-  //     image: 'https://readdy.ai/api/search-image?query=premium%20skinny%20jeansset%20pieces%20modern%20fashion%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=prod1&orientation=squarish',
-  //     sizes: ['28', '30', '32', '34', '36'],
-  //     stock: 750, // in pcs
-  //     barcode: '1234567890123'
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Formal Cotton Shirt Set',
-  //     parentProduct: 'Cotton Casual Shirt',
-  //     singlePicPrice: 320,
-  //     pcsInSet: 3,
-  //     image: 'https://readdy.ai/api/search-image?query=formal%20cotton%20shirt%20set%20pieces%20business%20professional%20clean%20background%20productphotography%20folded%20shirts&width=300&height=300&seq=prod2&orientation=squarish',
-  //     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-  //     stock: 600, // in pcs
-  //     barcode: '2345678901234'
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Casual Denim Shirt Set',
-  //     parentProduct: 'Casual Denim Shirt',
-  //     singlePicPrice: 400,
-  //     pcsInSet: 4,
-  //     image: 'https://readdy.ai/api/search-image?query=casual%20denim%20shirt%20set%20pieces%20fashion%20clean%20background%20product%20photography&width=300&height=300&seq=prod3&orientation=squarish',
-  //     sizes: ['S', 'M', 'L', 'XL'],
-  //     stock: 320, // in pcs
-  //     barcode: '3456789012345'
-  //   },
-  //   {
-  //     id: 4,
-  //     name: 'Regular Fit Jeans Set',
-  //     parentProduct: 'Regular Fit Jeans',
-  //     singlePicPrice: 367,
-  //     pcsInSet: 6,
-  //     image: 'https://readdy.ai/api/search-image?query=regular%20fit%20jeans%20set%20pieces%20classic%20style%20clean%20background%20product%20photography&width=300&height=300&seq=prod4&orientation=squarish',
-  //     sizes: ['28', '30', '32', '34', '36'],
-  //     stock: 600, // in pcs
-  //     barcode: '4567890123456'
-  //   }
-  // ]);
+  const [editOrderNoteForm, setEditOrderNoteForm] = useState({ orderId: '', orderNote: '' })
+  const [showEditOrderNoteModal, setShowEditOrderNoteModal] = useState(false)
   const [subProducts, setSubProducts] = useState([])
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -476,9 +427,7 @@ export default function OrdersManagement() {
 
   // Points calculation functions - Updated with new rules
   const calculatePointsToEarn = (finalAmount) => {
-    // Points Earn Rule: 1 pt = ₹0.50, Earned = 40% of Final Amount / 0.50 (rounded down)
-    const earnableAmount = finalAmount * 0.4; // 40% of final amount
-    return Math.floor(earnableAmount / 0.5); // 1 point = ₹0.50, rounded down
+    return Math.floor((finalAmount * 4) / 100);
   };
 
   const calculatePointsValue = (points) => {
@@ -900,6 +849,16 @@ export default function OrdersManagement() {
     fetchProductsWithPagination()
   }, [productSearchQuery, currentPageSubProduct])
 
+  //////////////////NOTS////////////////
+  const openEditOrderNote = (order) => {
+    setEditOrderNoteForm({
+      orderId: order._id,
+      orderNote: order?.orderNote || ''
+    });
+    setShowEditOrderNoteModal(true);
+  };
+
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -948,8 +907,10 @@ export default function OrdersManagement() {
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             setTotalPages={setTotalPages}
+            openEditOrderNote={openEditOrderNote}
           />
         </Card>
+
 
         {filteredOrders.length === 0 && (
           <div className="text-center py-12">
@@ -957,6 +918,14 @@ export default function OrdersManagement() {
             <p className="text-gray-500">No orders found matching your criteria</p>
           </div>
         )}
+
+        {showEditOrderNoteModal && (
+          <CreateNotesModel
+            fetchAllOrder={fetchAllOrder}
+            setEditOrderNoteForm={setEditOrderNoteForm}
+            editOrderNoteForm={editOrderNoteForm}
+            setShowEditOrderNoteModal={setShowEditOrderNoteModal}
+          />)}
 
         {/* Create Order Modal */}
         {showCreateOrderModal && (
@@ -1237,19 +1206,25 @@ export default function OrdersManagement() {
                       <div>
                         <h3 className="font-medium mb-3">Customer Information</h3>
                         <div className="space-y-2 text-sm">
-                          <div><span className="text-gray-500">Name:</span> {selectedOrder.customer.name}</div>
-                          <div><span className="text-gray-500">Email:</span> {selectedOrder.customer.email}</div>
-                          <div><span className="text-gray-500">Phone:</span> {selectedOrder.customer.phone}</div>
-                          <div><span className="text-gray-500">Type:</span> {selectedOrder.customer.type}</div>
+                          <div><span className="text-gray-500">Name:</span> {selectedOrder?.customer?.name}</div>
+                          <div><span className="text-gray-500">Email:</span> {selectedOrder?.customer?.email}</div>
+                          <div><span className="text-gray-500">Phone:</span> {selectedOrder?.customer?.phone}</div>
+                          <div><span className="text-gray-500">Type:</span> {selectedOrder?.customer?.type}</div>
                         </div>
                       </div>
                       <div>
                         <h3 className="font-medium mb-3">Order Information</h3>
                         <div className="space-y-2 text-sm">
-                          <div><span className="text-gray-500">Date:</span> {selectedOrder.orderDate}</div>
-                          <div><span className="text-gray-500">Type:</span> {selectedOrder.orderType}</div>
-                          <div><span className="text-gray-500">Payment Method:</span> {selectedOrder.paymentMethod}</div>
-                          <div><span className="text-gray-500">Final Total:</span> ₹{selectedOrder.total.toLocaleString()}</div>
+                          <div><span className="text-gray-500">Date:</span> {selectedOrder?.orderDate}</div>
+                          <div><span className="text-gray-500">Type:</span> {selectedOrder?.orderType}</div>
+                          <div><span className="text-gray-500">Payment Method:</span> {selectedOrder?.paymentMethod}</div>
+                          <div><span className="text-gray-500">Final Total:</span> ₹{selectedOrder?.total.toLocaleString()}</div>
+                          {selectedOrder?.orderNote && (
+                            <div><span className="text-gray-500">Note:</span> {selectedOrder?.orderNote}</div>
+                          )}
+                          {selectedOrder?.transportName && (
+                            <div><span className="text-gray-500">Transport:</span> {selectedOrder?.transportName}</div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1424,7 +1399,7 @@ export default function OrdersManagement() {
 
                       {/* Quick Actions */}
                       <div className="mt-6 space-y-2">
-                        {canUpdateStatus(selectedOrder.status) && (
+                        {canUpdateStatus(selectedOrder?.status) && (
                           <Button
                             onClick={() => {
                               setShowOrderModal(false);

@@ -6,7 +6,7 @@ const ShortUniqueId = require("short-unique-id");
 
 exports.createWishList = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { productId, userId, status } = req.body;
+        const { productId, userId, status ,quantity} = req.body;
         console.log("BODY:=>", req.body)
         if (!productId || !userId) {
             return next(new ErrorHandler("Product ID and User ID are required", 400));
@@ -23,7 +23,7 @@ exports.createWishList = catchAsyncErrors(async (req, res, next) => {
             return res.status(200).json({ success: true, message: "Wishlist item already exists", data: existingWishList });
         }
 
-        const newWishList = await WishList.create({ productId, userId, status });
+        const newWishList = await WishList.create({ productId, userId, status,quantity });
 
         return res.status(201).json({ success: true, message: "Wishlist item added successfully", data: newWishList });
 
@@ -32,6 +32,42 @@ exports.createWishList = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler("Something went wrong while handling wishlist", 500));
     }
 });
+
+exports.updateWishList = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const ID = req.params.id;
+        const { productId, userId, status, quantity } = req.body;
+
+        console.log("BODY:=>", req.body, "ID:", ID);
+
+        // Validate inputs
+        if (!productId || !userId) {
+            return next(new ErrorHandler("Product ID and User ID are required", 400));
+        }
+
+        // Find existing wishlist item by ID
+        let existingWishList = await WishList.findById(ID);
+        if (!existingWishList) {
+            return next(new ErrorHandler("Wishlist item not found", 404));
+        }
+
+        // Update fields
+        existingWishList.productId = productId || existingWishList.productId;
+        existingWishList.userId = userId || existingWishList.userId;
+        existingWishList.status = status !== undefined ? status : existingWishList.status;
+        if (quantity !== undefined) existingWishList.quantity = quantity || existingWishList.quantity; // ✅ only if you add quantity field in schema
+        existingWishList.updatedAt = Date.now();
+
+        await existingWishList.save();
+
+        return res.status(200).json({ success: true, message: "Wishlist updated successfully", data: existingWishList, });
+
+    } catch (error) {
+        console.error("Update Wishlist Error:", error);
+        return next(new ErrorHandler("Something went wrong while updating wishlist", 500));
+    }
+});
+
 
 
 exports.getAllWishLists = catchAsyncErrors(async (req, res, next) => {
