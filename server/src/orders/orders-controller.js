@@ -162,114 +162,6 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-
-const generateOrderNumber = () => {
-    const now = new Date();
-    return `ORD-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-};
-
-exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
-    try {
-        const {
-            customer,
-            items,
-            subtotal,
-            pointsRedeemed = 0,
-            pointsRedemptionValue = 0,
-            total,
-            status = "Pending",
-            paymentType,
-            paidAmount = 0,
-            balanceAmount = 0,
-            payments = [],
-            paymentMethod,
-            orderType = "Offline",
-            orderDate = new Date().toISOString().split("T")[0], // YYYY-MM-DD
-            trackingId = "",
-            deliveryVendor = "",
-            pointsEarned = 0,
-            pointsEarnedValue = 0,
-            orderNote,
-            transportName,
-        } = req.body;
-
-        // ✅ Validate required fields
-        if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
-            return next(new ErrorHandler("Customer info and at least 1 item are required.", 400));
-        }
-
-        // ✅ Generate unique order number
-        const orderNumber = generateOrderNumber();
-
-        // ✅ Create status history
-        const statusHistory = [
-            { status, date: orderDate, updatedBy: "System" },
-        ];
-        console.log("FFFFFFFF:==>", req.body)
-
-        // /////////////ADD POINTS//////////////////////////////
-        let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
-        if (pointsRedeemed > 0) {
-            if (!userPoints || userPoints?.points < pointsRedeemed) {
-                return res.status(400).json({ success: false, message: "Insufficient reward points." });
-            }
-            userPoints.points -= pointsRedeemed;
-            userPoints.history.push({ type: "redeemed", amount: pointsRedeemed, description: `Points redeemed for Order ${orderNumber}`, });
-            await userPoints.save();
-
-            let userPoints2 = await RewardPoints.findOne({ userId: customer?.userId });
-
-            let earnedPoints = Math.floor((total * 4) / 100);
-            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
-
-            if (!userPoints2) {
-                userPoints2 = new RewardPoints({
-                    userId: customer?.userId,
-                    points: earnedPoints,
-                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
-                });
-            } else {
-                userPoints2.points += earnedPoints;
-                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
-            }
-            await userPoints2.save();
-        } else {
-            // Earn 4% points
-            let earnedPoints = Math.floor((total * 4) / 100);
-            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
-            if (!userPoints) {
-                userPoints = new RewardPoints({
-                    userId: customer?.userId,
-                    points: earnedPoints,
-                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
-                });
-            } else {
-                userPoints.points += earnedPoints;
-                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
-            }
-        }
-
-        await userPoints.save();
-        // //////////////////////////////////////////////////////////////////////////////////////////////
-
-        let pointsEarneds = pointsEarned > 5000 ? 5000 : pointsEarned
-        let pointsEarnedValues = pointsEarneds / 2
-
-        // ✅ Create new order
-        const newOrder = await AdminOrder.create({
-            orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
-            status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
-            orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
-            transportName, orderNote
-        });
-
-        res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
-    } catch (err) {
-        return next(new ErrorHandler(err.message || "Failed to create order.", 500));
-    }
-});
-
-
 exports.verifyPayment = async (req, res) => {
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, userId, rewardPointsUsed, orderUniqueId } = req.body;
@@ -384,6 +276,293 @@ exports.verifyPayment = async (req, res) => {
         return res.status(500).json({ error: "Server error while verifying payment" });
     }
 }
+
+const generateOrderNumber = async () => {
+
+    const totalOrders = await Order.countDocuments();
+
+
+    const dateObj = new Date();
+    const year = dateObj.getFullYear();
+
+    // Format serial number with leading zeros (4 digits)
+    const formattedSerial = String(totalOrders + 1).padStart(5, "0");
+
+    // Create order number like ORD-2025-0001
+    const orderNumber = `ORD-${year}-${formattedSerial}`;
+
+    return orderNumber
+
+};
+
+exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const {
+            customer,
+            items,
+            subtotal,
+            pointsRedeemed = 0,
+            pointsRedemptionValue = 0,
+            total,
+            status = "Pending",
+            paymentType,
+            paidAmount = 0,
+            balanceAmount = 0,
+            payments = [],
+            paymentMethod,
+            orderType = "Offline",
+            orderDate = new Date().toISOString().split("T")[0], // YYYY-MM-DD
+            trackingId = "",
+            deliveryVendor = "",
+            pointsEarned = 0,
+            pointsEarnedValue = 0,
+            orderNote,
+            transportName,
+        } = req.body;
+
+        // ✅ Validate required fields
+        if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
+            return next(new ErrorHandler("Customer info and at least 1 item are required.", 400));
+        }
+        // ✅ Generate unique order number
+        const orderNumber = generateOrderNumber();
+
+        // ✅ Create status history
+        const statusHistory = [
+            { status, date: orderDate, updatedBy: "System" },
+        ];
+        console.log("FFFFFFFF:==>", req.body)
+
+        // /////////////ADD POINTS//////////////////////////////
+        let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
+        if (pointsRedeemed > 0) {
+            if (!userPoints || userPoints?.points < pointsRedeemed) {
+                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+            }
+            userPoints.points -= pointsRedeemed;
+            userPoints.history.push({ type: "redeemed", amount: pointsRedeemed, description: `Points redeemed for Order ${orderNumber}`, });
+            await userPoints.save();
+
+            let userPoints2 = await RewardPoints.findOne({ userId: customer?.userId });
+
+            let earnedPoints = Math.floor((total * 4) / 100);
+            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
+
+            if (!userPoints2) {
+                userPoints2 = new RewardPoints({
+                    userId: customer?.userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
+                });
+            } else {
+                userPoints2.points += earnedPoints;
+                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
+            }
+            await userPoints2.save();
+        } else {
+            // Earn 4% points
+            let earnedPoints = Math.floor((total * 4) / 100);
+            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId: customer?.userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
+            }
+        }
+
+        await userPoints.save();
+        // //////////////////////////////////////////////////////////////////////////////////////////////
+
+        let pointsEarneds = pointsEarned > 5000 ? 5000 : pointsEarned
+        let pointsEarnedValues = pointsEarneds / 2
+
+        // ✅ Create new order
+        const newOrder = await AdminOrder.create({
+            orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
+            status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
+            orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
+            transportName, orderNote
+        });
+
+        res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
+    } catch (err) {
+        return next(new ErrorHandler(err.message || "Failed to create order.", 500));
+    }
+});
+
+exports.createOrderByclient = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const {
+            customer,
+            items,
+            subtotal,
+            pointsRedeemed = 0,
+            pointsRedemptionValue = 0,
+            total,
+            status = "Pending",
+            paymentType,
+            paidAmount = 0,
+            balanceAmount = 0,
+            payments = [],
+            paymentMethod,
+            orderType = "Offline",
+            orderDate = new Date().toISOString().split("T")[0], // YYYY-MM-DD
+            trackingId = "",
+            deliveryVendor = "",
+            pointsEarned = 0,
+            pointsEarnedValue = 0,
+            orderNote,
+            transportName,
+        } = req.body;
+
+        // ✅ Validate required fields
+        if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
+            return next(new ErrorHandler("Customer info and at least 1 item are required.", 400));
+        }
+        // ✅ Generate unique order number
+        const orderNumber = generateOrderNumber();
+
+        // ✅ Create status history
+        const statusHistory = [
+            { status, date: orderDate, updatedBy: "System" },
+        ];
+        console.log("FFFFFFFF:==>", req.body)
+
+        // /////////////ADD POINTS//////////////////////////////
+        let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
+        if (pointsRedeemed > 0) {
+            if (!userPoints || userPoints?.points < pointsRedeemed) {
+                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+            }
+            userPoints.points -= pointsRedeemed;
+            userPoints.history.push({ type: "redeemed", amount: pointsRedeemed, description: `Points redeemed for Order ${orderNumber}`, });
+            await userPoints.save();
+
+            let userPoints2 = await RewardPoints.findOne({ userId: customer?.userId });
+
+            let earnedPoints = Math.floor((total * 4) / 100);
+            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
+
+            if (!userPoints2) {
+                userPoints2 = new RewardPoints({
+                    userId: customer?.userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
+                });
+            } else {
+                userPoints2.points += earnedPoints;
+                userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
+            }
+            await userPoints2.save();
+        } else {
+            // Earn 4% points
+            let earnedPoints = Math.floor((total * 4) / 100);
+            earnedPoints = earnedPoints > 5000 ? 5000 : earnedPoints
+            if (!userPoints) {
+                userPoints = new RewardPoints({
+                    userId: customer?.userId,
+                    points: earnedPoints,
+                    history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, }],
+                });
+            } else {
+                userPoints.points += earnedPoints;
+                userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderNumber}`, });
+            }
+        }
+
+        await userPoints.save();
+        // //////////////////////////////////////////////////////////////////////////////////////////////
+
+        let pointsEarneds = pointsEarned > 5000 ? 5000 : pointsEarned
+        let pointsEarnedValues = pointsEarneds / 2
+
+        // ✅ Create new order
+        const newOrder = await AdminOrder.create({
+            orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
+            status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
+            orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
+            transportName, orderNote
+        });
+
+        res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
+    } catch (error) {
+        return next(new ErrorHandler(error.message || "Failed to create order.", 500));
+    }
+});
+
+exports.verifyPaymentByClient = async (req, res) => {
+    try {
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            order_id,
+        } = req.body;
+
+        const order = await AdminOrder.findById({ _id: order_id }).populate("customer.userId");
+
+        if (!order) return res.status(404).json({ error: "Order not found" });
+
+        if (order.paymentMethod === "RAZORPAY") {
+            return res.status(200).json({ message: "Payment already verified", orderId: order?._id });
+        }
+
+        const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+        const secret = process.env.RAZORPAY_KEY_SECRET;
+
+        if (!secret) return res.status(500).json({ error: "Missing Razorpay secret" });
+
+        const expectedSignature = crypto.createHmac("sha256", secret).update(body).digest("hex");
+
+        const isValid = expectedSignature === razorpay_signature;
+
+        if (!isValid) {
+            return res.status(400).json({ error: "Invalid Razorpay signature" });
+        }
+
+        // ✅ Update order with payment info
+        order.paymentMethod = "RAZORPAY";
+        order.paymentInfo = {
+            transactionId: razorpay_payment_id,
+            razorpayOrderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+        };
+        order.paymentType = order.balanceAmount === 0 ? "Complete Payment" : "Partial Payment";
+
+        await order.save();
+
+        // ✅ Notify
+        sendThankYouEmail({
+            email: order?.customer?.userId?.email,
+            name: order?.customer?.userId?.name,
+            phone: order?.customer?.userId?.phone
+        });
+
+        sendThankYouEmailAdmin({
+            email: order?.customer?.userId?.email,
+            name: order?.customer?.userId?.name,
+            phone: order?.customer?.userId?.phone
+        });
+
+        sendOrderThankByUserOnWhatsapp({
+            name: order?.customer?.userId?.name,
+            mobile: order?.customer?.userId?.phone,
+            email: order?.customer?.userId?.email
+        });
+
+        return res.status(200).json({ message: "Payment verified successfully", orderId: order._id });
+
+    } catch (error) {
+        console.error("Error verifying payment:", error);
+        return res.status(500).json({ error: "Server error during Razorpay verification" });
+    }
+};
 
 exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, next) => {
     try {
