@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import AdminLayout from '../../../../components/feature/AdminLayout';
-import Card from '../../../../components/base/Card';
-import Button from '../../../../components/base/Button';
-import { getData, postData } from '../../../../services/FetchNodeServices';
+import AdminLayout from '../../../components/feature/AdminLayout';
+import Card from '../../../components/base/Card';
+import Button from '../../../components/base/Button';
+import { getData, postData } from '../../../services/FetchNodeServices';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Swal from 'sweetalert2';
@@ -17,17 +17,11 @@ export default function UsersManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
-  const [filters, setFilters] = useState({
-    status: '',
-    verified: '',
-    search: ''
-  });
+  const [filters, setFilters] = useState({ status: '', verified: '', search: '' });
   const [filterDays, setFilterDays] = useState('');
   const [formErrors, setFormErrors] = useState({});
 
-  const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', status: true, password: '', street: '', city: '', state: '', zipCode: '', country: '', shopname: ''
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', status: true, password: '', street: '', city: '', state: '', zipCode: '', country: '', shopname: '' });
 
   const [otpData, setOtpData] = useState({ email: '', otp: '', countdown: 0 });
 
