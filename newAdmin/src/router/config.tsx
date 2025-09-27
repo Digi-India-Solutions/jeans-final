@@ -166,7 +166,7 @@ import CategoriesManagement from "../pages/admin/application/categories/page";
 import SubCategoriesManagement from "../pages/admin/application/subcategories/page";
 import ProductsManagement from "../pages/admin/application/products/page";
 import SubProductsManagement from "../pages/admin/application/sub-products/page";
-import UsersManagement from "../pages/admin/application/users/page";
+import UsersManagement from "../pages/admin/users/page";
 import WishlistManagement from "../pages/admin/application/wishlist/page";
 import SizesManagement from "../pages/admin/application/sizes/page";
 import CouponsManagement from "../pages/admin/application/coupons/page";
@@ -208,6 +208,7 @@ const adminRoutes: RouteObject[] = [
       { path: "marketing", element: <MarketingPage /> },
       { path: "enquiries", element: <EnquiriesPage /> },
       { path: "user-roles", element: <UserRolesManagement /> },
+       { path: "users", element: <UsersManagement /> },
       {
         path: "application",
         children: [
@@ -215,7 +216,6 @@ const adminRoutes: RouteObject[] = [
           { path: "subcategories", element: <SubCategoriesManagement /> },
           { path: "products", element: <ProductsManagement /> },
           { path: "sub-products", element: <SubProductsManagement /> },
-          { path: "users", element: <UsersManagement /> },
           { path: "cart", element: <CartsManagement /> },
           { path: "wishlist", element: <WishlistManagement /> },
           { path: "sizes", element: <SizesManagement /> },

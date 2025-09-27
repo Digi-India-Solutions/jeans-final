@@ -18,7 +18,7 @@ const menuItems = [
       { title: 'Sub-Products', path: '/admin/application/sub-products' },
       { title: 'Sizes', path: '/admin/application/sizes' },
       { title: 'Coupons', path: '/admin/application/coupons' },
-      { title: 'User Management', path: '/admin/application/users' },
+      // { title: 'User Management', path: '/admin/application/users' },
       { title: 'Videos', path: '/admin/application/videos' },
       // { title: 'Cart', path: '/admin/application/cart' },
       { title: 'Wishlist', path: '/admin/application/wishlist' },
@@ -43,7 +43,12 @@ const menuItems = [
     path: '/admin/returns'
   },
   {
-    title: 'User & Roles',
+    title: 'User Management',
+    icon: 'ri-user-settings-line',
+    path: '/admin/users'
+  },
+  {
+    title: 'Admin & Staff Roles',
     icon: 'ri-shield-user-line',
     path: '/admin/user-roles'
   },
@@ -82,38 +87,34 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full w-64 border-r transform transition-all duration-300 ease-in-out z-50 lg:translate-x-0 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      } ${
-        isDarkMode 
-          ? 'bg-gray-800 border-gray-700' 
+      <div className={`fixed left-0 top-0 h-full w-64 border-r transform transition-all duration-300 ease-in-out z-50 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        } ${isDarkMode
+          ? 'bg-gray-800 border-gray-700'
           : 'bg-white border-gray-200'
-      }`}>
+        }`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className={`flex items-center justify-between p-6 border-b ${
-            isDarkMode ? 'border-gray-700' : 'border-gray-200'
-          }`}>
+          <div className={`flex items-center justify-between p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <i className="ri-shirt-line text-white text-lg"></i>
               </div>
-              <span className={`text-xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`} style={{fontFamily: '"Pacifico", serif'}}>
+              <span className={`text-xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`} style={{ fontFamily: '"Pacifico", serif' }}>
                 Garments Admin
               </span>
             </div>
             <button
               onClick={onClose}
-              className={`lg:hidden p-1 rounded-md transition-colors ${
-                isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-              }`}
+              className={`lg:hidden p-1 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
+                }`}
             >
               <i className="ri-close-line"></i>
             </button>
@@ -128,11 +129,10 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
                     <div>
                       <button
                         onClick={() => toggleExpanded(index)}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-lg transition-colors ${
-                          isDarkMode 
-                            ? 'text-gray-300 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-lg transition-colors ${isDarkMode
+                          ? 'text-gray-300 hover:bg-gray-700'
+                          : 'text-gray-700 hover:bg-gray-100'
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
                           <i className={`${item.icon} text-lg`}></i>
@@ -146,13 +146,12 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
                             <li key={childIndex}>
                               <button
                                 onClick={() => handleNavigation(child.path)}
-                                className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
-                                  location.pathname === child.path
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : isDarkMode 
-                                      ? 'text-gray-400 hover:bg-gray-700 hover:text-gray-200' 
-                                      : 'text-gray-600 hover:bg-gray-100'
-                                }`}
+                                className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${location.pathname === child.path
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : isDarkMode
+                                    ? 'text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                  }`}
                               >
                                 {child.title}
                               </button>
@@ -164,13 +163,12 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
                   ) : (
                     <button
                       onClick={() => handleNavigation(item.path)}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg transition-colors ${
-                        location.pathname === item.path
-                          ? 'bg-blue-100 text-blue-700'
-                          : isDarkMode 
-                            ? 'text-gray-300 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                      className={`w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg transition-colors ${location.pathname === item.path
+                        ? 'bg-blue-100 text-blue-700'
+                        : isDarkMode
+                          ? 'text-gray-300 hover:bg-gray-700'
+                          : 'text-gray-700 hover:bg-gray-100'
+                        }`}
                     >
                       <i className={`${item.icon} text-lg`}></i>
                       <span className="font-medium">{item.title}</span>
