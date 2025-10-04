@@ -148,7 +148,7 @@
 
 // export default routes;
 
-
+import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import HomePage from "../pages/home/page";
 import NotFound from "../pages/NotFound";
@@ -184,6 +184,9 @@ import UserRolesManagement from "../pages/admin/user-roles/page";
 import ChallanCreate from "../pages/admin/challan/create/page";
 import CartsManagement from "../pages/admin/application/cart/page"
 
+
+const CatalogueUpload = lazy(() => import('../pages/admin/catalogue/page'));
+
 // Check login status
 const login = sessionStorage.getItem("login");
 
@@ -208,7 +211,8 @@ const adminRoutes: RouteObject[] = [
       { path: "marketing", element: <MarketingPage /> },
       { path: "enquiries", element: <EnquiriesPage /> },
       { path: "user-roles", element: <UserRolesManagement /> },
-       { path: "users", element: <UsersManagement /> },
+      { path: "users", element: <UsersManagement /> },
+      { path: '/admin/catalogue', element: <CatalogueUpload /> },
       {
         path: "application",
         children: [

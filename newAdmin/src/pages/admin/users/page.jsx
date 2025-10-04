@@ -382,7 +382,7 @@ export default function UsersManagement() {
 
   const fetchOrdersAndSpent = async () => {
     try {
-      const response = await getData('api/order/get-all-orders');
+      const response = await getData('api/order/get-all-Admin-orders');
       console.log('RESPONS:=>', response)
       if (response?.success === true) {
         setOrders(response?.orders);
@@ -399,13 +399,13 @@ export default function UsersManagement() {
 
   const OrdersAndSpent = (userId) => {
     // Filter orders by user
-    const userOrders = orders.filter(order => order?.userId?._id === userId);
-
+    const userOrders = orders.filter(order => order?.customer?.userId?._id === userId);
+    // console.log('RESPONS:=>', userOrders)
     // Count orders
     const orderCount = userOrders.length;
 
     // Calculate total spent (assuming order.totalPrice exists)
-    const totalSpent = userOrders.reduce((sum, order) => sum + (order?.recivedAmount || 0), 0);
+    const totalSpent = userOrders.reduce((sum, order) => sum + (order?.total || 0), 0);
 
     // Return JSX for display
     return (

@@ -10,7 +10,8 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const { uploadImage } = require("../../middleware/Uploads");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
-const Order = require("../orders/orders-model");
+const { Order } = require("../orders/orders-model");
+const { AdminOrder } = require("../orders/orders-model");
 const dayjs = require("dayjs");
 const { sendOrderNotificationByAdminOnWhatsapp, sendWhatsAppByUserForRequastActiveAccount, sendWhatsAppByUserForRequastDeactiveAccount, sendWhatsAppByAdminForRequastActiveAccount } = require("../../utils/whatsAppCampaigns");
 
@@ -42,7 +43,7 @@ exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
         // console.log("DDDDDDD", req.body)
-        const { fullName, mobile, email, otp, password, fcmToken ,address } = req.body;
+        const { fullName, mobile, email, otp, password, fcmToken, address } = req.body;
 
         if (!email || !otp || !password) {
             return res.status(200).json({ status: false, message: "All fields are required" });
@@ -67,7 +68,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 
         const hash = await bcrypt.hash(password, 10);
 
-        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, fcmToken ,address });
+        const newUser = await User.create({ name: fullName, email, phone: mobile, password: hash, uniqueUserId, fcmToken, address });
         sendEmailByUserForRequastActiveAccount({ email, fullName, mobile });
         sendEmailByAdminForRequastActiveAccount({ email, fullName, mobile });
         sendWhatsAppByUserForRequastActiveAccount({ name: fullName, phone: mobile, });
@@ -468,12 +469,12 @@ exports.getUsersWithoutOrders = catchAsyncErrors(async (req, res, next) => {
 
         const sinceDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-        const recentOrders = await Order.find({ createdAt: { $gte: sinceDate } }).select("userId");
+        const recentOrders = await AdminOrder.find({ createdAt: { $gte: sinceDate } }).select("customer.userId");
 
-        const orderedUserIds = new Set(recentOrders.map(order => order?.userId));
+        const orderedUserIds = new Set(recentOrders.map(order => order?.customer?.userId));
 
         const usersWithoutOrders = await User.find({ _id: { $nin: Array.from(orderedUserIds) } });
-
+        console.log("XXXXXX:==>", usersWithoutOrders);
         const formattedUsers = usersWithoutOrders.map(user => ({ _id: user._id, name: user.name, email: user.email, phone: user.phone, isActive: user.isActive, createdAt: user?.createdAt, address: user?.address, fcmToken: user?.fcmToken, shopname: user?.shopname, photo: user?.photo, uniqueUserId: user?.uniqueUserId, isUser: user?.isUser }));
         const RevercFormattedUsers = formattedUsers.reverse();
         return res.status(200).json({ status: true, data: RevercFormattedUsers, orderData: orderedUserIds });

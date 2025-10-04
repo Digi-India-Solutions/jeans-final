@@ -61,6 +61,11 @@ const menuItems = [
     title: 'Enquiries',
     icon: 'ri-question-answer-line',
     path: '/admin/enquiries'
+  },
+  {
+    title: 'Catalogue Upload',
+    icon: 'ri-file-pdf-line',
+    path: '/admin/catalogue'
   }
 ];
 

@@ -32,7 +32,7 @@ function AdvancedFilters({ setFilters, filters }) {
                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <div className="relative">
                                 <select
-                                    value={filters.status}
+                                    value={filters?.status}
                                     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                                     className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
                                 >
