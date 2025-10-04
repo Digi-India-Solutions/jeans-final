@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
-import UsersTable from './usersTable';
+import UsersTable from './UsersTable';
 import RolesTable from './RolesTable';
 import ShowUserModal from './ShowUserModal';
 import ShowRoleModal from './ShowRoleModal';
