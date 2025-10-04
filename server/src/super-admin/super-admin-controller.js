@@ -98,6 +98,104 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+/////////////////////////////////////// crud operation by admin ////////////////////////////////////////////////////
+
+exports.createAdminByAdmin = catchAsyncErrors(async (req, res, next) => {
+    console.log('req.body::', req.body)
+    try {
+        const { email, password } = req.body.userForm;
+        // console.log('req.body::', req.body.userForm)
+        const hash = await bcrypt.hash(password, 10);
+
+        const currentSuperAdmin = await SuperAdmin.findOne({ email });
+
+        if (currentSuperAdmin) {
+            return res.status(200).json({ status: false, message: "Super Admin email already exist." });
+        }
+        const newSuperAdmin = await SuperAdmin.create({ ...req.body.userForm, password: hash });
+
+        res.status(200).json({ status: true, message: "Super Admin created successfully", data: newSuperAdmin });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+// Login Admin User
+exports.adminLogin = catchAsyncErrors(async (req, res, next) => {
+    const { email, password } = req.body;
+    const adminUser = await SuperAdmin.findOne({ email });
+    if (!adminUser) return next(new ErrorHandler('Admin user not found', 404));
+    const match = await adminUser.comparePassword(password);
+    if (!match) return next(new ErrorHandler('Incorrect password', 400));
+    const token = adminUser.getJwtToken();
+    // update lastLogin
+    adminUser.lastLogin = new Date();
+    await adminUser.save();
+    res.status(200).json({ status: true, message: 'Login successful', token, adminUser });
+});
+
+// Get all Admin Users
+exports.getAdminUsersByAdmin = catchAsyncErrors(async (req, res) => {
+    const users = await SuperAdmin.find();
+    res.status(200).json({ status: true, message: 'Admin users fetched successfully', data: users });
+    // sendResponse(res, 200, 'Admin users fetched successfully', users);
+});
+
+exports.getAdminUsersByAdminwithPagination = catchAsyncErrors(async (req, res, next) => {
+    try {
+        // Extract and parse query params safely
+        let { page = 1, limit = 10 } = req.query;
+
+        const total = await SuperAdmin.countDocuments();
+
+        const skip = (page - 1) * limit;
+
+        const users = await SuperAdmin.find().skip(skip).limit(limit).sort({ createdAt: -1 });
+
+        const totalPages = Math.ceil(total / limit);
+
+        return res.status(200).json({
+            status: true,
+            message: 'Admin users fetched successfully',
+            data: users,
+            pagination: { total, totalPages, currentPage: page, pageSize: limit }
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+// Update Admin User
+exports.updateAdminByAdmin = catchAsyncErrors(async (req, res, next) => {
+    const id = req.params.id;
+    let updateData = { ...req?.body?.userForm };
+    // hash password if provided
+    if (updateData.password) {
+        updateData.password = await bcrypt.hash(updateData.password, 10);
+    } else {
+        updateData.password = updateData.oldPassword
+    }
+
+    console.log('updateData::===>', updateData)
+
+    const user = await SuperAdmin.findByIdAndUpdate(id, updateData, {
+        new: true, runValidators: true
+    });
+
+    if (!user) return next(new ErrorHandler('Admin user not found', 404));
+
+    sendResponse(res, 200, 'Admin user updated successfully', user);
+});
+
+// Delete Admin User
+exports.deleteAdminUserByAdmin = catchAsyncErrors(async (req, res, next) => {
+    const id = req.params.id;
+    const user = await SuperAdmin.findByIdAndDelete(id);
+    if (!user) return next(new ErrorHandler('Admin user not found', 404));
+    sendResponse(res, 200, 'Admin user deleted successfully', user);
+});
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // exports.updateSuperAdminByID = catchAsyncErrors(async (req, res, next) => {

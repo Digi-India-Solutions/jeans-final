@@ -15,6 +15,7 @@ app.use("/Public", express.static(path.join(__dirname + "/Public")));
 // app.set(express.static("./Public"));
 
 const superAdminRoutes = require("./src/super-admin/super-admin-routes");
+const adminRoleRoutes = require("./src/adminRole/adminRole-routes");
 const bannerRoutes = require("./src/banners/banners-routes");
 const productRoutes = require("./src/products/products-routes");
 const subProductRoutes = require("./src/subProducts/subProducts-routes");
@@ -33,10 +34,13 @@ const reviewRoutes = require("./src/Reviews/review-routes")
 const enquiryRoutes = require("./src/enquiry/enquiry-routes");
 const mainCategoryRoutes = require("./src/mainCategorys/mainCategorys.routes");
 const notificationRoutes = require("./src/Notification/notification-routes");
-const salesAndReportsRoutes = require("./src/SalesAndReports/salesAndReports-routes")
+const salesAndReportsRoutes = require("./src/SalesAndReports/salesAndReports-routes");
+const challanRoutes = require("./src/challan/challan-routes");
+const returnRoutes = require("./src/return/return-routes");
 
 
 app.use("/api/admin", superAdminRoutes);
+app.use("/api/adminRole", adminRoleRoutes);
 app.use("/api/banner", bannerRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/subProduct", subProductRoutes);
@@ -56,6 +60,8 @@ app.use("/api/enquiry", enquiryRoutes);
 app.use("/api/mainCategory", mainCategoryRoutes)
 app.use("/api/notification", notificationRoutes)
 app.use("/api/salesAndReports", salesAndReportsRoutes)
+app.use("/api/challan", challanRoutes)
+app.use("/api/return", returnRoutes)
 
 const connectDatabase = require("./db/database");
 

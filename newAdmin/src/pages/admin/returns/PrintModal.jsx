@@ -1,7 +1,8 @@
 import React from 'react'
 import Button from '../../../components/base/Button';
 
-function PrintModal({ setShowPrintModal, setPrintingItem, printingItem,printDocument }) {
+function PrintModal({ setShowPrintModal, setPrintingItem, printingItem, printDocument }) {
+    console.log("item?.size::=>", printingItem?.items?.availableSizes)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -36,7 +37,7 @@ function PrintModal({ setShowPrintModal, setPrintingItem, printingItem,printDocu
                                 <p className="text-sm">
                                     <strong>Name:</strong> {printingItem.customer}<br />
                                     <strong>Order Number:</strong> {printingItem.orderNumber}<br />
-                                    <strong>Date:</strong> {printingItem.date}
+                                    <strong>Date:</strong> {(printingItem.date).split('T')[0]}
                                 </p>
                             </div>
                             <div>
@@ -71,11 +72,11 @@ function PrintModal({ setShowPrintModal, setPrintingItem, printingItem,printDocu
                                     {printingItem.items.map((item, index) => (
                                         <tr key={index}>
                                             <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.size}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item?.availableSizes.map((size) => size).join(', ')}</td>
                                             <td className="border border-gray-300 px-4 py-2 text-right">
                                                 {printingItem.type === 'challan' ? item.dispatchedQty : item.returnQty}
                                             </td>
-                                            <td className="border border-gray-300 px-4 py-2 text-right">₹{item.price}</td>
+                                            <td className="border border-gray-300 px-4 py-2 text-right">₹{printingItem.type === 'challan' ? item?.price || 0 : item?.refundAmount || 0}</td>
                                             <td className="border border-gray-300 px-4 py-2 text-right">
                                                 ₹{printingItem.type === 'challan'
                                                     ? (item.dispatchedQty * item.price).toLocaleString()
@@ -102,7 +103,7 @@ function PrintModal({ setShowPrintModal, setPrintingItem, printingItem,printDocu
                         {printingItem.type === 'return' && printingItem.items[0]?.reason && (
                             <div className="mb-6">
                                 <h3 className="font-semibold mb-2">Return Reason:</h3>
-                                <p className="text-sm">{printingItem.items[0].reason}</p>
+                                <p className="text-sm">{printingItem.items.map((item) => <div>{item?.reason}</div>)}</p>
                             </div>
                         )}
 

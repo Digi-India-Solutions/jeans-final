@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
@@ -11,6 +11,7 @@ import CreateReturnModal from './CreateReturnModal';
 import PrintModal from './PrintModal';
 import EditModal from './EditModal';
 import AdvancedFilters from './AdvancedFilters';
+import { getData, postData } from '../../../services/FetchNodeServices';
 
 export default function ReturnsAndChallan() {
   // Mock sub-products stock for returns processing
@@ -22,37 +23,37 @@ export default function ReturnsAndChallan() {
     { id: 5, name: 'Formal Dress Shirt Set', stock: 480 } // in pcs
   ]);
 
-  const [customers] = useState([
+  const [customerss] = useState([
     { id: 1, name: 'Rajesh Kumar', email: 'rajesh@example.com', type: 'B2B' },
     { id: 2, name: 'Fashion Store Pvt Ltd', email: 'orders@fashionstore.com', type: 'B2B' },
     { id: 3, name: 'Priya Sharma', email: 'priya.sharma@email.com', type: 'Retail' },
     { id: 4, name: 'Amit Patel', email: 'amit.patel@email.com', type: 'Retail' }
   ]);
 
-  const [customerOrders] = useState({
-    1: [
-      {
-        id: 'ORD-2024-001',
-        items: [
-          { id: 1, name: 'Premium Skinny Jeans Set', size: '32', orderedQty: 5, dispatchedQty: 5, pendingQty: 0, price: 450, pcsInSet: 5 },
-          { id: 2, name: 'Formal Cotton Shirt Set', size: 'L', orderedQty: 3, dispatchedQty: 3, pendingQty: 0, price: 320, pcsInSet: 3 }
-        ],
-        total: 18570,
-        date: '2024-01-15'
-      }
-    ],
-    2: [
-      {
-        id: 'ORD-2024-002',
-        items: [
-          { id: 4, name: 'Regular Fit Jeans Set', size: '30', orderedQty: 50, dispatchedQty: 30, pendingQty: 20, price: 367, pcsInSet: 6 },
-          { id: 5, name: 'Formal Dress Shirt Set', size: 'L', orderedQty: 25, dispatchedQty: 20, pendingQty: 5, price: 383, pcsInSet: 6 }
-        ],
-        total: 154725,
-        date: '2024-01-12'
-      }
-    ]
-  });
+  // const [customerOrderss] = useState({
+  //   1: [
+  //     {
+  //       id: 'ORD-2024-001',
+  //       items: [
+  //         { id: 1, name: 'Premium Skinny Jeans Set', size: '32', orderedQty: 5, dispatchedQty: 5, pendingQty: 0, price: 450, pcsInSet: 5 },
+  //         { id: 2, name: 'Formal Cotton Shirt Set', size: 'L', orderedQty: 3, dispatchedQty: 3, pendingQty: 0, price: 320, pcsInSet: 3 }
+  //       ],
+  //       total: 18570,
+  //       date: '2024-01-15'
+  //     }
+  //   ],
+  //   2: [
+  //     {
+  //       id: 'ORD-2024-002',
+  //       items: [
+  //         { id: 4, name: 'Regular Fit Jeans Set', size: '30', orderedQty: 50, dispatchedQty: 30, pendingQty: 20, price: 367, pcsInSet: 6 },
+  //         { id: 5, name: 'Formal Dress Shirt Set', size: 'L', orderedQty: 25, dispatchedQty: 20, pendingQty: 5, price: 383, pcsInSet: 6 }
+  //       ],
+  //       total: 154725,
+  //       date: '2024-01-12'
+  //     }
+  //   ]
+  // });
 
   const [challans, setChallans] = useState([
     {
@@ -83,32 +84,7 @@ export default function ReturnsAndChallan() {
     }
   ]);
 
-  const [returns, setReturns] = useState([
-    {
-      id: 1,
-      returnNumber: 'RET-2024-001',
-      customer: 'Priya Sharma',
-      orderNumber: 'ORD-2024-003',
-      items: [
-        { name: 'Casual T-Shirt', size: 'S', returnQty: 1, reason: 'Size issue', refundAmount: 899, pcsInSet: 1 }
-      ],
-      totalRefund: 899,
-      date: '2024-01-14',
-      status: 'Approved'
-    },
-    {
-      id: 2,
-      returnNumber: 'RET-2024-002',
-      customer: 'Amit Patel',
-      orderNumber: 'ORD-2024-004',
-      items: [
-        { name: 'Formal Dress Shirt Set', size: 'XL', returnQty: 2, reason: 'Quality issue', refundAmount: 4596, pcsInSet: 6 }
-      ],
-      totalRefund: 4596,
-      date: '2024-01-15',
-      status: 'Pending'
-    }
-  ]);
+  const [returns, setReturns] = useState([]);
 
   const incrementStock = (productName, returnedPcs) => {
     setSubProductsStock(prevStock =>
@@ -126,13 +102,22 @@ export default function ReturnsAndChallan() {
   const [activeTab, setActiveTab] = useState('challans');
   const [activeReportTab, setActiveReportTab] = useState('deliveries');
   const [showReports, setShowReports] = useState(false);
-
+  const [customers, setCustomers] = useState([customerss])
+  const [customerOrders, setCustomerOrders] = useState([])
   const [showCreateChallanModal, setShowCreateChallanModal] = useState(false);
   const [showCreateReturnModal, setShowCreateReturnModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [printingItem, setPrintingItem] = useState(null);
+
+  const [challanCurrantPage, setChallanCurrantPage] = useState(1)
+  const [challanPage, setChallanPage] = useState(1)
+  const [totalChallans, setTotalChallans] = useState(0)
+
+  const [returnCurrantPage, setReturnCurrantPage] = useState(1)
+  const [returnPage, setReturnPage] = useState(1)
+  const [totalReturns, setTotalReturns] = useState(0)
 
   // Filter states
   const [filters, setFilters] = useState({ client: '', status: '', dateFrom: '', dateTo: '', search: '' });
@@ -153,30 +138,30 @@ export default function ReturnsAndChallan() {
   const getFilteredChallans = () => {
     let filtered = challans;
 
-    if (filters.client) {
-      filtered = filtered.filter(challan =>
-        challan.customer.toLowerCase().includes(filters.client.toLowerCase())
-      );
-    }
+    // if (filters.client) {
+    //   filtered = filtered.filter(challan =>
+    //     challan.customer.toLowerCase().includes(filters.client.toLowerCase())
+    //   );
+    // }
 
-    if (filters.status) {
-      filtered = filtered.filter(challan => challan.status === filters.status);
-    }
+    // if (filters.status) {
+    //   filtered = filtered.filter(challan => challan.status === filters.status);
+    // }
 
-    if (filters.dateFrom) {
-      filtered = filtered.filter(challan => challan.date >= filters.dateFrom);
-    }
+    // if (filters.dateFrom) {
+    //   filtered = filtered.filter(challan => challan.date >= filters.dateFrom);
+    // }
 
-    if (filters.dateTo) {
-      filtered = filtered.filter(challan => challan.date <= filters.dateTo);
-    }
+    // if (filters.dateTo) {
+    //   filtered = filtered.filter(challan => challan.date <= filters.dateTo);
+    // }
 
-    if (filters.search) {
-      filtered = filtered.filter(challan =>
-        challan.challanNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
-        challan.orderNumber.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
+    // if (filters.search) {
+    //   filtered = filtered.filter(challan =>
+    //     challan.challanNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
+    //     challan.orderNumber.toLowerCase().includes(filters.search.toLowerCase())
+    //   );
+    // }
 
     return filtered;
   };
@@ -184,30 +169,30 @@ export default function ReturnsAndChallan() {
   const getFilteredReturns = () => {
     let filtered = returns;
 
-    if (filters.client) {
-      filtered = filtered.filter(returnItem =>
-        returnItem.customer.toLowerCase().includes(filters.client.toLowerCase())
-      );
-    }
+    // if (filters.client) {
+    //   filtered = filtered.filter(returnItem =>
+    //     returnItem.customer.toLowerCase().includes(filters.client.toLowerCase())
+    //   );
+    // }
 
-    if (filters.status) {
-      filtered = filtered.filter(returnItem => returnItem.status === filters.status);
-    }
+    // if (filters.status) {
+    //   filtered = filtered.filter(returnItem => returnItem.status === filters.status);
+    // }
 
-    if (filters.dateFrom) {
-      filtered = filtered.filter(returnItem => returnItem.date >= filters.dateFrom);
-    }
+    // if (filters.dateFrom) {
+    //   filtered = filtered.filter(returnItem => returnItem.date >= filters.dateFrom);
+    // }
 
-    if (filters.dateTo) {
-      filtered = filtered.filter(returnItem => returnItem.date <= filters.dateTo);
-    }
+    // if (filters.dateTo) {
+    //   filtered = filtered.filter(returnItem => returnItem.date <= filters.dateTo);
+    // }
 
-    if (filters.search) {
-      filtered = filtered.filter(returnItem =>
-        returnItem.returnNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
-        returnItem.orderNumber.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
+    // if (filters.search) {
+    //   filtered = filtered.filter(returnItem =>
+    //     returnItem.returnNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
+    //     returnItem.orderNumber.toLowerCase().includes(filters.search.toLowerCase())
+    //   );
+    // }
 
     return filtered;
   };
@@ -215,47 +200,40 @@ export default function ReturnsAndChallan() {
   // CRUD operations with stock management
   const handleEdit = (item, type) => {
     setEditingItem({ ...item, type });
-    setEditForm({
-      items: item.items,
-      status: item.status,
-      reason: item.items[0]?.reason || '',
-      notes: item.notes || ''
-    });
+    setEditForm({ _id: item?._id, items: item.items, status: item.status, reason: item.items[0]?.reason || '', notes: item?.notes || '' });
     setShowEditModal(true);
   };
 
-  const handleDelete = (id, type) => {
+  const handleDelete = async (id, type) => {
     if (confirm(`Are you sure you want to delete this ${type}?`)) {
       if (type === 'challan') {
-        setChallans(challans.filter(challan => challan.id !== id));
+        const response = await getData(`api/challan/delete-challan/${id}`)
+        // console.log("SSSSSSSSS:=>", response)
+        if (response?.success === true) {
+          fetchChallan()
+        }
       } else {
-        setReturns(returns.filter(returnItem => returnItem.id !== id));
+        const response = await getData(`api/return/delete-return/${id}`)
+        if (response?.success === true) {
+          fetchReturn()
+        }
       }
     }
   };
 
-  const handleStatusUpdate = (id, newStatus, type) => {
+  const handleStatusUpdate = async (id, newStatus, type) => {
     if (type === 'challan') {
-      setChallans(challans.map(challan =>
-        challan.id === id ? { ...challan, status: newStatus } : challan
-      ));
+      const response = await postData(`api/challan/update-challan-status/${id}`, { newStatus })
+      if (response.success === true) {
+        fetchChallan()
+      }
     } else if (type === 'return') {
-      // Handle return status change with stock adjustment
-      const returnItem = returns.find(r => r.id === id);
-
-      if (returnItem && newStatus === 'Approved' && returnItem.status !== 'Approved') {
-        // Auto increment stock when return is approved
-        returnItem.items.forEach(item => {
-          const returnedPcs = item.returnQty * (item.pcsInSet || 1);
-          incrementStock(item.name, returnedPcs);
-        });
-
+      const response = await postData(`api/return/update-return-status/${id}`, { newStatus })
+      console.log("response:::=>", response)
+      if (response?.success === true) {
+        fetchReturn()
         alert(`Return approved! Stock has been automatically incremented for returned items.`);
       }
-
-      setReturns(returns.map(returnItem =>
-        returnItem.id === id ? { ...returnItem, status: newStatus } : returnItem
-      ));
     }
   };
 
@@ -276,81 +254,35 @@ export default function ReturnsAndChallan() {
   };
 
   const handleCustomerChange = (customerId, formType) => {
-    const orders = customerOrders[customerId] || [];
-    setSelectedCustomerOrders(orders);
+    // const orders = customerOrders[customerId] || [];
+    // console.log("SSSSSSSSSSSS:==>", customerOrders)
+    // setSelectedCustomerOrders(customerOrders);
 
     if (formType === 'challan') {
-      setChallanForm({
-        ...challanForm,
-        customerId,
-        orderId: '',
-        items: []
-      });
+      setChallanForm({ ...challanForm, customerId, orderId: '', items: [] });
     } else {
-      setReturnForm({
-        ...returnForm,
-        customerId,
-        orderId: '',
-        items: []
-      });
+      setReturnForm({ ...returnForm, customerId, orderId: '', items: [] });
     }
   };
 
   const handleOrderChange = (orderId, formType) => {
-    const order = selectedCustomerOrders.find(o => o.id === orderId);
+    const order = selectedCustomerOrders.find(o => o._id === orderId);
+
     if (order) {
       if (formType === 'challan') {
-        const challanItems = order.items
-          .filter(item => item.pendingQty > 0)
-          .map(item => ({
-            ...item,
-            dispatchQty: 0
-          }));
 
-        setChallanForm({
-          ...challanForm,
-          orderId,
-          items: challanItems
-        });
+        // console.log("ZZZZZZZZZ==>", order?.items)
+        const challanItems = order?.items?.filter(item => item?.quantity > 0).map(item => ({ ...item, dispatchQty: 0 }));
+        setChallanForm({ ...challanForm, orderId, orderNumber: order?.orderNumber, items: challanItems });
+
       } else {
-        const returnItems = order.items
-          .filter(item => item.dispatchedQty > 0)
-          .map(item => ({
-            ...item,
-            returnQty: 0,
-            reason: '',
-            refundAmount: 0
-          }));
-
-        setReturnForm({
-          ...returnForm,
-          orderId,
-          items: returnItems
-        });
+        const returnItems = order?.items?.filter(item => item?.quantity > 0).map(item => ({ ...item, dispatchQty: 0 }));
+        // console.log("ZZZZZXXXXZZXXXXX:==>", returnItems)
+        setReturnForm({ ...returnForm, orderId, items: returnItems });
       }
     }
   };
 
-  const updateReturnItem = (index, field, value) => {
-    const updatedItems = returnForm.items.map((item, i) => {
-      if (i === index) {
-        const updatedItem = { ...item, [field]: value };
-
-        if (field === 'returnQty') {
-          updatedItem.returnQty = Math.min(Math.max(0, value), item.dispatchedQty);
-          updatedItem.refundAmount = updatedItem.returnQty * item.pcsInSet * item.price;
-        }
-
-        return updatedItem;
-      }
-      return item;
-    });
-
-    setReturnForm({
-      ...returnForm,
-      items: updatedItems
-    });
-  };
 
 
 
@@ -363,80 +295,76 @@ export default function ReturnsAndChallan() {
     customDateTo: ''
   });
 
-  // Generate mock report data based on period
-  const generateReportData = (type, period) => {
-    const data = [];
-    const labels = [];
 
-    switch (period) {
-      case 'daily':
-        for (let i = 6; i >= 0; i--) {
-          const date = new Date();
-          date.setDate(date.getDate() - i);
-          labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-
-          if (type === 'deliveries') {
-            data.push(Math.floor(Math.random() * 50) + 10);
-          } else {
-            data.push(Math.floor(Math.random() * 15) + 2);
-          }
-        }
-        break;
-
-      case 'monthly':
-        for (let i = 11; i >= 0; i--) {
-          const date = new Date();
-          date.setMonth(date.getMonth() - i);
-          labels.push(date.toLocaleDateString('en-US', { month: 'short' }));
-
-          if (type === 'deliveries') {
-            data.push(Math.floor(Math.random() * 200) + 50);
-          } else {
-            data.push(Math.floor(Math.random() * 50) + 10);
-          }
-        }
-        break;
-
-      case 'yearly':
-        for (let i = 4; i >= 0; i--) {
-          const year = new Date().getFullYear() - i;
-          labels.push(year.toString());
-
-          if (type === 'deliveries') {
-            data.push(Math.floor(Math.random() * 2000) + 500);
-          } else {
-            data.push(Math.floor(Math.random() * 500) + 100);
-          }
-        }
-        break;
-
-      default:
-        labels.push('Custom Period');
-        data.push(type === 'deliveries' ? 150 : 35);
+  /////////////////////////////////////////////////////////////////////////
+  const fetchCustomers = async () => {
+    try {
+      const response = await getData("api/user/get-all-user");
+      if (response?.success) {
+        setCustomers(response?.data);
+      }
+    } catch (error) {
+      console.error("Fetch users error:", error);
     }
+  }
 
-    return { labels, data };
-  };
+  const fetchChallan = async () => {
+    try {
+      const response = await getData(`api/challan/get-all-challans-with-pagination?page=${challanCurrantPage}&limit=12&filter=${encodeURIComponent(JSON.stringify(filters))}`);
+      // console.log("ZSSSXSSSSSfilters:=>ZSSSXSSSSSfilters:=>", response)
+      if (response?.success === true) {
+        setChallans(response?.challans);
+        setChallanPage(response?.totalPages)
+        setTotalChallans(response?.total)
 
-  const getReportSummary = (type, period) => {
-    if (type === 'deliveries') {
-      return {
-        total: 1247,
-        trend: '+12.5%',
-        trendColor: 'text-green-600',
-        totalValue: '₹2,847,650',
-        avgPerDay: 41.6
-      };
-    } else {
-      return {
-        total: 189,
-        trend: '-8.2%',
-        trendColor: 'text-red-600',
-        totalValue: '₹342,890',
-        avgPerDay: 6.3
-      };
+      }
+    } catch (error) {
+      console.error("Fetch users error:", error);
     }
-  };
+  }
+
+  const fetchReturn = async () => {
+    try {
+      const response = await getData(`api/return/get-all-return-with-pagination?page=${returnCurrantPage}&limit=12&filter=${encodeURIComponent(JSON.stringify(filters))}`);
+      // console.log("ZSSSXSSSSS:=>", response)
+      if (response?.success === true) {
+        setReturns(response?.returns);
+        setReturnPage(response?.totalPages)
+        setTotalReturns(response?.total)
+
+      }
+    } catch (error) {
+      console.error("Fetch users error:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchChallan()
+    fetchReturn()
+  }, [filters?.client, filters?.status, filters?.dateFrom, filters?.dateTo, filters?.search, challanCurrantPage, returnCurrantPage])
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [])
+
+  const fetchAllOrder = async () => {
+    try {
+      const response = await getData(`api/order/get-all-orders-by-user/${challanForm?.customerId || returnForm?.customerId}`);
+      // console.log("XXXXXXXXXXX:=-=>yy", response)
+      if (response.success === true) {
+        setCustomerOrders(response?.orders || []);
+        setSelectedCustomerOrders(response?.orders || []);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchAllOrder()
+  }, [challanForm?.customerId, returnForm?.customerId])
+
+  /////////////////////////////////////////////////////////////////////////
 
   return (
     <AdminLayout>
@@ -468,7 +396,7 @@ export default function ReturnsAndChallan() {
               }`}
           >
             <i className="ri-truck-line mr-2"></i>
-            Delivery Challans ({getFilteredChallans().length})
+            Delivery Challans ({totalChallans})
           </button>
           <button
             onClick={() => {
@@ -481,7 +409,7 @@ export default function ReturnsAndChallan() {
               }`}
           >
             <i className="ri-arrow-go-back-line mr-2"></i>
-            Returns ({getFilteredReturns().length})
+            Returns ({totalReturns})
           </button>
           <button
             onClick={() => setShowReports(true)}
@@ -499,8 +427,6 @@ export default function ReturnsAndChallan() {
             activeReportTab={activeReportTab}
             reportFilters={reportFilters}
             setReportFilters={setReportFilters}
-            getReportSummary={getReportSummary}
-            generateReportData={generateReportData}
           />)}
 
         {/* Advanced Filters */}
@@ -513,7 +439,13 @@ export default function ReturnsAndChallan() {
             handleEdit={handleEdit}
             handleStatusUpdate={handleStatusUpdate}
             handlePrint={handlePrint}
-            handleDelete={handleDelete} />
+            handleDelete={handleDelete}
+
+            challanCurrantPage={challanCurrantPage}
+            setChallanCurrantPage={setChallanCurrantPage}
+            challanPage={challanPage}
+            setChallanPage={setChallanPage}
+          />
         )}
 
         {/* Returns Table View with Stock Info */}
@@ -524,6 +456,11 @@ export default function ReturnsAndChallan() {
             handleStatusUpdate={handleStatusUpdate}
             handlePrint={handlePrint}
             handleDelete={handleDelete}
+
+            returnCurrantPage={returnCurrantPage}
+            setReturnCurrantPage={setReturnCurrantPage}
+            returnPage={returnPage}
+            setReturnPage={setReturnPage}
           />)}
 
         {/* Create Challan Modal */}
@@ -542,12 +479,14 @@ export default function ReturnsAndChallan() {
             setSubProductsStock={setSubProductsStock}
             challans={challans}
             setChallans={setChallans}
+            fetchChallan={fetchChallan}
           />
         )}
 
         {/* Create Return Modal */}
         {showCreateReturnModal && (
           <CreateReturnModal
+            fetchReturn={fetchReturn}
             selectedCustomerOrders={selectedCustomerOrders}
             setShowCreateReturnModal={setShowCreateReturnModal}
             setReturnForm={setReturnForm}
@@ -557,7 +496,7 @@ export default function ReturnsAndChallan() {
             refundMethods={refundMethods}
             handleCustomerChange={handleCustomerChange}
             handleOrderChange={handleOrderChange}
-            updateReturnItem={updateReturnItem}
+            // updateReturnItem={updateReturnItem}
             returns={returns}
             setReturns={setReturns}
           />)}
@@ -575,6 +514,8 @@ export default function ReturnsAndChallan() {
             editForm={editForm}
             setEditForm={setEditForm}
             handleEdit={handleEdit}
+            fetchChallan={fetchChallan}
+            fetchReturn={fetchReturn}
           />)}
 
         {/* Print Modal */}

@@ -1,8 +1,12 @@
 import React from 'react'
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
+import Pagination from '../../../components/base/Pagination';
 
-function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, handlePrint, handleDelete }) {
+function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, handlePrint, handleDelete,
+    challanCurrantPage,
+    setChallanCurrantPage,
+    challanPage, }) {
     return (
         <Card className="overflow-hidden">
             <div className="overflow-x-auto">
@@ -57,7 +61,7 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                                 challan.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
                                                     'bg-gray-100 text-gray-800'
                                                 }`}>
-                                                {challan.status}
+                                                {challan?.status}
                                             </span>
                                             <div className="text-sm text-gray-500 mt-1">{challan.vendor}</div>
                                         </div>
@@ -78,19 +82,19 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                                     <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                                                         <div className="py-1">
                                                             <button
-                                                                onClick={() => handleStatusUpdate(challan.id, 'Pending', 'challan')}
+                                                                onClick={() => handleStatusUpdate(challan?._id, 'Pending', 'challan')}
                                                                 className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Pending
                                                             </button>
                                                             <button
-                                                                onClick={() => handleStatusUpdate(challan.id, 'Dispatched', 'challan')}
+                                                                onClick={() => handleStatusUpdate(challan?._id, 'Dispatched', 'challan')}
                                                                 className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Dispatched
                                                             </button>
                                                             <button
-                                                                onClick={() => handleStatusUpdate(challan.id, 'Completed', 'challan')}
+                                                                onClick={() => handleStatusUpdate(challan?._id, 'Completed', 'challan')}
                                                                 className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Completed
@@ -107,7 +111,7 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                                     <i className="ri-printer-line mr-1"></i>Print
                                                 </Button>
                                                 <Button
-                                                    onClick={() => handleDelete(challan.id, 'challan')}
+                                                    onClick={() => handleDelete(challan?._id, 'challan')}
                                                     className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-delete-bin-line mr-1"></i>Delete
@@ -121,6 +125,50 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                     </tbody>
                 </table>
             </div>
+
+            <div className="flex justify-center mt-4">
+                {/* <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                /> */}
+
+                {challanPage > 1 && (
+                    <div className="flex justify-center mt-6">
+                        <div className="flex space-x-2">
+                            <Button
+                                onClick={() => setChallanCurrantPage(prev => Math.max(prev - 1, 1))}
+                                disabled={challanCurrantPage === 1}
+                                className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                            >
+                                Previous
+                            </Button>
+
+                            {Array.from({ length: challanPage }, (_, i) => i + 1).map(page => (
+                                <Button
+                                    key={page}
+                                    onClick={() => setChallanCurrantPage(page)}
+                                    className={`px-4 py-2 ${challanCurrantPage === page
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-100 text-gray-700'}`}
+                                >
+                                    {page}
+                                </Button>
+                            ))}
+
+                            <Button
+                                onClick={() => setChallanCurrantPage(prev => Math.min(prev + 1, challanPage))}
+                                disabled={challanCurrantPage === challanPage}
+                                className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                            >
+                                Next
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+            </div>
+
         </Card>
     )
 }

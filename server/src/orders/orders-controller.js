@@ -623,6 +623,22 @@ exports.getAllOrders = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+
+exports.getAllAdminOrders = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const totalOrders = await AdminOrder.countDocuments();
+
+        const orders = await AdminOrder.find({}).sort({ createdAt: -1 }).populate("items.productId").populate("items.productId.productId").populate("customer.userId")
+
+            res.status(200).json({ success: true, message: "Orders Fetched Successfully", totalOrders, orders, });
+
+        // sendResponse(res, 200, "Order Fetched Successfully", { totalOrders, orders });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+
 exports.getOrderByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const orderID = req.params.id;
@@ -793,20 +809,21 @@ exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
     try {
         // const { pageNumber } = req.query;
         const userID = req.params.id;
-
-        const orders = await Order.find({ userId: userID }).sort({ createdAt: -1 }).populate({
-            path: "products.subProduct",
+        console.log("orders=>", userID)
+        const orders = await AdminOrder.find({ "customer.userId": userID }).sort({ createdAt: -1 }).populate({
+            path: "items.productId",
             populate: [
                 { path: "productId" },
-                { path: "sizes" }
+                // { path: "sizes" }
             ]
-        }).populate("userId", "name email , phone")
+        }).populate("customer.userId", "name email , phone")
+        console.log("orders=>", orders)
         // .populate("products.subProduct");
         // console.log("orders:==>", !orders[0].products.length);
-        if (!orders || orders.length === 0) {
+        if (!orders || orders?.length === 0) {
             return res.status(201).json({ success: false, message: "Your Orders is empty" });
         }
-        else if (orders[0]?.products?.length <= 0) {
+        else if (orders[0]?.items?.length <= 0) {
             return res.status(201).json({ success: false, message: "You have no Orders" });
         }
         res.status(200).json({ success: true, message: "Orders Fetched Successfully", orders, });

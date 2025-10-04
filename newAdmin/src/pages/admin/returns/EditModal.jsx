@@ -1,22 +1,26 @@
 import React from 'react'
 import Button from '../../../components/base/Button';
+import { postData } from '../../../services/FetchNodeServices';
 
-function EditModal({ setChallans, challans, editingItem, setReturns, returns, setEditingItem,
-    setShowEditModal, editForm, setEditForm, handleEdit }) {
+function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturns, returns, setEditingItem,
+    setShowEditModal, editForm, setEditForm, handleEdit, fetchReturn }) {
 
-    const saveEdit = () => {
-        if (editingItem.type === 'challan') {
-            setChallans(challans.map(challan =>
-                challan.id === editingItem.id
-                    ? { ...challan, ...editForm, items: editForm.items }
-                    : challan
-            ));
+    const saveEdit = async () => {
+        if (editingItem?.type === 'challan') {
+            const data = { ...editingItem, ...editForm, items: editForm.items };
+            const respons = await postData(`api/challan/update-challan/${editForm?._id}`, { data })
+            if (respons.success === true) {
+                fetchChallan()
+            }
+
         } else {
-            setReturns(returns.map(returnItem =>
-                returnItem.id === editingItem.id
-                    ? { ...returnItem, ...editForm, items: editForm.items }
-                    : returnItem
-            ));
+
+            const data = { ...editingItem, ...editForm, items: editForm.items, orderId: editingItem?.orderId?.customer?.userId };
+            console.log("data:::=>", data)
+            const respons = await postData(`api/return/update-return/${editForm?._id}`, { data })
+            if (respons.success === true) {
+                fetchReturn()
+            }
         }
         setShowEditModal(false);
         setEditingItem(null);
@@ -27,12 +31,18 @@ function EditModal({ setChallans, challans, editingItem, setReturns, returns, se
             i === index ? { ...item, [field]: value } : item
         );
 
-        setEditForm({
-            ...editForm,
-            items: updatedItems
-        });
+        setEditForm({ ...editForm, items: updatedItems });
     };
 
+    const handleChange = (index, field, value) => {
+        const updatedItems = editForm?.items?.map((item, i) =>
+            i === index ? { ...item, [field]: value } : item
+        );
+
+        setEditForm({ ...editForm, items: updatedItems });
+    };
+
+    // console.log("editForm:::=>", editForm)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -75,10 +85,10 @@ function EditModal({ setChallans, challans, editingItem, setReturns, returns, se
                             <label className="block text-sm font-medium text-gray-700 mb-1">Items</label>
                             <div className="space-y-2">
                                 {editForm.items.map((item, index) => (
-                                    <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                    <> <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                                         <div>
-                                            <div className="font-medium">{item.name}</div>
-                                            <div className="text-sm text-gray-500">Size: {item.size}</div>
+                                            <div className="font-medium">{item?.name}</div>
+                                            <div className="text-sm text-gray-500">Size: {item?.availableSizes?.map((item, ind) => <>{item} {ind !== item?.availableSizes?.length - 1 && ", "}</>)}</div>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                             <span className="text-sm">Qty:</span>
@@ -91,21 +101,24 @@ function EditModal({ setChallans, challans, editingItem, setReturns, returns, se
                                             />
                                         </div>
                                     </div>
-                                ))}
+                                        {
+                                            editingItem.type === 'return' && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                                                    <input
+                                                        type="text"
+                                                        value={item?.reason}
+                                                        onChange={(e) => handleChange(index, 'reason', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                </div>
+                                            )
+                                        }
+                                    </>))}
                             </div>
                         </div>
 
-                        {editingItem.type === 'return' && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                                <input
-                                    type="text"
-                                    value={editForm.reason}
-                                    onChange={(e) => setEditForm({ ...editForm, reason: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-                        )}
+
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>

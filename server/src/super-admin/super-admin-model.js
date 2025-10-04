@@ -35,6 +35,15 @@ const superAdminSchema = new Schema({
     },
     role: {
         type: String,
+        default: "Super Admin",
+    },
+    status: {
+        type: String,
+        default: "Active",
+    },
+    lastLogin: {
+        type: String,
+        default: 'Never',
     },
     createdAt: {
         type: Date,
