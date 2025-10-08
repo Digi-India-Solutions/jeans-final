@@ -241,7 +241,7 @@ exports.updateSubProductByID = catchAsyncErrors(async (req, res, next) => {
             uploadedImages.push(...newImages);
         }
 
-        const updatedFields = { ...data, sizes: selectedSizes, };
+        const updatedFields = { ...data, subProductImages: existingProduct.subProductImages, sizes: selectedSizes, };
 
         if (uploadedImages.length > 0) {
             updatedFields.subProductImages = uploadedImages;

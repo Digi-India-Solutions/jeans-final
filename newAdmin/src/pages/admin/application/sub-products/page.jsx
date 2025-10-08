@@ -32,7 +32,7 @@ export default function SubProductsManagement() {
     try {
       const response = await getData(`api/product/get-all-products`);
       console.log("GG:=>", response)
-      if (response.success) {
+      if (response.success === true) {
         setProductList(response.data || []);
       }
     } catch (error) {
@@ -372,8 +372,9 @@ export default function SubProductsManagement() {
 
   const handleEdit = (item) => {
     setEditingItem(item);
+    console.log("DDDDDD=>DDDDDD=>item", item)
     setFormData({ ...item, selectedSizes: JSON.parse(item.sizes), images: item?.subProductImages, productId: item.productId._id });
-    setUploadedFiles([]);
+    setUploadedFiles(item.subProductImages);
     setShowModal(true);
   };
 
@@ -625,7 +626,7 @@ export default function SubProductsManagement() {
             setSelectedForPrint={setSelectedForPrint}
             setEditingItem={setEditingItem}
             editingItem={editingItem}
-            fetchProducts={fetchProducts}
+            fetchProductsWithPagination={fetchProductsWithPagination}
           />
         )}
       </div>

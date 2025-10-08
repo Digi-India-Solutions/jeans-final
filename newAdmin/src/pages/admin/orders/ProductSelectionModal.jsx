@@ -173,7 +173,7 @@ function ProductSelectionModal({
                         {filteredSubProducts?.map((product) => {
                             const isSelected = isProductSelected(product?._id);
                             const currentQuantity = getProductQuantity(product?._id);
-                            const availableSets = Math.floor((product?.lotStock || 0) / (product?.pcsInSet || 1));
+                            const availableSets = Math.floor((product?.lotStock || 0));
 
                             return (
                                 <div
@@ -234,7 +234,7 @@ function ProductSelectionModal({
 
                                     {/* Stock */}
                                     <div className="text-sm text-gray-500 mb-3">
-                                        Stock: {product?.lotStock} pcs ({availableSets} sets
+                                        Stock: {parseInt(product?.pcsInSet) * availableSets} pcs ({availableSets} sets
                                         available)
                                     </div>
 

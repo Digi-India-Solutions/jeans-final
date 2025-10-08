@@ -9,6 +9,7 @@ const crypto = require("crypto");
 const razorpayInstance = require("../../utils/razorpay");
 const { sendThankYouEmailAdmin, sendThankYouEmail } = require("../../utils/mail");
 const { sendOrderThankByUserOnWhatsapp } = require("../../utils/whatsAppCampaigns");
+const subProductsModel = require("../subProducts/subProducts-model");
 
 exports.createOrder = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -279,7 +280,7 @@ exports.verifyPayment = async (req, res) => {
 
 const generateOrderNumber = async () => {
 
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await AdminOrder.countDocuments();
 
 
     const dateObj = new Date();
@@ -290,7 +291,7 @@ const generateOrderNumber = async () => {
 
     // Create order number like ORD-2025-0001
     const orderNumber = `ORD-${year}-${formattedSerial}`;
-
+    console.log('totalOrders', orderNumber)
     return orderNumber
 
 };
@@ -325,13 +326,13 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             return next(new ErrorHandler("Customer info and at least 1 item are required.", 400));
         }
         // ✅ Generate unique order number
-        const orderNumber = generateOrderNumber();
+        const orderNumber = await generateOrderNumber();
 
         // ✅ Create status history
         const statusHistory = [
             { status, date: orderDate, updatedBy: "System" },
         ];
-        console.log("FFFFFFFF:==>", req.body)
+        console.log("FFFFFFFF:==>hjh", req.body, orderNumber)
 
         // /////////////ADD POINTS//////////////////////////////
         let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
@@ -388,6 +389,28 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
             transportName, orderNote
         });
+        if (newOrder) {
+            for (const item of items) {
+                const product = await subProductsModel?.findById(item.productId);
+
+                if (product) {
+                    // ensure both are numbers
+                    const currentStock = Number(product.lotStock) || 0;
+                    const quantityOrdered = Number(item.quantity) || 0;
+
+                    // update stock
+                    product.lotStock = currentStock - quantityOrdered;
+
+                    // if stock depleted
+                    if (product.lotStock <= 0) {
+                        product.lotStock = 0; // avoid negative stock
+                        product.stock = 'Out of Stock';
+                    }
+
+                    await product.save();
+                }
+            }
+        }
 
         res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
     } catch (err) {
@@ -488,6 +511,30 @@ exports.createOrderByclient = catchAsyncErrors(async (req, res, next) => {
             orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
             transportName, orderNote
         });
+
+        if (newOrder) {
+            for (const item of items) {
+                const product = await subProductsModel?.findById(item.productId);
+
+                if (product) {
+                    // ensure both are numbers
+                    const currentStock = Number(product.lotStock) || 0;
+                    const quantityOrdered = Number(item.quantity) || 0;
+
+                    // update stock
+                    product.lotStock = currentStock - quantityOrdered;
+
+                    // if stock depleted
+                    if (product.lotStock <= 0) {
+                        product.lotStock = 0; // avoid negative stock
+                        product.stock = 'Out of Stock';
+                    }
+
+                    await product.save();
+                }
+            }
+        }
+
 
         res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
     } catch (error) {
@@ -630,7 +677,7 @@ exports.getAllAdminOrders = catchAsyncErrors(async (req, res, next) => {
 
         const orders = await AdminOrder.find({}).sort({ createdAt: -1 }).populate("items.productId").populate("items.productId.productId").populate("customer.userId")
 
-            res.status(200).json({ success: true, message: "Orders Fetched Successfully", totalOrders, orders, });
+        res.status(200).json({ success: true, message: "Orders Fetched Successfully", totalOrders, orders, });
 
         // sendResponse(res, 200, "Order Fetched Successfully", { totalOrders, orders });
     } catch (error) {
@@ -719,13 +766,16 @@ exports.changeStatusByAdmin = catchAsyncErrors(async (req, res, next) => {
             order.deliveryVendor = deliveryVendor;
         }
 
+        // if (newStatus === 'Delivered') {
+        //     order.items.forEach(item => {
+        //         item.deliveredPcs = (Number(item.quantity) * Number(item.pcsInSet)) || 0;
+        //     });
+        // }
+
+
         await order.save();
 
-        res.status(200).json({
-            success: true,
-            message: `Order status updated to ${newStatus}.`,
-            order,
-        });
+        res.status(200).json({ success: true, message: `Order status updated to ${newStatus}.`, order, });
     } catch (err) {
         return next(new ErrorHandler(err.message || "Failed to update order status.", 500));
     }

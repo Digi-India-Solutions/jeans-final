@@ -6,7 +6,7 @@ const returnSchema = new Schema(
         returnNumber: { type: String, required: true },          // auto generated
         customer: { type: String },                              // customer name
         customerId: { type: Schema.Types.ObjectId, ref: 'User' }, // optional if needed
-        orderId: { type: Schema.Types.ObjectId, ref: 'AdminOrder' },
+        orderId: { type: Schema.Types.ObjectId, ref: "AdminOrder", required: false, default: null, },
         orderNumber: { type: String },                          // e.g. ORD-2025-3076
         refundMethod: { type: String },                        // from frontend
         totalRefund: { type: Number },                         // computed in frontend
@@ -16,13 +16,14 @@ const returnSchema = new Schema(
         reason: { type: String },
         items: [
             {
-                productId: { type: Schema.Types.ObjectId, ref: 'subProduct' },
+                productId: { type: Schema.Types.ObjectId, ref: 'subProduct', required: false, default: null },
                 name: String,
                 availableSizes: [String],
-                returnQty: Number,
+                returnPcs: Number,
                 reason: String,
                 refundAmount: Number,
                 pcsInSet: Number,
+                singlePicPrice: Number,
             }
         ]
     },

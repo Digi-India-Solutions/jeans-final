@@ -1,5 +1,8 @@
 const Challan = require("./challan-model"); // path to your model
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
+const { AdminOrder } = require("../orders/orders-model");
+const { uploadImage, deleteImage } = require("../../middleware/Uploads");
+const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
 
 // 📝 CREATE a Challan
 exports.createChallan = catchAsyncErrors(async (req, res, next) => {
@@ -7,9 +10,7 @@ exports.createChallan = catchAsyncErrors(async (req, res, next) => {
     const year = new Date().getFullYear();
 
     // Get the latest challan of this year
-    const lastChallan = await Challan.findOne({ challanNumber: { $regex: `^CHN-${year}` } })
-        .sort({ createdAt: -1 })
-        .lean();
+    const lastChallan = await Challan.findOne({ challanNumber: { $regex: `^CHN-${year}` } }).sort({ createdAt: -1 }).lean();
 
     let serial = 1;
 
@@ -21,21 +22,167 @@ exports.createChallan = catchAsyncErrors(async (req, res, next) => {
 
     const challanNumber = `CHN-${year}-${serial.toString().padStart(3, "0")}`;
 
-    //     const ExistOrder = await AdminOrder.findOne({ _id: req.body.orderId });
+    const ExistOrder = await AdminOrder.findOne({ _id: req.body.orderId });
 
-    //     if (!ExistOrder) {
-    //         return res.status(404).json({ success: false, message: "Order not found" });
-    //     }
-    // ExistOrder.dispatchedQty = req.body.dispatchedQty || ExistOrder.dispatchedQty;
-    // ExistOrder.quantity = req.body.quantity || ExistOrder.quantity;
-    // ExistOrder.price = req.body.price || ExistOrder.price;
-    // ExistOrder.pcsInSet = req.body.pcsInSet || ExistOrder.pcsInSet;
-    // ExistOrder.images = req.body.images || ExistOrder.images;
-    // ExistOrder.save();
+    if (!ExistOrder) {
+        return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    if (Array.isArray(req.body.items)) {
+        req.body.items.forEach(bodyItem => {
+            // find the matching item in the order by name or productId
+            const orderItem = ExistOrder.items.find(
+                i => i.name === bodyItem.name // or i.productId.equals(bodyItem.productId)
+            );
+
+            if (orderItem) {
+                // update dispatchedQty and anything else you want
+                // console.log("bodyItem.dispatchedQty:==>", bodyItem.dispatchedQty)
+                // console.log("bodyItem.alreadyDispatched:==>", bodyItem.alreadyDispatched, req.body.items)
+
+                orderItem.dispatchedQty = (Number(bodyItem.dispatchedQty) + Number(bodyItem.alreadyDispatched || 0)) || orderItem.dispatchedQty;
+                orderItem.deliveredPcs = (orderItem.dispatchedQty * orderItem.pcsInSet)
+                // optionally update deliveredPcs, etc.
+                // orderItem.deliveredPcs = (orderItem.quantity * orderItem.pcsInSet)
+            }
+        });
+
+        // tell mongoose that the items array has been modified
+        ExistOrder.markModified('items');
+    }
+    // console.log("ExistOrder:==>", ExistOrder.status)
+    ExistOrder.status = 'Shipped';
+    ExistOrder.statusHistory.push({
+        status: 'Shipped',
+        date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+        updatedBy: "Admin",
+    });
+
+    ExistOrder.trackingId = req.body.notes || ExistOrder.trackingId;
+    ExistOrder.deliveryVendor = req.body.vendor || ExistOrder.deliveryVendor;
+
+    // persist changes
+    await ExistOrder.save();
+
+
+    console.log("ExistOrder:==>", ExistOrder)
+    console.log("BODY:==>", req.body)
 
     const challan = await Challan.create({ ...req.body, challanNumber });
     console.log("SSSS:==>", challan)
     res.status(201).json({ success: true, challan, });
+});
+
+
+// exports.createChallanWithSlip = catchAsyncErrors(async (req, res, next) => {
+//     const year = new Date().getFullYear();
+
+//     // 1. Generate next challan number
+//     const lastChallan = await Challan.findOne({
+//         challanNumber: { $regex: `^CHN-${year}` },
+//     })
+//         .sort({ createdAt: -1 })
+//         .lean();
+
+//     let serial = 1;
+//     if (lastChallan && lastChallan.challanNumber) {
+//         const parts = lastChallan.challanNumber.split('-');
+//         const lastSerial = parseInt(parts[2], 10);
+//         serial = lastSerial + 1;
+//     }
+//     const challanNumber = `CHN-${year}-${serial.toString().padStart(3, '0')}`;
+
+//     // 2. Update existing AdminOrder
+//     const ExistOrder = await AdminOrder.findOne({ _id: req.body.orderId });
+//     if (!ExistOrder) {
+//         return res.status(404).json({ success: false, message: 'Order not found' });
+//     }
+
+//     if (Array.isArray(req.body.items)) {
+//         req.body.items.forEach(bodyItem => {
+//             const orderItem = ExistOrder.items.find(
+//                 i => i.name === bodyItem.name // or use productId equals
+//             );
+//             if (orderItem) {
+//                 orderItem.dispatchedQty =
+//                     Number(bodyItem.dispatchedQty) || orderItem.dispatchedQty;
+//                 orderItem.deliveredPcs = orderItem.dispatchedQty * orderItem.pcsInSet;
+//             }
+//         });
+//         ExistOrder.markModified('items');
+//     }
+
+//     // update order status + history
+//     ExistOrder.status = 'Shipped';
+//     ExistOrder.statusHistory.push({
+//         status: 'Shipped',
+//         date: new Date().toISOString().split('T')[0],
+//         updatedBy: 'Admin',
+//     });
+
+//     ExistOrder.trackingId = req.body.notes || ExistOrder.trackingId;
+//     ExistOrder.deliveryVendor = req.body.vendor || ExistOrder.deliveryVendor;
+//     await ExistOrder.save();
+
+//     // 3. Upload bilti slip if present
+//     let biltiSlipUrl = '';
+//     if (req.file) {
+//         try {
+//             biltiSlipUrl = await uploadImage(req.file.path); // your util should return Cloudinary URL
+//             deleteLocalFile(req.file.path);
+//         } catch (err) {
+//             return next(
+//                 new ErrorHandler('Image upload failed, please try again', 500)
+//             );
+//         }
+//     }
+
+//     // 4. Create new Challan
+//     const challanPayload = {
+//         ...req.body,
+//         challanNumber,
+//         biltiSlipUrl, // store uploaded file URL
+//     };
+
+//     // if items were sent as JSON string from FormData
+//     if (typeof challanPayload.items === 'string') {
+//         challanPayload.items = JSON.parse(challanPayload.items);
+//     }
+
+//     const challan = await Challan.create(challanPayload);
+
+//     return res.status(201).json({ success: true, challan });
+// });
+
+exports.uploadBiltiSlip = catchAsyncErrors(async (req, res, next) => {
+    const { challanId } = req.body;
+    if (!challanId) return next(new ErrorHandler('Challan ID is required', 400));
+
+    const challan = await Challan.findById(challanId);
+    if (!challan) return next(new ErrorHandler('Challan not found', 404));
+
+    let url = '';
+    if (req.file) {
+        url = await uploadImage(req.file.path);
+        deleteLocalFile(req.file.path);
+        challan.biltiSlipUrl = url;
+        await challan.save();
+    }
+
+    res.status(200).json({ success: true, url });
+});
+
+exports.removeBiltiSlip = catchAsyncErrors(async (req, res, next) => {
+    const { challanId } = req.body;
+    const challan = await Challan.findById(challanId);
+    if (!challan) return next(new ErrorHandler('Challan not found', 404));
+
+    if (challan?.biltiSlipUrl) {
+        await deleteImage(challan.biltiSlipUrl);
+    }
+    challan.biltiSlipUrl = '';
+    await challan.save();
+
+    res.status(200).json({ success: true, message: 'Bilti slip removed' });
 });
 
 // 📖 GET all Challans
@@ -97,73 +244,73 @@ exports.getAllChallans = catchAsyncErrors(async (req, res, next) => {
 
 
 exports.getAllChallansWithPagination = catchAsyncErrors(async (req, res, next) => {
-  // 🔹 Pagination
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
+    // 🔹 Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-  // 🔹 Read filters
-  const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
-  const search = filter.search?.trim() || '';
-  const status = filter.status || '';
-  const customer = filter.client || '';
-  const dateFrom = filter.dateFrom || '';
-  const dateTo = filter.dateTo || '';
+    // 🔹 Read filters
+    const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
+    const search = filter.search?.trim() || '';
+    const status = filter.status || '';
+    const customer = filter.client || '';
+    const dateFrom = filter.dateFrom || '';
+    const dateTo = filter.dateTo || '';
 
-  console.log("GGGG:=>", filter);
+    console.log("GGGG:=>", filter);
 
-  // 🔹 Build MongoDB query
-  const query = {};
+    // 🔹 Build MongoDB query
+    const query = {};
 
-  // Date range
-  if (dateFrom || dateTo) {
-    query.date = {};
-    if (dateFrom) query.date.$gte = new Date(dateFrom);
-    if (dateTo) {
-      // include whole day of 'to'
-      const to = new Date(dateTo);
-      to.setHours(23, 59, 59, 999);
-      query.date.$lte = to;
+    // Date range
+    if (dateFrom || dateTo) {
+        query.date = {};
+        if (dateFrom) query.date.$gte = new Date(dateFrom);
+        if (dateTo) {
+            // include whole day of 'to'
+            const to = new Date(dateTo);
+            to.setHours(23, 59, 59, 999);
+            query.date.$lte = to;
+        }
     }
-  }
 
-  // Status filter
-  if (status) {
-    query.status = status;
-  }
+    // Status filter
+    if (status) {
+        query.status = status;
+    }
 
-  // Customer filter
-  if (customer) {
-    query.customer = { $regex: customer, $options: 'i' };
-  }
+    // Customer filter
+    if (customer) {
+        query.customer = { $regex: customer, $options: 'i' };
+    }
 
-  // Search on multiple fields
-  if (search) {
-    query.$or = [
-      { challanNumber: { $regex: search, $options: 'i' } },
-      { customer: { $regex: search, $options: 'i' } },
-      { orderNumber: { $regex: search, $options: 'i' } },
-      { status: { $regex: search, $options: 'i' } },
-    ];
-  }
+    // Search on multiple fields
+    if (search) {
+        query.$or = [
+            { challanNumber: { $regex: search, $options: 'i' } },
+            { customer: { $regex: search, $options: 'i' } },
+            { orderNumber: { $regex: search, $options: 'i' } },
+            { status: { $regex: search, $options: 'i' } },
+        ];
+    }
 
-  // 🔹 Count & fetch
-  const total = await Challan.countDocuments(query);
+    // 🔹 Count & fetch
+    const total = await Challan.countDocuments(query);
 
-  const challans = await Challan.find(query)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
+    const challans = await Challan.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
 
-  res.status(200).json({
-    success: true,
-    count: challans.length,
-    total,
-    currentPage: page,
-    totalPages: Math.ceil(total / limit),
-    challans,
-  });
+    res.status(200).json({
+        success: true,
+        count: challans.length,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        challans,
+    });
 });
 // 📖 GET single Challan by ID
 exports.getChallanById = catchAsyncErrors(async (req, res, next) => {
@@ -212,6 +359,45 @@ exports.updateChallan = catchAsyncErrors(async (req, res, next) => {
     challan = await challan.save();
 
     // console.log("Updated challan =>", challan);
+
+    const ExistOrder = await AdminOrder.findOne({ _id: req.body.data.orderId });
+
+    if (!ExistOrder) {
+        return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    if (Array.isArray(req.body.data.items)) {
+        req.body.data.items.forEach(bodyItem => {
+            // find the matching item in the order by name or productId
+            const orderItem = ExistOrder.items.find(
+                i => i.name === bodyItem.name // or i.productId.equals(bodyItem.productId)
+            );
+
+            if (orderItem) {
+                // update dispatchedQty and anything else you want
+                orderItem.dispatchedQty = Number(bodyItem.dispatchedQty) || orderItem.dispatchedQty;
+                orderItem.deliveredPcs = (orderItem.dispatchedQty * orderItem.pcsInSet)
+                // optionally update deliveredPcs, etc.
+                // orderItem.deliveredPcs = (orderItem.quantity * orderItem.pcsInSet)
+            }
+        });
+
+        // tell mongoose that the items array has been modified
+        ExistOrder.markModified('items');
+    }
+    console.log("ExistOrder:==>", ExistOrder.status)
+    ExistOrder.status = 'Shipped';
+    ExistOrder.statusHistory.push({
+        status: 'Shipped',
+        date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+        updatedBy: "Admin",
+    });
+
+    ExistOrder.trackingId = req.body.data.notes || ExistOrder.trackingId;
+    ExistOrder.deliveryVendor = req.body.data.vendor || ExistOrder.deliveryVendor;
+
+    // persist changes
+    await ExistOrder.save();
+
 
     // 3. Send response
     return res.status(200).json({ success: true, challan });
@@ -366,3 +552,17 @@ exports.getChallansReport = catchAsyncErrors(async (req, res, next) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+
+exports.getAllChallansByCustomerAndOrder = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { orderId, customerId } = req.body;
+        console.log("challans:==>", req.body);
+        const challans = await Challan.find({ orderId, customerId });
+        console.log("challans:==>", challans);
+        res.status(200).json({ status: true, data: challans });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+})

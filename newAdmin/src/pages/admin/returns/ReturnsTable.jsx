@@ -8,7 +8,7 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
     returnPage,
     
 }) {
-    // console.log("getFilteredReturns==>", getFilteredReturns()[0])
+    console.log("getFilteredReturns==>", getFilteredReturns()[1])
     return (
         <Card className="overflow-hidden">
             <div className="overflow-x-auto">
@@ -34,7 +34,7 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {getFilteredReturns().map((returnItem) => {
-                            const totalReturnPcs = returnItem.items.reduce((sum, item) => sum + (item.returnQty * (item.pcsInSet || 1)), 0);
+                            const totalReturnPcs = returnItem.items.reduce((sum, item) => sum + (item.returnPcs), 0);
 
                             return (
                                 <tr key={returnItem.id} className="hover:bg-gray-50">

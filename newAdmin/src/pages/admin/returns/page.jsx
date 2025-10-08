@@ -131,7 +131,7 @@ export default function ReturnsAndChallan() {
 
   const [selectedCustomerOrders, setSelectedCustomerOrders] = useState([]);
 
-  const vendors = ['BlueDart', 'Delhivery', 'DTDC', 'India Post', 'FedEx'];
+  const vendors = ['Transport', 'BlueDart', 'Delhivery', 'DTDC', 'India Post', 'FedEx'];
   const refundMethods = ['Original Payment Method', 'Bank Transfer', 'Cash', 'Store Credit'];
 
   // Filter functions

@@ -2,7 +2,8 @@ import React from 'react'
 import Button from '../../../../components/base/Button';
 
 function ShowProductPrintModal({ selectedForPrint, setShowPrintModal, generateEAN13SVG,
-    setSelectedForPrint, printQuantities, setPrintQuantities, handlePrint,updatePrintQuantity }) {
+    setSelectedForPrint, printQuantities, setPrintQuantities, handlePrint, updatePrintQuantity }) {
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -26,17 +27,17 @@ function ShowProductPrintModal({ selectedForPrint, setShowPrintModal, generateEA
 
                         <div className="space-y-4">
                             {selectedForPrint.map(item => (
-                                <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                                <div key={item._id} className="border border-gray-200 rounded-lg p-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center space-x-3">
                                             <img
-                                                src={item.subProductImages && item.subProductImages?.length > 0 ? item.subProductImages[0] : ''}
-                                                alt={item.name}
+                                                src={item?.subProductImages && item.subProductImages?.length > 0 ? item.subProductImages[0] || item?.productId?.images[0] : item?.productId?.images[0] || ''}
+                                                alt={item?.name}
                                                 className="w-12 h-12 object-cover rounded"
                                             />
                                             <div>
-                                                <h4 className="font-medium">{item.name}</h4>
-                                                <p className="text-sm text-gray-500">{item.barcode}</p>
+                                                <h4 className="font-medium">{item?.name}</h4>
+                                                <p className="text-sm text-gray-500">{item?.barcode}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center space-x-2">

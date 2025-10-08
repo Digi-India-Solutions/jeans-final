@@ -1,11 +1,12 @@
 const Return = require("./return-model"); // path to your model
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
+const { AdminOrder } = require("../orders/orders-model");
 
 // 📝 CREATE a return
 exports.createReturn = catchAsyncErrors(async (req, res, next) => {
 
     const year = new Date().getFullYear();
-    console.log("SSSS:==>", req.body)
+    console.log("SSSS:==>", req.body.data)
     // Get the latest Return of this year
     const lastReturn = await Return.findOne({ returnNumber: { $regex: `^RET-${year}` } }).sort({ createdAt: -1 }).lean();
 
@@ -18,20 +19,53 @@ exports.createReturn = catchAsyncErrors(async (req, res, next) => {
     }
 
     const challanNumber = `RET-${year}-${serial.toString().padStart(3, "0")}`;
+    if (req.body.data.orderId.length > 0) {
+        const ExistOrder = await AdminOrder.findOne({ _id: req.body.data.orderId });
 
-    //     const ExistOrder = await AdminOrder.findOne({ _id: req.body.orderId });
+        if (!ExistOrder) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        console.log("bodyItem.dispatchedQty:==>", ExistOrder, req.body.data.orderId)
+        if (Array.isArray(req.body.data.items)) {
+            req.body.data.items.forEach(bodyItem => {
+                // find the matching item in the order by name or productId
+                const orderItem = ExistOrder.items.find(
+                    i => i.name === bodyItem.name // or i.productId.equals(bodyItem.productId)
+                );
 
-    //     if (!ExistOrder) {
-    //         return res.status(404).json({ success: false, message: "Order not found" });
-    //     }
-    // ExistOrder.dispatchedQty = req.body.dispatchedQty || ExistOrder.dispatchedQty;
-    // ExistOrder.quantity = req.body.quantity || ExistOrder.quantity;
-    // ExistOrder.price = req.body.price || ExistOrder.price;
-    // ExistOrder.pcsInSet = req.body.pcsInSet || ExistOrder.pcsInSet;
-    // ExistOrder.images = req.body.images || ExistOrder.images;
-    // ExistOrder.save();
+                if (orderItem) {
+                    // update dispatchedQty and anything else you want
+                    console.log("bodyItem.dispatchedQty:==>", bodyItem.returnPcs)
+                    // console.log("bodyItem.alreadyDispatched:==>", bodyItem.alreadyReturned, req.body.items)
 
-    const returns = await Return.create({ ...req.body.data, returnNumber: challanNumber });
+                    orderItem.returnPcs = (Number(bodyItem.returnPcs) + Number(bodyItem.alreadyReturned || 0)) || orderItem.returnPcs;
+                    // orderItem.deliveredPcs = (orderItem.dispatchedQty * orderItem.pcsInSet)
+                    // optionally update deliveredPcs, etc.
+                    // orderItem.deliveredPcs = (orderItem.quantity * orderItem.pcsInSet)
+                }
+            });
+
+            // tell mongoose that the items array has been modified
+            ExistOrder.markModified('items');
+        }
+        // console.log("ExistOrder:==>", ExistOrder.status)
+        // ExistOrder.status = 'Returned';
+        ExistOrder.statusHistory.push({
+            status: 'Returned',
+            date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+            updatedBy: "Admin",
+            notes: req.body.data.reason || req.body.data.items[0].reason
+        });
+
+        // ExistOrder.trackingId = req.body.notes || ExistOrder.trackingId;
+        // ExistOrder.deliveryVendor = req.body.vendor || ExistOrder.deliveryVendor;
+
+        // persist changes
+        await ExistOrder.save();
+    }
+
+
+    const returns = await Return.create({ ...req.body.data, orderId: req.body.data.orderId ? req.body.data.orderId : null, returnNumber: challanNumber });
     console.log("SSSS:==>", returns)
     res.status(201).json({ success: true, returns, });
 });
@@ -126,7 +160,7 @@ exports.updateReturn = catchAsyncErrors(async (req, res, next) => {
         return res.status(404).json({ success: false, message: "returns not found" });
     }
 
-    console.log("Request body for update Body ==>", req.body?.data);
+    console.log("Request body for update Body ==>", req.body?.data.orderId);
 
     returns.status = req.body.data.status || returns?.status;
     returns.returnNumber = req.body.data.returnNumber || returns.returnNumber;
@@ -137,7 +171,7 @@ exports.updateReturn = catchAsyncErrors(async (req, res, next) => {
     returns.notes = req.body.data.notes || returns.notes;
     returns.vendor = req.body.data.vendor || returns.vendor;
     returns.customerId = req.body.data.customerId || returns.customerId;
-    returns.orderId = req.body.data.orderId || returns.orderId;
+    returns.orderId = req.body.data.orderId || returns?.orderId;
     returns.dispatchedQty = req.body.data.dispatchedQty || returns.dispatchedQty;
     returns.quantity = req.body.data.quantity || returns.quantity;
     returns.price = req.body.data.price || returns.price;
@@ -264,4 +298,18 @@ exports.getReturnReport = catchAsyncErrors(async (req, res, next) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+
+exports.getAllReturnsByCustomerAndOrder = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { orderId, customerId } = req.body;
+        console.log("returns:==>", req.body);
+        const returns = await Return.find({ orderId, customerId });
+        console.log("returns:==>", returns);
+        res.status(200).json({ status: true, data: returns });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+})
 
