@@ -14,7 +14,7 @@ router.post("/create-order-by-admin", createOrderByAdmin);
 
 router.post("/create-order-by-client", createOrderByclient);
 
-router.post("/create-order-by-admin", createOrderByAdmin);
+// router.post("/create-order-by-admin", createOrderByAdmin);
 
 router.get("/get-all-orders", getAllOrders);
 

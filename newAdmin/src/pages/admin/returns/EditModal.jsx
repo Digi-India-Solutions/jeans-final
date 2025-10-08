@@ -15,7 +15,7 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
 
         } else {
 
-            const data = { ...editingItem, ...editForm, items: editForm.items, orderId: editingItem?.orderId?.customer?.userId };
+            const data = { ...editingItem, ...editForm, items: editForm.items, orderId: editingItem?.orderId?._id };
             console.log("data:::=>", data)
             const respons = await postData(`api/return/update-return/${editForm?._id}`, { data })
             if (respons.success === true) {
@@ -41,8 +41,15 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
 
         setEditForm({ ...editForm, items: updatedItems });
     };
+    const changePrice = (index, value, Refund) => {
+        console.log("GGGG:==>", value.singlePicPrice)
+        const updatedItems = editForm?.items?.map((item, i) =>
+            i === index ? { ...item, totalRefund: value.singlePicPrice * Refund } : item
+        );
+        setEditForm({ ...editForm, items: updatedItems });
+    };
 
-    // console.log("editForm:::=>", editForm)
+    console.log("editForm:::=>", editForm.items)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -92,13 +99,29 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                                         </div>
                                         <div className="flex items-center space-x-2">
                                             <span className="text-sm">Qty:</span>
-                                            <input
+                                            {editingItem.type === 'return' ? <input
                                                 type="number"
-                                                value={editingItem.type === 'challan' ? item.dispatchedQty : item.returnQty}
-                                                onChange={(e) => updateEditItemQuantity(index, editingItem.type === 'challan' ? 'dispatchedQty' : 'returnQty', parseInt(e.target.value) || 0)}
+                                                disabled={item?.dispatchedQty >= item?.returnPcs}
+                                                value={editingItem.type === 'challan' ? item.dispatchedQty : item.returnPcs}
+                                                onChange={(e) => {
+                                                    const newValue = parseInt(e.target.value) || 0;
+                                                    const field =
+                                                        editingItem.type === "challan" ? "dispatchedQty" : "returnPcs";
+
+                                                    updateEditItemQuantity(index, field, newValue);
+                                                    // changePrice(index, item, newValue);
+                                                }}
                                                 className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
                                                 min="0"
-                                            />
+                                            /> : <input
+                                                type="number"
+                                                disabled={item?.dispatchedQty >= item?.returnQty}
+                                                value={editingItem.type === 'challan' ? item.dispatchedQty : item.returnQty}
+                                                onChange={(e) => updateEditItemQuantity(index, editingItem.type === 'challan' ? 'dispatchedQty' : 'returnPcs', parseInt(e.target.value) || 0)}
+                                                className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                                                min="0"
+                                            />}
+
                                         </div>
                                     </div>
                                         {

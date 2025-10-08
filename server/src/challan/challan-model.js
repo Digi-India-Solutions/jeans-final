@@ -12,6 +12,7 @@ const challanSchema = new Schema(
         deliveryVendor: { type: String }, // maps to "vendor" in JSON
         notes: { type: String },
         vendor: { type: String },
+        biltiSlipUrl: { type: String },
         items: [
             {
                 // Product reference (optional)

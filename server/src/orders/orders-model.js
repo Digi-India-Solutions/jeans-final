@@ -340,6 +340,10 @@ const adminOrderSchema = new Schema({
         availableSizes: [{ type: String }],
         images: [{ type: String }],
         selectedSizes: [{ type: String }],
+        deliveredPcs: { type: Number, default: 0 },
+        dispatchedQty: { type: Number, default: 0 },
+        returnPcs: { type: Number, default: 0 },
+        // returnAmount: { type: Number, default: 0 },
     }],
 
     subtotal: { type: Number, required: true },

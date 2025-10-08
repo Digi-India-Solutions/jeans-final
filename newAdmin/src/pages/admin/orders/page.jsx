@@ -1073,7 +1073,7 @@ export default function OrdersManagement() {
             <div className="bg-white rounded-lg max-w-md w-full">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Update Order Status</h2>
+                  <h2 className="text-xl font-semibold">{selectedOrder.status === 'Packed' ? 'Please Create Delivery Challan' : 'Update Order Status'}</h2>
                   <button
                     onClick={() => {
                       setShowStatusUpdateModal(false);
@@ -1085,7 +1085,9 @@ export default function OrdersManagement() {
                   </button>
                 </div>
 
-                <div className="space-y-4">
+                {selectedOrder.status === 'Packed' ? <div className="space-y-4">
+
+                </div> : <div className="space-y-4">
                   <div>
                     <div className="text-sm text-gray-600 mb-2">Order: {selectedOrder.orderNumber}</div>
                     <div className="text-sm text-gray-600 mb-4">Current Status:
@@ -1144,7 +1146,7 @@ export default function OrdersManagement() {
                       </div>
                     </>
                   )}
-                </div>
+                </div>}
 
                 <div className="flex space-x-3 mt-6">
                   <Button
@@ -1156,12 +1158,12 @@ export default function OrdersManagement() {
                   >
                     Cancel
                   </Button>
-                  <Button
+                  {selectedOrder.status === 'Packed' ? '' : <Button
                     onClick={handleStatusUpdate}
                     className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                   >
                     Update Status
-                  </Button>
+                  </Button>}
                 </div>
               </div>
             </div>
@@ -1309,14 +1311,14 @@ export default function OrdersManagement() {
                       <h3 className="font-medium mb-3">Order Sets</h3>
                       <div className="space-y-3">
                         {selectedOrder.items.map((item, index) => {
-                          const product = subProducts.find(p => p.id === item.productId);
+                          const product = subProducts.find(p => p._id === item.productId);
                           const totalPcs = item.quantity * item.pcsInSet;
                           const lineTotal = item.quantity * item.pcsInSet * item.singlePicPrice;
-
+                          // console.log("hhhhhh>>", item)
                           return (
                             <div key={index} className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
                               <img
-                                src={product?.images?.[0] || 'https://readdy.ai/api/search-image?query=product%20set%20pieces%20fashion%20clean%20background&width=100&height=100&seq=placeholder-detail&orientation=squarish'}
+                                src={product?.images?.[0] || item?.productId?.subProductImages?.[0] || 'https://readdy.ai/api/search-image?query=product%20set%20pieces%20fashion%20clean%20background&width=100&height=100&seq=placeholder-detail&orientation=squarish'}
                                 alt={item.name}
                                 className="w-16 h-16 object-cover rounded-lg"
                               />
@@ -1421,11 +1423,13 @@ export default function OrdersManagement() {
                             Update Payment
                           </Button>
                         )}
-                        {selectedOrder.status !== 'Cancelled' && selectedOrder.status !== 'Delivered' && (
+                        {selectedOrder.status !== 'Cancelled' && 
+                        // selectedOrder.status !== 'Delivered' &&
+                         (
                           <Button
                             onClick={() => {
                               if (confirm('Are you sure you want to cancel this order?')) {
-                                updateOrderStatus(selectedOrder.id, 'Cancelled');
+                                updateOrderStatus(selectedOrder._id, 'Cancelled');
                                 setSelectedOrder({ ...selectedOrder, status: 'Cancelled' });
                               }
                             }}

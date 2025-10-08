@@ -364,6 +364,18 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         fetchRewordByUserId(newOrderForm?.customerId)
     }, [newOrderForm?.customerId])
 
+
+    const updateItemSinglePicPrice = (index, price) => {
+        const updatedItems = newOrderForm.items.map((item, i) => {
+            if (i === index) {
+                return { ...item, singlePicPrice: price };
+            }
+            return item;
+        });
+
+        setNewOrderForm(prev => ({ ...prev, items: updatedItems, }));
+    };
+
     console.log("FFFFFFFFF:==>", newOrderForm, getTotalValue())
 
     return (
@@ -535,12 +547,12 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                             <p className="text-xs text-blue-600">
                                                 • Manual entry: Click "Add" button or press Enter
                                             </p>
-                                            <p className="text-xs text-green-600">
+                                            {/* <p className="text-xs text-green-600">
                                                 ✓ Valid scan = Success beep + Product added
                                             </p>
                                             <p className="text-xs text-red-600">
                                                 ✗ Invalid scan = Error beep + No action
-                                            </p>
+                                            </p> */}
                                         </div>
                                     </div>
 
@@ -559,7 +571,16 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                     />
                                                     <div className="flex-1">
                                                         <div className="font-medium">{item?.name}</div>
-                                                        <div className="text-sm text-gray-500">₹{item?.singlePicPrice} per piece</div>
+                                                        <div className="text-sm text-gray-500">₹{item?.singlePicPrice} per piece Price <input
+                                                            type="text"
+                                                            pattern="[0-9]*"
+                                                            min="0"
+                                                            value={item?.singlePicPrice || 0}
+                                                            onChange={(e) => updateItemSinglePicPrice(index, parseInt(e.target.value) || 1)}
+                                                            className="w-12 px-1 py-0.5 border border-gray-300 rounded text-xs text-center"
+                                                        />
+                                                        </div>
+
                                                         <div className="text-xs text-blue-600">
                                                             Total: {item?.quantity} set{item?.quantity > 1 ? 's' : ''} × {item?.pcsInSet || 0} pcs = {totalPcs} pieces
                                                         </div>
@@ -570,9 +591,9 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                             <div className="flex items-center space-x-1">
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => updateItemPcsInSet(index, (item?.pcsInSet || 1) - 1)}
+                                                                    onClick={() => updateItemPcsInSet(index, parseInt(item?.pcsInSet || 1) - 1)}
                                                                     className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded text-xs hover:bg-gray-50"
-                                                                    disabled={item.pcsInSet <= 1}
+                                                                    disabled={item?.pcsInSet <= 1}
                                                                 >
                                                                     <i className="ri-subtract-line text-xs"></i>
                                                                 </button>
@@ -585,7 +606,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                                 />
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => updateItemPcsInSet(index, (item?.pcsInSet || 1) + 1)}
+                                                                    onClick={() => updateItemPcsInSet(index, parseInt(item?.pcsInSet || 1) + 1)}
                                                                     className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded text-xs hover:bg-gray-50"
                                                                 >
                                                                     <i className="ri-add-line text-xs"></i>
@@ -596,7 +617,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                         {/* Available Sizes with Remove Option */}
 
 
-                                                        {normalizedSizes?.length > 0 && (
+                                                        {/* {normalizedSizes?.length > 0 && (
                                                             <div className="mt-1">
                                                                 <div className="text-xs text-gray-600 mb-1">Sizes:</div>
                                                                 <div className="flex flex-wrap gap-1">
@@ -613,26 +634,26 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                                     ))}
                                                                 </div>
                                                             </div>
-                                                        )}
+                                                        )} */}
                                                     </div>
                                                     <div className="flex items-center space-x-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => updateItemQuantity(index, item.quantity - 1)}
+                                                            onClick={() => updateItemQuantity(index, parseInt(item.quantity) - 1)}
                                                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50"
                                                         >
                                                             <i className="ri-subtract-line text-sm"></i>
                                                         </button>
-                                                        <span className="w-12 text-center font-medium">{item.quantity}</span>
+                                                        <span className="w-12 text-center font-medium">{item?.quantity}</span>
                                                         <button
                                                             type="button"
-                                                            onClick={() => updateItemQuantity(index, item?.quantity + 1)}
+                                                            onClick={() => updateItemQuantity(index, parseInt(item?.quantity) + 1)}
                                                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50"
                                                         >
                                                             <i className="ri-add-line text-sm"></i>
                                                         </button>
                                                     </div>
-                                                    <div className="font-medium">₹{(item?.quantity * item?.pcsInSet * item?.singlePicPrice)?.toLocaleString()}</div>
+                                                    <div className="font-medium">₹{(item?.quantity * parseInt(item?.pcsInSet) * parseInt(item?.singlePicPrice))?.toLocaleString()}</div>
                                                     <button
                                                         type="button"
                                                         onClick={() => removeItemFromOrder(index)}
@@ -842,7 +863,9 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         {getBalanceAmount() > 0 && (
                                             <div className="flex justify-between text-sm">
                                                 <span>Balance Due:</span>
-                                                <span className="font-medium text-red-600">₹{getBalanceAmount()?.toLocaleString()}</span>
+                                                {/* <span className="font-medium text-red-600">₹{getBalanceAmount()?.toLocaleString()}</span> */}
+                                                <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints)) - getTotalPaidAmount())?.toLocaleString()}</span>
+                                   
                                             </div>
                                         )}
                                         <div className="flex justify-between text-sm font-medium pt-2 border-t border-blue-200">

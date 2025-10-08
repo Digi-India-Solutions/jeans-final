@@ -4,7 +4,8 @@ const { createReturn,
     updateReturn,
     updateReturnStatus,
     deleteReturn,
-    getReturnReport
+    getReturnReport,
+    getAllReturnsByCustomerAndOrder
 } = require("./return-controller");
 const router = express.Router();
 
@@ -19,4 +20,8 @@ router.get('/delete-return/:id', deleteReturn)
 router.post('/update-return-status/:id', updateReturnStatus)
 
 router.post('/get-return-report', getReturnReport)
+
+
+router.post('/get-all-returns-by-customer-and-order', getAllReturnsByCustomerAndOrder)
+
 module.exports = router;

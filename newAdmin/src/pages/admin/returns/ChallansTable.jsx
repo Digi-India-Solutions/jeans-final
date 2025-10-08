@@ -2,6 +2,7 @@ import React from 'react'
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
 import Pagination from '../../../components/base/Pagination';
+import BiltiSlipUploader from './BiltiSlipUploader';
 
 function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, handlePrint, handleDelete,
     challanCurrantPage,
@@ -24,6 +25,9 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status & Vendor
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Bilti Slip
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
@@ -66,6 +70,12 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                             <div className="text-sm text-gray-500 mt-1">{challan.vendor}</div>
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <BiltiSlipUploader  challan={challan}/>
+                                        </div>
+                                    </td>
+
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                         <div className="flex flex-col space-y-1">
                                             <div className="flex space-x-1">
