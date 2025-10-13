@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
@@ -437,7 +436,7 @@ export default function CatalogueUpload() {
                   </Button>
                   <Button
                     onClick={uploadCatalogue}
-                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                    className="flex-1 bg-gray-700 text-white hover:bg-gray-900"
                     disabled={!uploadFile}
                   >
                     <i className="ri-upload-line mr-2"></i>

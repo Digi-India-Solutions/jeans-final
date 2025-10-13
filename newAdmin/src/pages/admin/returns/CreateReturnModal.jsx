@@ -219,7 +219,7 @@ function CreateReturnModal({
                                             };
                                             setReturnForm({ ...returnForm, items: [...(returnForm.items || []), newItem], });
                                         }}
-                                        className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600"
+                                        className="bg-blue-900 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600"
                                     >
                                         + Add Item
                                     </button>
@@ -377,23 +377,9 @@ function CreateReturnModal({
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex space-x-3 pt-4">
-                                <Button
-                                    onClick={() => {
-                                        setShowCreateReturnModal(false);
-                                        resetReturnForm();
-                                    }}
-                                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={createReturn}
-                                    disabled={!returnForm.customerId || returnForm.items.every((i) => !i.returnPcs)}
-                                    className="flex-1 bg-orange-600 text-white hover:bg-orange-700"
-                                >
-                                    Create Return
-                                </Button>
+                            <div className="flex space-x-3">
+                                <button className="flex-1 bg-gray-700 text-white hover:bg-gray-900" onClick={() => setShowCreateReturnModal(false)}>Cancel</button>
+                                <button className="flex-1 bg-green-600 text-white hover:bg-green-700" onClick={createReturn}>Create Return</button>
                             </div>
                         </div>
 

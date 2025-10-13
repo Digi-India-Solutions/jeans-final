@@ -294,22 +294,22 @@ export default function FAQsManagement() {
                     <div className="flex items-center space-x-2 ml-4">
                       <Button
                         onClick={() => handleEdit(faq)}
-                        className="bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 text-xs"
+                        className="bg-blue-900 text-blue-600 hover:bg-blue-500 px-2 py-1 text-xs"
                       >
                         <i className="ri-edit-line"></i>
                       </Button>
                       <Button
                         onClick={() => toggleStatus(faq._id, faq?.isActive)}
                         className={`px-2 py-1 text-xs ${faq.isActive
-                          ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100'
-                          : 'bg-green-50 text-green-600 hover:bg-green-100'
+                          ? 'bg-yellow-500 text-yellow-600 hover:bg-yellow-900'
+                          : 'bg-green-500 text-green-600 hover:bg-green-900'
                           }`}
                       >
                         <i className={faq.isActive ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
                       </Button>
                       <Button
                         onClick={() => deleteFaq(faq._id)}
-                        className="bg-red-50 text-red-600 hover:bg-red-100 px-2 py-1 text-xs"
+                        className="bg-red-500 text-red-600 hover:bg-red-900 px-2 py-1 text-xs"
                       >
                         <i className="ri-delete-bin-line"></i>
                       </Button>
@@ -342,7 +342,7 @@ export default function FAQsManagement() {
                       setShowModal(false);
                       setEditingFaq(null);
                     }}
-                    className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
+                    className="text-gray-800 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
                   >
                     <i className="ri-close-line"></i>
                   </button>
@@ -395,7 +395,7 @@ export default function FAQsManagement() {
                         onClick={() => {
                           setShowModal(false);
                           setEditingFaq(null);
-                        }} className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"  >
+                        }} className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"  >
                         Cancel
                       </Button>
                       <Button type="submit" className="flex-1 bg-blue-600 text-white hover:bg-blue-700" disabled={isLoading}                      >

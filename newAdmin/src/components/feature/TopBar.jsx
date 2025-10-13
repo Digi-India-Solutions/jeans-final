@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,8 +43,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
       <div className="flex items-center space-x-4">
         <button
           onClick={onMenuClick}
-          className={`lg:hidden p-2 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
-            }`}
+          className={`lg:hidden p-2 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-700 text-gray-600'}`}
         >
           <i className="ri-menu-line text-xl"></i>
         </button>
@@ -71,13 +69,13 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
       {/* Right side */}
       <div className="flex items-center space-x-4">
         {/* Theme toggle */}
-        <button
+        {/* <button
           onClick={onThemeToggle}
           className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
             }`}
         >
           <i className={`${isDarkMode ? 'ri-sun-line' : 'ri-moon-line'} text-xl`}></i>
-        </button>
+        </button> */}
 
         {/* Quick actions */}
         <div className="hidden md:flex items-center space-x-2">
@@ -95,8 +93,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
         <div className="relative notification-dropdown">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
-              }`}
+            className={'relative p-2 rounded-lg transition-colors'}
           >
             <i className="ri-notification-3-line text-xl"></i>
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -151,37 +148,32 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
         <div className="relative profile-dropdown">
           <button
             onClick={() => setShowProfile(!showProfile)}
-            className={`flex items-center space-x-2 p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-              }`}
+            className={'flex items-center space-x-2 p-2 rounded-lg transition-colors '}
           >
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               <i className={`ri-user-line ${isDarkMode ? 'text-gray-600' : 'text-gray-600'}`}></i>
             </div>
-            <span className={`hidden md:block text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'
-              }`}>Admin</span>
+            <span className={'hidden md:block text-sm font-medium '}>Admin</span>
             <i className={`ri-arrow-down-s-line text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}></i>
           </button>
 
           {showProfile && (
-            <div className={`absolute right-0 top-12 w-48 rounded-lg shadow-lg border z-50 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            <div className={`absolute right-0 top-12 w-48 rounded-lg shadow-lg border z-50 ${isDarkMode ? '' : 'bg-white border-gray-200'
               }`}>
               <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                 <p className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Admin User</p>
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>admin@garments.com</p>
               </div>
               <div className="py-2">
-                <button className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
-                  }`}>
+                <button className={'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 '}>
                   <i className="ri-user-settings-line"></i>
                   <span>Profile Settings</span>
                 </button>
-                <button className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
-                  }`}>
+                <button className={'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 '}>
                   <i className="ri-settings-3-line"></i>
                   <span>System Settings</span>
                 </button>
-                <button className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
-                  }`}>
+                <button className={'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 '}>
                   <i className="ri-question-line"></i>
                   <span>Help & Support</span>
                 </button>

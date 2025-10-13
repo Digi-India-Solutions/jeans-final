@@ -25,7 +25,7 @@ function CreateNotesModel({ fetchAllOrder, setEditOrderNoteForm, setShowEditOrde
                                     setShowEditOrderNoteModal(false);
                                     setEditOrderNoteForm({ orderId: null, orderNote: '' });
                                 }}
-                                className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
+                                className="text-gray-900 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
                             >
                                 <i className="ri-close-line"></i>
                             </button>
@@ -54,7 +54,7 @@ function CreateNotesModel({ fetchAllOrder, setEditOrderNoteForm, setShowEditOrde
                                     setShowEditOrderNoteModal(false);
                                     setEditOrderNoteForm({ orderId: null, orderNote: '' });
                                 }}
-                                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"
                             >
                                 Cancel
                             </Button>

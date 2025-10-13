@@ -1051,7 +1051,7 @@ export default function OrdersManagement() {
                       setShowPaymentUpdateModal(false);
                       setPaymentUpdateForm({ paidAmount: '', paymentMethod: '', notes: '' });
                     }}
-                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-500"
                   >
                     Cancel
                   </Button>
@@ -1154,7 +1154,7 @@ export default function OrdersManagement() {
                       setShowStatusUpdateModal(false);
                       setStatusUpdateForm({ newStatus: '', trackingId: '', deliveryVendor: '' });
                     }}
-                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"
                   >
                     Cancel
                   </Button>

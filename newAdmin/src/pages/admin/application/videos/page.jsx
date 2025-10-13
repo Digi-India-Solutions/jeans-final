@@ -283,7 +283,7 @@ export default function VideosManagement() {
                       <div className="flex space-x-2">
                         <Button
                           onClick={() => window.open(video.videoUrl, '_blank')}
-                          className="flex-1 bg-green-50 text-green-600 hover:bg-green-100 text-sm"
+                          className="flex-1 bg-green-500 text-green-600 hover:bg-green-800 text-sm"
                         >
                           <i className="ri-play-line mr-1"></i>
                           Watch
@@ -296,13 +296,13 @@ export default function VideosManagement() {
                         </Button>
                         <Button
                           onClick={() => toggleStatus(video._id)}
-                          className={`px-3 ${video.status ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                          className={`px-3 ${video.status ? 'bg-yellow-400 text-yellow-600 hover:bg-yellow-900' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
                         >
                           <i className={video.status ? 'ri-pause-line' : 'ri-play-line'}></i>
                         </Button>
                         <Button
                           onClick={() => handleDelete(video._id)}
-                          className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                          className="bg-red-500 text-red-600 hover:bg-red-900 px-3"
                         >
                           <i className="ri-delete-bin-line"></i>
                         </Button>
@@ -358,7 +358,7 @@ export default function VideosManagement() {
                       <Button
                         type="button"
                         onClick={() => setShowModal(false)}
-                        className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        className="flex-1 bg-gray-600 text-gray-700 hover:bg-gray-800"
                       >
                         Cancel
                       </Button>

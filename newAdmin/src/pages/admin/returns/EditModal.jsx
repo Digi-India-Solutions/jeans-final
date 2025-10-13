@@ -159,7 +159,7 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                                     setShowEditModal(false);
                                     setEditingItem(null);
                                 }}
-                                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                className="flex-1 bg-gray-700 text-white hover:bg-gray-900"
                             >
                                 Cancel
                             </Button>
