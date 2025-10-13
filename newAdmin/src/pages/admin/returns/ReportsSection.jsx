@@ -88,7 +88,7 @@ function ReportsSection({ setActiveReportTab, activeReportTab, reportFilters, se
                 <button
                     onClick={() => setActiveReportTab('deliveries')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeReportTab === 'deliveries'
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-blue-900 text-blue-700'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
@@ -267,9 +267,8 @@ function ReportsSection({ setActiveReportTab, activeReportTab, reportFilters, se
                             {activeReportTab === 'deliveries' ? 'Delivery Challans' : 'Returns'} Trend
                         </h3>
                         <div className="flex space-x-2">
-                            <Button className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm px-3 py-1">
-                                <i className="ri-download-line mr-1"></i>
-                                Export
+                            <Button className="bg-gray-700 text-white hover:bg-gray-900 text-sm px-3 py-1">
+                              Export
                             </Button>
                         </div>
                     </div>
