@@ -259,7 +259,7 @@ export default function BannersManagement() {
                       // onClick={() => toggleStatus(banner?._id, !banner?.isActive)}
                       onClick={() => toggleStatus(banner?._id, banner)}
                       className={`flex-1 text-sm ${banner?.isActive
-                        ? "bg-red-50 text-red-600 hover:bg-red-100"
+                        ? "bg-red-600 text-red-600 hover:bg-red-100"
                         : "bg-green-50 text-green-600 hover:bg-green-100"
                         }`}
                     >
@@ -267,7 +267,7 @@ export default function BannersManagement() {
                     </Button>
                     <Button
                       onClick={() => handleDelete(banner?._id)}
-                      className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                      className="bg-red-900 text-red-600 hover:bg-red-100 px-3"
                     >
                       <i className="ri-delete-bin-line"></i>
                     </Button>
@@ -448,7 +448,7 @@ export default function BannersManagement() {
                         setShowAddModal(false);
                         resetForm();
                       }}
-                      className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-200"
                     >
                       Cancel
                     </Button>

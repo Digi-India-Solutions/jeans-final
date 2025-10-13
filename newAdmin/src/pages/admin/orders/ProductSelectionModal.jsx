@@ -308,7 +308,7 @@ function ProductSelectionModal({
                                     <Button
                                         onClick={() => setCurrentPageSubProduct(prev => Math.max(prev - 1, 1))}
                                         disabled={currentPageSubProduct === 1}
-                                        className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                                        className="px-4 py-2 bg-gray-900 text-gray-700 "
                                     >
                                         Previous
                                     </Button>
@@ -319,7 +319,7 @@ function ProductSelectionModal({
                                             onClick={() => setCurrentPageSubProduct(page)}
                                             className={`px-4 py-2 ${currentPageSubProduct === page
                                                 ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-100 text-gray-700'}`}
+                                                : 'bg-gray-300 text-gray-900'}`}
                                         >
                                             {page}
                                         </Button>
@@ -328,7 +328,7 @@ function ProductSelectionModal({
                                     <Button
                                         onClick={() => setCurrentPageSubProduct(prev => Math.min(prev + 1, totalPagesSubProduct))}
                                         disabled={currentPageSubProduct === totalPagesSubProduct}
-                                        className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                                        className="px-4 py-2 bg-gray-500 text-gray-700 disabled:opacity-50"
                                     >
                                         Next
                                     </Button>
@@ -354,7 +354,7 @@ function ProductSelectionModal({
                                 setFilteredSubProducts(subProducts);
                                 setProductSearchQuery("");
                             }}
-                            className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="bg-gray-900 text-gray-700 hover:bg-gray-200"
                         >
                             Close
                         </Button>

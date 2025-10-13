@@ -67,7 +67,7 @@ function AdvancedFilters({ setFilters, filters }) {
                         <div className="flex items-end">
                             <Button
                                 onClick={() => setFilters({ client: '', status: '', dateFrom: '', dateTo: '', search: '' })}
-                                className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                className="w-full bg-gray-900 text-gray-700 hover:bg-gray-700"
                             >
                                 Clear Filters
                             </Button>

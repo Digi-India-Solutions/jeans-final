@@ -1,3 +1,105 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global compact scaling to emulate ~25% zoom-out across the admin UI */
+html {
+  font-size: 75%; /* reduce root font size to 75% (~25% smaller) */
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Accessibility overrides: darken light background utilities on interactive elements (buttons/inputs/links)
+   This ensures any element that used bg-*-100..300 gets a darker, high-contrast background + white text.
+   We intentionally scope to button-like elements to avoid altering layout backgrounds. */
+
+/* Gray */
+button[class*="bg-gray-100"], button[class*="bg-gray-200"], button[class*="bg-gray-300"],
+input[type="button"][class*="bg-gray-100"], input[type="button"][class*="bg-gray-200"], input[type="button"][class*="bg-gray-300"],
+input[type="submit"][class*="bg-gray-100"], input[type="submit"][class*="bg-gray-200"], input[type="submit"][class*="bg-gray-300"],
+a[class*="bg-gray-100"], a[class*="bg-gray-200"], a[class*="bg-gray-300"] {
+  background-color: #374151 !important; /* tailwind gray-700 */
+  color: #ffffff !important;
+}
+button[class*="hover:bg-gray-100"], button[class*="hover:bg-gray-200"], button[class*="hover:bg-gray-300"],
+input[type="button"][class*="hover:bg-gray-100"], input[type="button"][class*="hover:bg-gray-200"], input[type="button"][class*="hover:bg-gray-300"],
+input[type="submit"][class*="hover:bg-gray-100"], input[type="submit"][class*="hover:bg-gray-200"], input[type="submit"][class*="hover:bg-gray-300"],
+a[class*="hover:bg-gray-100"], a[class*="hover:bg-gray-200"], a[class*="hover:bg-gray-300"]:hover {
+  background-color: #111827 !important; /* tailwind gray-900 */
+  color: #ffffff !important;
+}
+
+/* Blue */
+button[class*="bg-blue-100"], button[class*="bg-blue-200"], button[class*="bg-blue-300"],
+input[type="button"][class*="bg-blue-100"], input[type="button"][class*="bg-blue-200"], input[type="button"][class*="bg-blue-300"],
+input[type="submit"][class*="bg-blue-100"], input[type="submit"][class*="bg-blue-200"], input[type="submit"][class*="bg-blue-300"],
+a[class*="bg-blue-100"], a[class*="bg-blue-200"], a[class*="bg-blue-300"] {
+  background-color: #1D4ED8 !important; /* tailwind blue-700 */
+  color: #ffffff !important;
+}
+button[class*="hover:bg-blue-100"], button[class*="hover:bg-blue-200"], button[class*="hover:bg-blue-300"],
+input[type="button"][class*="hover:bg-blue-100"], input[type="button"][class*="hover:bg-blue-200"], input[type="button"][class*="hover:bg-blue-300"],
+input[type="submit"][class*="hover:bg-blue-100"], input[type="submit"][class*="hover:bg-blue-200"], input[type="submit"][class*="hover:bg-blue-300"],
+a[class*="hover:bg-blue-100"], a[class*="hover:bg-blue-200"], a[class*="hover:bg-blue-300"]:hover {
+  background-color: #1E40AF !important; /* tailwind blue-900 */
+  color: #ffffff !important;
+}
+
+/* Green */
+button[class*="bg-green-100"], button[class*="bg-green-200"], button[class*="bg-green-300"],
+input[type="button"][class*="bg-green-100"], input[type="button"][class*="bg-green-200"], input[type="button"][class*="bg-green-300"],
+input[type="submit"][class*="bg-green-100"], input[type="submit"][class*="bg-green-200"], input[type="submit"][class*="bg-green-300"],
+a[class*="bg-green-100"], a[class*="bg-green-200"], a[class*="bg-green-300"] {
+  background-color: #15803D !important; /* tailwind green-700 */
+  color: #ffffff !important;
+}
+button[class*="hover:bg-green-100"], button[class*="hover:bg-green-200"], button[class*="hover:bg-green-300"],
+input[type="button"][class*="hover:bg-green-100"], input[type="button"][class*="hover:bg-green-200"], input[type="button"][class*="hover:bg-green-300"],
+input[type="submit"][class*="hover:bg-green-100"], input[type="submit"][class*="hover:bg-green-200"], input[type="submit"][class*="hover:bg-green-300"],
+a[class*="hover:bg-green-100"], a[class*="hover:bg-green-200"], a[class*="hover:bg-green-300"]:hover {
+  background-color: #064E3B !important; /* tailwind green-900 */
+  color: #ffffff !important;
+}
+
+/* Red */
+button[class*="bg-red-100"], button[class*="bg-red-200"], button[class*="bg-red-300"],
+input[type="button"][class*="bg-red-100"], input[type="button"][class*="bg-red-200"], input[type="button"][class*="bg-red-300"],
+input[type="submit"][class*="bg-red-100"], input[type="submit"][class*="bg-red-200"], input[type="submit"][class*="bg-red-300"],
+a[class*="bg-red-100"], a[class*="bg-red-200"], a[class*="bg-red-300"] {
+  background-color: #B91C1C !important; /* tailwind red-700 */
+  color: #ffffff !important;
+}
+button[class*="hover:bg-red-100"], button[class*="hover:bg-red-200"], button[class*="hover:bg-red-300"],
+input[type="button"][class*="hover:bg-red-100"], input[type="button"][class*="hover:bg-red-200"], input[type="button"][class*="hover:bg-red-300"],
+input[type="submit"][class*="hover:bg-red-100"], input[type="submit"][class*="hover:bg-red-200"], input[type="submit"][class*="hover:bg-red-300"],
+a[class*="hover:bg-red-100"], a[class*="hover:bg-red-200"], a[class*="hover:bg-red-300"]:hover {
+  background-color: #7F1D1D !important; /* darker red */
+  color: #ffffff !important;
+}
+
+/* Orange / Amber */
+button[class*="bg-amber-100"], button[class*="bg-amber-200"], button[class*="bg-amber-300"],
+input[type="button"][class*="bg-amber-100"], input[type="button"][class*="bg-amber-200"], input[type="button"][class*="bg-amber-300"],
+input[type="submit"][class*="bg-amber-100"], input[type="submit"][class*="bg-amber-200"], input[type="submit"][class*="bg-amber-300"],
+a[class*="bg-amber-100"], a[class*="bg-amber-200"], a[class*="bg-amber-300"] {
+  background-color: #C2410C !important; /* tailwind orange-700 */
+  color: #ffffff !important;
+}
+button[class*="hover:bg-amber-100"], button[class*="hover:bg-amber-200"], button[class*="hover:bg-amber-300"],
+input[type="button"][class*="hover:bg-amber-100"], input[type="button"][class*="hover:bg-amber-200"], input[type="button"][class*="hover:bg-amber-300"],
+input[type="submit"][class*="hover:bg-amber-100"], input[type="submit"][class*="hover:bg-amber-200"], input[type="submit"][class*="hover:bg-amber-300"],
+a[class*="hover:bg-amber-100"], a[class*="hover:bg-amber-200"], a[class*="hover:bg-amber-300"]:hover {
+  background-color: #7C2D12 !important; /* darker orange */
+  color: #ffffff !important;
+}
+
+/* Additional: ensure dropdown menu items that used hover:bg-gray-100 are visible */
+button[role="menuitem"][class*="hover:bg-gray-100"]:hover, .dropdown-item[class*="hover:bg-gray-100"]:hover {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+}
