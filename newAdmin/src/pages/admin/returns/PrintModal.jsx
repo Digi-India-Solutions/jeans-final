@@ -113,23 +113,9 @@ function PrintModal({ setShowPrintModal, setPrintingItem, printingItem, printDoc
                         </div>
                     </div>
 
-                    <div className="flex space-x-3 mt-6">
-                        <Button
-                            onClick={() => {
-                                setShowPrintModal(false);
-                                setPrintingItem(null);
-                            }}
-                            className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        >
-                            Close
-                        </Button>
-                        <Button
-                            onClick={printDocument}
-                            className="flex-1 bg-green-600 text-white hover:bg-green-700"
-                        >
-                            <i className="ri-printer-line mr-2"></i>
-                            Print Document
-                        </Button>
+                    <div className="flex space-x-3 mt-4">
+                        <button className="flex-1 bg-gray-700 text-white hover:bg-gray-900" onClick={() => setShowPrintModal(false)}>Close</button>
+                        <button className="flex-1 bg-blue-600 text-white hover:bg-blue-700" onClick={printDocument}>Print</button>
                     </div>
                 </div>
             </div>

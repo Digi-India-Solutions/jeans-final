@@ -390,7 +390,7 @@ export default function SizesManagement() {
                   <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading}                  >
                     {isLoading ? 'Saving...' : (editingItem ? 'Update' : 'Create')}
                   </Button>
-                  <Button onClick={() => setShowModal(false)} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700" disabled={isLoading}                  >
+                  <Button onClick={() => setShowModal(false)} className="flex-1 bg-gray-900 hover:bg-gray-400 text-gray-800" disabled={isLoading}                  >
                     Cancel
                   </Button>
                 </div>

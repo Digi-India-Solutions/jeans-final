@@ -248,7 +248,7 @@ export default function CategoriesManagement() {
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => handleEdit(category)}
-                    className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
+                    className="flex-1 bg-blue-500 text-blue-600 hover:bg-blue-100 text-sm"
                   >
                     <i className="ri-edit-line mr-1"></i>
                     Edit
@@ -256,15 +256,15 @@ export default function CategoriesManagement() {
                   <Button
                     onClick={() => toggleStatus(category._id, category.status)}
                     className={`flex-1 text-sm ${category.status
-                      ? "bg-red-50 text-red-600 hover:bg-red-100"
-                      : "bg-green-50 text-green-600 hover:bg-green-100"
+                      ? "bg-red-500 text-red-600 hover:bg-red-900"
+                      : "bg-green-500 text-green-600 hover:bg-green-100"
                       }`}
                   >
                     {category.status ? "Deactivate" : "Activate"}
                   </Button>
                   <Button
                     onClick={() => handleDelete(category._id)}
-                    className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                    className="bg-red-500 text-red-600 hover:bg-red-100 px-3"
                   >
                     <i className="ri-delete-bin-line"></i>
                   </Button>
@@ -409,7 +409,7 @@ export default function CategoriesManagement() {
                         setShowAddModal(false);
                         resetForm();
                       }}
-                      className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      className="flex-1 bg-gray-500 text-gray-700 hover:bg-gray-900"
                     >
                       Cancel
                     </Button>
