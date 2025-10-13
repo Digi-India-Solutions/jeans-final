@@ -468,26 +468,26 @@ export default function WishlistManagement() {
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => handleViewDetails(wishlist)}
-                    className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
+                    className="flex-1 bg-blue-500 text-blue-600 hover:bg-blue-700 text-sm"
                   >
                     <i className="ri-eye-line mr-1"></i>
                     View
                   </Button>
                   <Button
                     onClick={() => handleEditWishlist(wishlist)}
-                    className="bg-green-50 text-green-600 hover:bg-green-100 px-3"
+                    className="bg-green-500 text-green-600 hover:bg-green-800 px-3"
                   >
                     <i className="ri-edit-line"></i>
                   </Button>
                   <Button
                     onClick={() => sendWishlistReminder(wishlist)}
-                    className="bg-purple-50 text-purple-600 hover:bg-purple-100 px-3"
+                    className="bg-purple-500 text-purple-600 hover:bg-purple-800 px-3"
                   >
                     <i className="ri-mail-line"></i>
                   </Button>
                   <Button
                     onClick={() => deleteWishlist(wishlist?._id)}
-                    className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                    className="bg-red-500 text-red-600 hover:bg-red-800 px-3"
                   >
                     <i className="ri-delete-bin-line"></i>
                   </Button>
@@ -622,13 +622,13 @@ export default function WishlistManagement() {
                       setShowCreateModal(false);
                       setCreateForm({ customerId: '', selectedProducts: [] });
                     }}
-                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={createWishlist}
-                    className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                    className="flex-1 bg-blue-900 text-white-600 hover:bg-blue-500"
                     disabled={!createForm.customerId || createForm.selectedProducts.length === 0}
                   >
                     Create Wishlist
@@ -759,7 +759,7 @@ export default function WishlistManagement() {
                       setEditingWishlist(null);
                       setEditForm({ customerId: '', selectedProducts: [] });
                     }}
-                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="flex-1 bg-gray-600 text-gray-700 hover:bg-gray-800"
                   >
                     Cancel
                   </Button>

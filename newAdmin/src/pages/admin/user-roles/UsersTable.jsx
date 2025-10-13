@@ -95,7 +95,7 @@ function UsersTable({ userPermition, permiton, setUsers, users, setEditingUser, 
                                         <div className="flex space-x-2">
                                             {permiton.update || userPermition?.role === 'Super Admin' && <Button
                                                 onClick={() => handleEditUser(user)}
-                                                className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
+                                                className="px-4 py-2 bg-gray-700 text-white disabled:opacity-50 hover:bg-gray-900"
                                             >
                                                 Edit
                                             </Button>}

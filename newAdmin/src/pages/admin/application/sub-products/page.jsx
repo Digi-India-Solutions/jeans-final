@@ -413,13 +413,13 @@ export default function SubProductsManagement() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'In Stock':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500 text-green-800';
       case 'Low Stock':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500 text-yellow-800';
       case 'Out of Stock':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500 text-gray-800';
     }
   };
 
@@ -561,14 +561,14 @@ export default function SubProductsManagement() {
                 <div className="flex space-x-2">
                   {permiton.update && <Button
                     onClick={() => handleEdit(item)}
-                    className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
+                    className="flex-1 bg-blue-500 text-blue-600 hover:bg-blue-900 text-sm"
                   >
                     <i className="ri-edit-line mr-1"></i>
                     Edit
                   </Button>}
                   {permiton.delete && <Button
                     onClick={() => handleDelete(item?._id)}
-                    className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                    className="bg-red-500 text-red-600 hover:bg-red-900 px-3"
                   >
                     <i className="ri-delete-bin-line"></i>
                   </Button>}
@@ -584,7 +584,7 @@ export default function SubProductsManagement() {
               <Button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                className="px-4 py-2 bg-gray-900 text-gray-700 "
               >
                 Previous
               </Button>
@@ -595,7 +595,7 @@ export default function SubProductsManagement() {
                   onClick={() => setCurrentPage(page)}
                   className={`px-4 py-2 ${currentPage === page
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700'}`}
+                    : 'bg-gray-400 text-gray-700'}`}
                 >
                   {page}
                 </Button>
@@ -604,7 +604,7 @@ export default function SubProductsManagement() {
               <Button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                className="px-4 py-2 bg-gray-900 text-gray-700 disabled:opacity-50"
               >
                 Next
               </Button>

@@ -748,14 +748,14 @@ function CreateChallanModal({
                 setShowCreateChallanModal(false);
                 resetForm();
               }}
-              className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+              className="flex-1 bg-gray-700 text-white hover:bg-gray-900"
             >
               Cancel
             </Button>
 
             <Button
               onClick={createChallan}
-              className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+              className="flex-1 bg-blue-900 text-white hover:bg-blue-700"
               disabled={
                 !challanForm.customerId ||
                 !challanForm.orderId ||

@@ -395,7 +395,7 @@ export default function ProductsManagement() {
                       alt={product.productName}
                       className="w-full h-48 object-cover"
                     />
-                    <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${product.status ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                    <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${product.status ? 'bg-green-700 text-white' : 'bg-gray-700 text-white'}`}>
                       {product.status ? "Active" : "Inactive"}
                     </div>
                     {product.images && product.images.length > 1 && (
@@ -437,14 +437,14 @@ export default function ProductsManagement() {
                       </Button>}
                      {permiton.update && <Button
                         onClick={() => toggleStatus(product)}
-                        className={`flex-1 text-sm ${product?.status ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                        className={`flex-1 text-sm ${product?.status ? 'bg-yellow-500 text-red-900 hover:bg-yellow-900' : 'bg-green-500 text-green-600 hover:bg-green-900'}`}
                       >
                         <i className={`ri-${product.status ? 'close' : 'check'}-line mr-1`}></i>
                         {product.status ? 'Deactivate' : 'Activate'}
                       </Button>} 
                       {permiton.delete && <Button
                         onClick={() => handleDelete(product?._id)}
-                        className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                        className="bg-red-500 text-red-600 hover:bg-red-900 px-3"
                       >
                         <i className="ri-delete-bin-line"></i>
                       </Button>}
@@ -461,7 +461,7 @@ export default function ProductsManagement() {
                   <Button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                    className="px-4 py-2 bg-gray-900 text-gray-700 disabled:opacity-90"
                   >
                     Previous
                   </Button>
@@ -472,7 +472,7 @@ export default function ProductsManagement() {
                       onClick={() => setCurrentPage(page)}
                       className={`px-4 py-2 ${currentPage === page
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700'}`}
+                        : 'bg-gray-600 text-gray-700'}`}
                     >
                       {page}
                     </Button>
@@ -481,7 +481,7 @@ export default function ProductsManagement() {
                   <Button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                    className="px-4 py-2 bg-gray-900 text-gray-700 disabled:opacity-50"
                   >
                     Next
                   </Button>
@@ -571,7 +571,7 @@ export default function ProductsManagement() {
                             {product.type || 'Regular'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status ? 'bg-green-700 text-white' : 'bg-gray-700 text-white'}`}>
                               {product.status ? 'Active' : 'Inactive'}
                             </span>
                           </td>
@@ -808,7 +808,7 @@ export default function ProductsManagement() {
                   </div>
 
                   <div className="flex space-x-3 pt-4">
-                    <Button type="button" onClick={resetForm} className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"                    >
+                    <Button type="button" onClick={resetForm} className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"                    >
                       Cancel
                     </Button>
                     <Button

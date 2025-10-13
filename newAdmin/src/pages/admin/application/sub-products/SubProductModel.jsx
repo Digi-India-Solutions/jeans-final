@@ -567,7 +567,7 @@ function SubProductModel({
             <Button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700"
+              className="flex-1 bg-gray-900 hover:bg-gray-400 text-gray-700"
             >
               Cancel
             </Button>

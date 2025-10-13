@@ -442,7 +442,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <select
                                                     value={newOrderForm?.customerId}
                                                     onChange={(e) => handleCustomerSelect(e.target.value)}
-                                                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
+                                                    className="w-full px-3 py-2 pr-8 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
                                                     required
                                                 >
                                                     <option value="">Select Customer</option>
@@ -679,7 +679,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                         <button
                                                             type="button"
                                                             onClick={() => updateItemQuantity(index, parseInt(item?.quantity) + 1)}
-                                                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50"
+                                                            className="w-8 h-8 flex items-center justify-center border border-gray-300 bg-gray-500 rounded-md hover:bg-gray-50"
                                                         >
                                                             <i className="ri-add-line text-sm"></i>
                                                         </button>
@@ -915,11 +915,11 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                             setShowCreateOrderModal(false);
                                             setNewOrderForm({ customerId: '', customerName: '', customerEmail: '', customerPhone: '', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [] })
                                         }}
-                                        className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-200"
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" className="flex-1 bg-blue-600 text-white hover:bg-blue-700" disabled={newOrderForm?.items?.length === 0}  >
+                                    <Button type="submit" className="flex-1 bg-blue-900 text-white hover:bg-blue-700" disabled={newOrderForm?.items?.length === 0}  >
                                         Create Order
                                     </Button>
                                 </div>

@@ -75,19 +75,19 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                                             {permiton.update && <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handleEdit(returnItem, 'return')}
-                                                    className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
+                                                    className="bg-blue-900 text-blue-600 hover:bg-blue-500 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-edit-line mr-1"></i>Edit
                                                 </Button>
                                                 <div className="relative group">
-                                                    <Button className="bg-purple-50 text-purple-600 hover:bg-purple-100 text-xs px-2 py-1">
+                                                    <Button className="bg-purple-950 text-purple-600 hover:bg-purple-600 text-xs px-2 py-1">
                                                         <i className="ri-arrow-down-s-line"></i>Status
                                                     </Button>
                                                     <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                                                         <div className="py-1">
                                                             {returnItem?.status !== 'Approved' && <button
                                                                 onClick={() => handleStatusUpdate(returnItem?._id, 'Pending', 'return')}
-                                                                className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
+                                                                className="block px-4 py-2 text-xs text-gray-200 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Pending
                                                             </button>}
@@ -122,13 +122,13 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                                             <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handlePrint(returnItem, 'return')}
-                                                    className="bg-green-50 text-green-600 hover:bg-green-100 text-xs px-2 py-1"
+                                                    className="bg-green-700 text-green-600 hover:bg-green-900 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-printer-line mr-1"></i>Print
                                                 </Button>
                                                 {permiton.delete && <Button
                                                     onClick={() => handleDelete(returnItem?._id, 'return')}
-                                                    className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
+                                                    className="bg-red-700 text-red-600 hover:bg-red-500 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-delete-bin-line mr-1"></i>Delete
                                                 </Button>}
@@ -155,7 +155,7 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                             <Button
                                 onClick={() => setReturnCurrantPage(prev => Math.max(prev - 1, 1))}
                                 disabled={returnCurrantPage === 1}
-                                className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                                className="px-4 py-2 bg-gray-500 text-gray-700 "
                             >
                                 Previous
                             </Button>
@@ -166,7 +166,7 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                                     onClick={() => setReturnCurrantPage(page)}
                                     className={`px-4 py-2 ${returnCurrantPage === page
                                         ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700'}`}
+                                        : 'bg-gray-900 text-gray-700'}`}
                                 >
                                     {page}
                                 </Button>

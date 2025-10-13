@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
@@ -81,7 +80,7 @@ export default function Dashboard() {
       case 'Shipped':
         return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-700 text-white';
     }
   };
 
