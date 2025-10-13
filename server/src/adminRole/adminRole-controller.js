@@ -31,3 +31,9 @@ exports.deleteRoleByAdmin = catchAsyncErrors(async (req, res, next) => {
     if (!role) return next(new ErrorHandler('Role not found', 404));
     res.status(200).json({ status: true, message: "Role deleted successfully", data: role });
 });
+
+exports.getAllRolesByRole = catchAsyncErrors(async (req, res) => {
+    console.log("req.body.role==>", req.body.role);
+    const roles = await AdminRole.find({ name: req.body.role }).sort({ createdAt: -1 });
+    res.status(200).json({ status: true, message: "Roles fetched successfully", data: roles });
+});

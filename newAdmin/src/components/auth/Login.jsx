@@ -4,6 +4,8 @@ import './Login.css';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { postData } from '../../services/FetchNodeServices';
+import jwtDecode from "jwt-decode";
+
 
 const Login = () => {
     const navigate = useNavigate();
@@ -11,17 +13,71 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [step, setStep] = useState(1); // 1: login, 2: forgot password
+  const [loading, setLoading] = useState(false);
+    // const handleLogin = async (e) => {
+    //     e.preventDefault();
+    //     const response = await postData('api/admin/admin-login', { email, password });
+
+    //     if (response?.status === true) {
+    //         const token = response?.data?.token;
+    //          const decoded = await jwtDecode(token);
+    //          console.log("DecodedHHH Token:==>", decoded);
+    //         toast.success(response?.message);
+    //         sessionStorage.setItem('login', true);
+    //         sessionStorage.setItem('JeansAdmin', response?.data?.token);
+    //          try {
+    //             const decoded = jwtDecode(token);
+    //             console.log("Decoded Token:==>", decoded);
+    //             sessionStorage.setItem('JeansUser', JSON.stringify(decoded));
+    //         } catch (err) {
+    //             console.warn("Invalid token decode:", err);
+    //         }
+    //         // window.location.href = '/admin/dashboard';
+    //     } else {
+    //         toast.error(response?.message);
+    //     }
+    // };
+
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const response = await postData('api/admin/admin-login', { email, password });
 
-        if (response?.status === true) {
-            toast.success(response?.message);
-            sessionStorage.setItem('login', true);
-            window.location.href = '/admin/dashboard';
-        } else {
-            toast.error(response?.message);
+        if (!email || !password) {
+            toast.error("Please fill in both fields");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await postData("api/admin/admin-login", { email, password });
+
+            if (response?.status === true) {
+                const token = response?.data?.token;
+                let decodedToken;
+
+                try {
+                    decodedToken = jwtDecode(token);
+                    console.log("Decoded Token:", decodedToken);
+                    sessionStorage.setItem("JeansUser", JSON.stringify(decodedToken));
+                } catch (err) {
+                    console.warn("Invalid token decode:", err);
+                }
+
+                sessionStorage.setItem("login", true);
+                sessionStorage.setItem("JeansAdmin", token);
+                toast.success(response?.message || "Login successful!");
+
+                // Small delay for smooth UX
+                setTimeout(() => navigate("/admin/dashboard"), 800);
+            } else {
+                toast.error(response?.message || "Invalid email or password");
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            toast.error("Something went wrong during login.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -92,7 +148,7 @@ const Login = () => {
                     )}
 
                     <button type="submit" className="login-button">
-                        {step === 1 ? 'Login' : 'Send Reset Link'}
+                        {step === 1 ? loading ? 'Loading...' : 'Login' : 'Send Reset Link'}
                     </button>
 
                     {step === 2 && (

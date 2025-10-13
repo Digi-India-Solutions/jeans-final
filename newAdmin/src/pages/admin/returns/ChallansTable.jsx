@@ -7,6 +7,7 @@ import BiltiSlipUploader from './BiltiSlipUploader';
 function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, handlePrint, handleDelete,
     challanCurrantPage,
     setChallanCurrantPage,
+    permiton,
     challanPage, }) {
     return (
         <Card className="overflow-hidden">
@@ -72,13 +73,13 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                     </td>
                                     <td className="px-6 py-4">
                                         <div>
-                                            <BiltiSlipUploader  challan={challan}/>
+                                            <BiltiSlipUploader challan={challan} permiton={permiton} />
                                         </div>
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                         <div className="flex flex-col space-y-1">
-                                            <div className="flex space-x-1">
+                                            {permiton.update && <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handleEdit(challan, 'challan')}
                                                     className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
@@ -112,7 +113,7 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div>}
                                             <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handlePrint(challan, 'challan')}
@@ -120,12 +121,12 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                                 >
                                                     <i className="ri-printer-line mr-1"></i>Print
                                                 </Button>
-                                                <Button
+                                                {permiton.delete && <Button
                                                     onClick={() => handleDelete(challan?._id, 'challan')}
                                                     className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-delete-bin-line mr-1"></i>Delete
-                                                </Button>
+                                                </Button>}
                                             </div>
                                         </div>
                                     </td>

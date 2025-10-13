@@ -78,13 +78,25 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                                     className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                                 >
-                                    <option value="Pending">Pending</option>
-                                    <option value="Approved">Approved</option>
+                                    {/* Always visible */}
+
                                     <option value="Rejected">Rejected</option>
-                                    <option value="Completed">Completed</option>
+
+                                    {/* Challan-specific statuses */}
+                                    {editingItem.type === "challan" && editForm.checkStatus !== "Approved" && (
+                                        <>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Completed">Completed</option>
+                                        </>
+                                    )}
+
+                                    {/* Common for all types */}
                                     <option value="Dispatched">Dispatched</option>
                                 </select>
-                                <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+
+                                {/* Dropdown icon */}
+                                <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                             </div>
                         </div>
 
@@ -101,7 +113,8 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                                             <span className="text-sm">Qty:</span>
                                             {editingItem.type === 'return' ? <input
                                                 type="number"
-                                                disabled={item?.dispatchedQty >= item?.returnPcs}
+                                                // disabled={item?.dispatchedQty >= item?.returnPcs}
+                                                disabled
                                                 value={editingItem.type === 'challan' ? item.dispatchedQty : item.returnPcs}
                                                 onChange={(e) => {
                                                     const newValue = parseInt(e.target.value) || 0;

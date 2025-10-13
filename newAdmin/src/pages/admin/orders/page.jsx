@@ -93,7 +93,8 @@ export default function OrdersManagement() {
   const [totalPagesSubProduct, setTotalPagesSubProduct] = useState(1)
   const [currentPageSubProduct, setCurrentPageSubProduct] = useState(1)
   const [paymentUpdateForm, setPaymentUpdateForm] = useState({ paidAmount: '', paymentMethod: '', notes: '' });
-
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
   const [filters, setFilters] = useState({ status: '', orderType: '', customerType: '', paymentType: '', search: '' });
 
   const [customers] = useState([
@@ -139,10 +140,7 @@ export default function OrdersManagement() {
     }
   ]);
 
-
   const [newOrderForm, setNewOrderForm] = useState({ customerId: '', customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [], customerAvailablePoints: 0, redeemPoints: 0, pointsToEarn: 0 });
-
-
 
   const deliveryVendors = ['BlueDart', 'Delhivery', 'DTDC', 'FedEx', 'India Post', 'Aramex'];
 
@@ -858,6 +856,20 @@ export default function OrdersManagement() {
     setShowEditOrderNoteModal(true);
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.orders)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
 
   return (
     <AdminLayout>
@@ -867,13 +879,13 @@ export default function OrdersManagement() {
             <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
             <p className="text-gray-600 mt-1">Manage online and offline orders with payment tracking</p>
           </div>
-          <Button
+          {permiton?.write && <Button
             onClick={() => setShowCreateOrderModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
           >
             <i className="ri-add-line"></i>
             <span>Create Order</span>
-          </Button>
+          </Button>}
         </div>
 
         {/* Filters */}
@@ -908,6 +920,7 @@ export default function OrdersManagement() {
             setCurrentPage={setCurrentPage}
             setTotalPages={setTotalPages}
             openEditOrderNote={openEditOrderNote}
+            permiton={permiton}
           />
         </Card>
 
@@ -1006,7 +1019,16 @@ export default function OrdersManagement() {
                     <input
                       type="number"
                       value={paymentUpdateForm?.paidAmount}
-                      onChange={(e) => setPaymentUpdateForm({ ...paymentUpdateForm, paidAmount: e.target.value })}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        const balance = parseFloat(selectedOrder?.balanceAmount || 0);
+
+                        if (value <= balance) {
+                          setPaymentUpdateForm({ ...paymentUpdateForm, paidAmount: value });
+                        } else {
+                          alert("⚠️ Paid amount cannot exceed the remaining balance!");
+                        }
+                      }}
                       placeholder="Enter payment amount"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       min="0"
@@ -1400,7 +1422,7 @@ export default function OrdersManagement() {
                       </div>
 
                       {/* Quick Actions */}
-                      <div className="mt-6 space-y-2">
+                      {permiton.update && <div className="mt-6 space-y-2">
                         {canUpdateStatus(selectedOrder?.status) && (
                           <Button
                             onClick={() => {
@@ -1423,22 +1445,22 @@ export default function OrdersManagement() {
                             Update Payment
                           </Button>
                         )}
-                        {selectedOrder.status !== 'Cancelled' && 
-                        // selectedOrder.status !== 'Delivered' &&
-                         (
-                          <Button
-                            onClick={() => {
-                              if (confirm('Are you sure you want to cancel this order?')) {
-                                updateOrderStatus(selectedOrder._id, 'Cancelled');
-                                setSelectedOrder({ ...selectedOrder, status: 'Cancelled' });
-                              }
-                            }}
-                            className="w-full bg-red-600 text-white hover:bg-red-700 text-sm"
-                          >
-                            Cancel Order
-                          </Button>
-                        )}
-                      </div>
+                        {selectedOrder.status !== 'Cancelled' &&
+                          // selectedOrder.status !== 'Delivered' &&
+                          (
+                            <Button
+                              onClick={() => {
+                                if (confirm('Are you sure you want to cancel this order?')) {
+                                  updateOrderStatus(selectedOrder._id, 'Cancelled');
+                                  setSelectedOrder({ ...selectedOrder, status: 'Cancelled' });
+                                }
+                              }}
+                              className="w-full bg-red-600 text-white hover:bg-red-700 text-sm"
+                            >
+                              Cancel Order
+                            </Button>
+                          )}
+                      </div>}
                     </div>
                   </div>
                 </div>

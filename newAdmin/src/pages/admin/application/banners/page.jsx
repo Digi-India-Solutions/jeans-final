@@ -14,11 +14,12 @@ export default function BannersManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [permiton, setPermiton] = useState('');
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   const emptyForm = { title: "", image: "", status: "Active", startDate: "", endDate: "", position: "Home Hero", url: "", };
 
   const [formData, setFormData] = useState(emptyForm);
-
+  console.log("USER==>", user)
   /** Reset Form */
   const resetForm = () => {
     setFormData(emptyForm);
@@ -45,6 +46,7 @@ export default function BannersManagement() {
 
   useEffect(() => {
     fetchBanners();
+
   }, []);
 
   /** Submit Form (Add / Edit) */
@@ -117,17 +119,17 @@ export default function BannersManagement() {
         confirmButtonText: 'Yes, delete it!'
       });
 
-      if (result?.isConfirmed) {
-        const data = await getData(`api/banner/delete/${id}`);
-        console.log("REASPONSE ALL BANNER", data)
-        if (data?.success === true) {
-          setBanners(banners.filter(banner => banner?._id !== id));
-          toast.success("Banner deleted successfully");
-        } else {
-          toast.error("Banner deleted Failed");
-        }
+      // if (result?.isConfirmed) {
+      //   const data = await getData(`api/banner/delete/${id}`);
+      //   console.log("REASPONSE ALL BANNER", data)
+      //   if (data?.success === true) {
+      //     setBanners(banners.filter(banner => banner?._id !== id));
+      //     toast.success("Banner deleted successfully");
+      //   } else {
+      //     toast.error("Banner deleted Failed");
+      //   }
 
-      }
+      // }
     } catch (error) {
       toast.error("Failed to delete the banner");
     }
@@ -163,7 +165,22 @@ export default function BannersManagement() {
     const formattedDate = new Date(date).toLocaleDateString("en-US", options);
     return formattedDate;
   }
+
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.banners)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
   console.log("hhhbanners:==>", banners)
+
   return (
     <AdminLayout>
       <ToastContainer />
@@ -178,16 +195,20 @@ export default function BannersManagement() {
               Manage promotional banners and advertisements
             </p>
           </div>
-          <Button
+          {permiton?.write && <Button
             onClick={() => {
-              resetForm();
-              setShowAddModal(true);
+              if (permiton?.write) {
+                resetForm();
+                setShowAddModal(true);
+              } else {
+                toast.error("You do not have permission to add banner");
+              }
             }}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
           >
             <i className="ri-add-line"></i>
             <span>Add Banner</span>
-          </Button>
+          </Button>}
         </div>
 
         {/* Banner Grid */}
@@ -249,12 +270,12 @@ export default function BannersManagement() {
                   </div>
 
                   <div className="flex space-x-2 mt-4">
-                    <Button
-                      onClick={() => handleEdit(banner)}
+                    {permiton.update && <Button
+                      onClick={() => permiton.update ? handleEdit(banner) : alert("You don't have permission to edit this banner")}
                       className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
                     >
                       <i className="ri-edit-line mr-1"></i>Edit
-                    </Button>
+                    </Button>}
                     <Button
                       // onClick={() => toggleStatus(banner?._id, !banner?.isActive)}
                       onClick={() => toggleStatus(banner?._id, banner)}
@@ -265,12 +286,12 @@ export default function BannersManagement() {
                     >
                       {banner?.isActive ? "Deactivate" : "Activate"}
                     </Button>
-                    <Button
-                      onClick={() => handleDelete(banner?._id)}
+                    {permiton.delete && <Button
+                      onClick={() => permiton.delete ? handleDelete(banner?._id) : alert("You don't have permission to delete this banner")}
                       className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
                     >
                       <i className="ri-delete-bin-line"></i>
-                    </Button>
+                    </Button>}
                   </div>
                 </div>
               </Card>
@@ -470,6 +491,6 @@ export default function BannersManagement() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </AdminLayout >
   );
 }

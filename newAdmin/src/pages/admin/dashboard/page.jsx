@@ -7,10 +7,11 @@ import StatsCard from './components/StatsCard';
 import SalesChart from './components/SalesChart';
 import OrdersChart from './components/OrdersChart';
 import RecentOrders from './components/RecentOrders';
+import { postData } from '../../../services/FetchNodeServices';
 
 export default function Dashboard() {
   const [dateRange, setDateRange] = useState('This Month');
-
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   // Updated stats with piece counts
   const stats = [
     {
@@ -110,6 +111,20 @@ export default function Dashboard() {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -165,14 +180,14 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-600">Today</p>
                 <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.jeans.todaySales / 1000).toFixed(0)}k | {categoryComparison.jeans.todayPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{width: '75%'}}></div>
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '75%' }}></div>
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Weekly</p>
                 <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.jeans.weeklySales / 1000).toFixed(0)}k | {categoryComparison.jeans.weeklyPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{width: '85%'}}></div>
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }}></div>
                 </div>
               </div>
             </div>
@@ -206,14 +221,14 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-600">Today</p>
                 <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.shirts.todaySales / 1000).toFixed(0)}k | {categoryComparison.shirts.todayPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{width: '65%'}}></div>
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Weekly</p>
                 <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.shirts.weeklySales / 1000).toFixed(0)}k | {categoryComparison.shirts.weeklyPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div className="bg-green-500 h-2 rounded-full" style={{width: '70%'}}></div>
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '70%' }}></div>
                 </div>
               </div>
             </div>

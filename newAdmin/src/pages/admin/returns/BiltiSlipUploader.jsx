@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Download, Upload, X, FileText,Trash2 } from 'lucide-react';
+import { Download, Upload, X, FileText, Trash2 } from 'lucide-react';
 import Button from '../../../components/base/Button';
 import { toast } from 'react-toastify';
 import { postData } from '../../../services/FetchNodeServices';
 
-export default function BiltiSlipUploader({ challan, refreshChallans }) {
+export default function BiltiSlipUploader({ challan, refreshChallans, permiton }) {
     const [file, setFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(challan?.biltiSlipUrl || '');
     const [isUploading, setIsUploading] = useState(false);
@@ -140,12 +140,12 @@ export default function BiltiSlipUploader({ challan, refreshChallans }) {
                         <Download className="w-4 h-4 mr-1" /> Download
                     </Button>
 
-                    <Button
+                    {permiton.delete && <Button
                         onClick={removeFile}
                         className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs flex items-center"
                     >
                         <X className="w-4 h-4 mr-1" /> <Trash2 className="w-4 h-4 mr-1" />
-                    </Button>
+                    </Button>}
                 </div>
             ) : (
                 <div className="flex items-center space-x-2">

@@ -173,16 +173,47 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         }
     };
 
+    // const updatePaymentMethod = (index, field, value) => {
+    //     const updatedPayments = newOrderForm.payments.map((payment, i) =>
+    //         i === index ? { ...payment, [field]: value } : payment
+    //     );
+    //     const subtotal = getTotalValue();
+    //     const pointsRedemptionValue = calculatePointsValue(newOrderForm.redeemPoints);
+    //     const finalTotal = subtotal - pointsRedemptionValue;
+
+    //     console.log("FFFFFFFFF:==>BBBB==>", updatedPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0), updatedPayments <= finalTotal, finalTotal)
+
+    //     if (updatedPayments <= finalTotal) {
+    //         setNewOrderForm({ ...newOrderForm, payments: updatedPayments });
+    //     }
+    // };
+
     const updatePaymentMethod = (index, field, value) => {
+        // Create a new array with the updated payment
         const updatedPayments = newOrderForm.payments.map((payment, i) =>
             i === index ? { ...payment, [field]: value } : payment
         );
 
-        setNewOrderForm({
-            ...newOrderForm,
-            payments: updatedPayments
-        });
+        // Calculate totals
+        const subtotal = getTotalValue(); // e.g., base price total
+        const pointsRedemptionValue = calculatePointsValue(newOrderForm.redeemPoints);
+        const finalTotal = parseFloat((subtotal - pointsRedemptionValue).toFixed(2));
+
+        // Compute current total payment entered by user
+        const totalPaymentEntered = updatedPayments.reduce(
+            (sum, payment) => sum + (parseFloat(payment?.amount) || 0),
+            0
+        );
+
+        // console.log("💰 Payment Debug:", "Total Entered:", totalPaymentEntered, "Allowed:", finalTotal);
+
+        if (totalPaymentEntered <= finalTotal) {
+            setNewOrderForm({ ...newOrderForm, payments: updatedPayments });
+        } else {
+            alert("⚠️ Total payment cannot exceed the order total amount.");
+        }
     };
+
 
     const calculateMaxRedeemablePoints = (cartValue) => {
         // Max 30% of cart value can be redeemed
@@ -376,7 +407,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         setNewOrderForm(prev => ({ ...prev, items: updatedItems, }));
     };
 
-    console.log("FFFFFFFFF:==>", newOrderForm, getTotalValue())
+    // console.log("FFFFFFFFF:==>BBBB", newOrderForm, finalTotal)
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -865,7 +896,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <span>Balance Due:</span>
                                                 {/* <span className="font-medium text-red-600">₹{getBalanceAmount()?.toLocaleString()}</span> */}
                                                 <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints)) - getTotalPaidAmount())?.toLocaleString()}</span>
-                                   
+
                                             </div>
                                         )}
                                         <div className="flex justify-between text-sm font-medium pt-2 border-t border-blue-200">
