@@ -298,7 +298,7 @@ export default function NotificationsManagement() {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6 w-fit">
+        <div className="flex space-x-1 bg-gray-900 p-1 rounded-lg mb-6 w-fit">
           <button
             onClick={() => setActiveTab('notifications')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -314,7 +314,7 @@ export default function NotificationsManagement() {
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               activeTab === 'templates'
                 ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-gray-900 hover:text-gray-900'
             }`}
           >
             Message Templates
@@ -445,7 +445,7 @@ export default function NotificationsManagement() {
                             </Button>
                             <Button
                               onClick={() => deleteNotification(notification.id)}
-                              className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
+                              className="bg-red-500 text-red-600 hover:bg-red-900 text-xs px-2 py-1"
                             >
                               Delete
                             </Button>
@@ -494,14 +494,14 @@ export default function NotificationsManagement() {
                   <div className="flex space-x-2">
                     <Button
                       onClick={() => handleEditTemplate(template)}
-                      className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
+                      className="flex-1 bg-blue-500 text-blue-600 hover:bg-blue-900 text-sm"
                     >
                       <i className="ri-edit-line mr-1"></i>
                       Edit
                     </Button>
                     <Button
                       onClick={() => deleteTemplate(template.id)}
-                      className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
+                      className="bg-red-500 text-red-600 hover:bg-red-900 px-3"
                     >
                       <i className="ri-delete-bin-line"></i>
                     </Button>
@@ -521,7 +521,7 @@ export default function NotificationsManagement() {
                   <h2 className="text-xl font-semibold">Firebase Configuration</h2>
                   <button
                     onClick={() => setShowFirebaseModal(false)}
-                    className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
+                    className="text-gray-900 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
                   >
                     <i className="ri-close-line"></i>
                   </button>
@@ -607,13 +607,13 @@ export default function NotificationsManagement() {
                   <div className="flex space-x-3 pt-4">
                     <Button
                       onClick={() => setShowFirebaseModal(false)}
-                      className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={testFirebaseConnection}
-                      className="bg-green-600 text-white hover:bg-green-700"
+                      className="bg-green-900 text-white hover:bg-green-900"
                       disabled={!firebaseSettings.projectId || !firebaseSettings.apiKey}
                     >
                       <i className="ri-wifi-line mr-2"></i>
@@ -772,7 +772,7 @@ export default function NotificationsManagement() {
                           image: ''
                         });
                       }}
-                      className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-500"
                     >
                       Cancel
                     </Button>
@@ -811,7 +811,7 @@ export default function NotificationsManagement() {
                         isActive: true
                       });
                     }}
-                    className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
+                    className="text-gray-900 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
                   >
                     <i className="ri-close-line"></i>
                   </button>
@@ -892,7 +892,7 @@ export default function NotificationsManagement() {
                           isActive: true
                         });
                       }}
-                      className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-600"
                     >
                       Cancel
                     </Button>

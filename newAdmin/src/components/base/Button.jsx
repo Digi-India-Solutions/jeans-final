@@ -1,4 +1,3 @@
-
 export default function Button({ 
   children, 
   variant = "primary", 
@@ -11,7 +10,7 @@ export default function Button({
   
   const variants = {
     primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-sm",
-    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-900",
+    secondary: "bg-gray-700 hover:bg-gray-900 text-white",
     outline: "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700",
     danger: "bg-red-600 hover:bg-red-700 text-white shadow-sm",
     success: "bg-green-600 hover:bg-green-700 text-white shadow-sm"

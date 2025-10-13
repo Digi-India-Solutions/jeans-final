@@ -252,59 +252,6 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
     if (window.innerWidth < 1024) onClose();
   };
 
-
-
-
-  // // { title: 'Cart', path: '/admin/application/cart' },
-  // { title: 'Wishlist', path: '/admin/application/wishlist' },
-  // { title: 'Client Rewards', path: '/admin/application/rewards' },
-  // { title: 'Notifications', path: '/admin/application/notifications' },
-  // { title: 'FAQs', path: '/admin/application/faqs' }
-  //       ]
-  //     },
-  // {
-  //   title: 'Order Management',
-  //     icon: 'ri-shopping-bag-line',
-  //       path: '/admin/orders'
-  // },
-  // {
-  //   title: 'Sales & Reports',
-  //     icon: 'ri-bar-chart-line',
-  //       path: '/admin/sales'
-  // },
-  // {
-  //   title: 'Return & Challan',
-  //     icon: 'ri-exchange-line',
-  //       path: '/admin/returns'
-  // },
-  // {
-  //   title: 'User Management',
-  //     icon: 'ri-user-settings-line',
-  //       path: '/admin/users'
-  // },
-  // {
-  //   title: 'Admin & Staff Roles',
-  //     icon: 'ri-shield-user-line',
-  //       path: '/admin/user-roles'
-  // },
-  // {
-  //   title: 'Marketing',
-  //     icon: 'ri-megaphone-line',
-  //       path: '/admin/marketing'
-  // },
-  // {
-  //   title: 'Enquiries',
-  //     icon: 'ri-question-answer-line',
-  //       path: '/admin/enquiries'
-  // },
-  // {
-  //   title: 'Catalogue Upload',
-  //     icon: 'ri-file-pdf-line',
-  //       path: '/admin/catalogue'
-  // }
-  //   ];
-
-
   // Build menu dynamically based on permissions
   const menuItems = [
     ...(permissions?.dashboard?.read || user?.role === 'Super Admin' ? [{ title: 'Dashboard', icon: 'ri-dashboard-line', path: '/admin/dashboard', }] : []),

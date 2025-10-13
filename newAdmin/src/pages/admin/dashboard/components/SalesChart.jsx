@@ -1,4 +1,3 @@
-
 export default function SalesChart() {
   const salesData = [
     { month: 'Jan', sales: 45000 },
@@ -23,8 +22,8 @@ export default function SalesChart() {
         <h3 className="text-lg font-semibold text-gray-800">Sales Overview</h3>
         <div className="flex items-center space-x-2">
           <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg">Monthly</button>
-          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">Weekly</button>
-          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 rounded-lg">Daily</button>
+          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-700 hover:text-white rounded-lg">Weekly</button>
+          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-700 hover:text-white rounded-lg">Daily</button>
         </div>
       </div>
       

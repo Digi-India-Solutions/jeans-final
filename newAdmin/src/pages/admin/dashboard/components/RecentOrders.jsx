@@ -1,4 +1,3 @@
-
 export default function RecentOrders() {
   const recentOrders = [
     {
@@ -55,7 +54,7 @@ export default function RecentOrders() {
       case 'Packed': return 'bg-purple-100 text-purple-800';
       case 'Pending': return 'bg-yellow-100 text-yellow-800';
       case 'Canceled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-700 text-white';
     }
   };
 
@@ -105,7 +104,7 @@ export default function RecentOrders() {
                 </td>
                 <td className="py-3 px-2">
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                    order.type === 'b2b' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+                    order.type === 'b2b' ? 'bg-purple-700 text-white' : 'bg-gray-700 text-white'
                   }`}>
                     {order.type === 'b2b' ? 'B2B' : 'Retail'}
                   </span>

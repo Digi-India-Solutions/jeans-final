@@ -64,7 +64,7 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                         <div>
                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${challan.status === 'Dispatched' ? 'bg-green-100 text-green-800' :
                                                 challan.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-gray-100 text-gray-800'
+                                                    'bg-gray-300 text-gray-800'
                                                 }`}>
                                                 {challan?.status}
                                             </span>
@@ -82,12 +82,12 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                             {permiton.update && <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handleEdit(challan, 'challan')}
-                                                    className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
+                                                    className="bg-blue-950 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-edit-line mr-1"></i>Edit
                                                 </Button>
                                                 <div className="relative group">
-                                                    <Button className="bg-purple-50 text-purple-600 hover:bg-purple-100 text-xs px-2 py-1">
+                                                    <Button className="bg-purple-750 text-purple-600 hover:bg-blue-700 text-xs px-2 py-1">
                                                         <i className="ri-arrow-down-s-line"></i>Status
                                                     </Button>
                                                     <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
@@ -117,13 +117,13 @@ function ChallansTable({ getFilteredChallans, handleEdit, handleStatusUpdate, ha
                                             <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handlePrint(challan, 'challan')}
-                                                    className="bg-green-50 text-green-600 hover:bg-green-100 text-xs px-2 py-1"
+                                                    className="bg-green-500 text-green-600 hover:bg-green-900 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-printer-line mr-1"></i>Print
                                                 </Button>
                                                 {permiton.delete && <Button
                                                     onClick={() => handleDelete(challan?._id, 'challan')}
-                                                    className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
+                                                    className="bg-red-500 text-red-600 hover:bg-red-900 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-delete-bin-line mr-1"></i>Delete
                                                 </Button>}

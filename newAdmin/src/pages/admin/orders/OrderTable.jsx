@@ -398,20 +398,20 @@ function OrderTable({
                                                     setSelectedOrder(order);
                                                     setShowOrderModal(true);
                                                 }}
-                                                className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
+                                                className="bg-blue-500 text-blue-600 hover:bg-blue-900 text-xs px-2 py-1"
                                             >
                                                 View
                                             </Button>}
                                             {permiton.update && <Button
                                                 onClick={() => openEditOrderNote(order)}
-                                                className="bg-purple-50 text-purple-600 hover:bg-purple-100 text-xs px-1 py-1"
+                                                className="bg-purple-500 text-purple-600 hover:bg-purple-900 text-xs px-1 py-1"
                                             >
                                                 Note
                                             </Button>}
                                             {canUpdateStatus(order?.status) && (
                                                 <Button
                                                     onClick={() => openStatusUpdate(order)}
-                                                    className="bg-green-50 text-green-600 hover:bg-green-100 text-xs px-1 py-1"
+                                                    className="bg-green-500 text-green-600 hover:bg-green-100 text-xs px-1 py-1"
                                                 >
                                                     Status
                                                 </Button>
@@ -421,7 +421,7 @@ function OrderTable({
                                             {order.balanceAmount > 0 && (
                                                 <Button
                                                     onClick={() => openPaymentUpdate(order)}
-                                                    className="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 text-xs px-2 py-1"
+                                                    className="bg-yellow-500 text-white-600 hover:bg-yellow-100 text-xs px-2 py-1"
                                                 >
                                                     Payment
                                                 </Button>
@@ -438,7 +438,7 @@ function OrderTable({
                                                                 updateOrderStatus(order?._id, "Cancelled");
                                                             }
                                                         }}
-                                                        className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
+                                                        className="bg-red-500 text-red-600 hover:bg-red-900 text-xs px-2 py-1"
                                                     >
                                                         Cancel
                                                     </Button>

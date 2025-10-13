@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Button from '../../../../components/base/Button';
 import Card from '../../../../components/base/Card';
 
@@ -145,7 +145,7 @@ function ManagementRewordTable({
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {daysUntilExpiry > 0 ? (
                                                 <div>
-                                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${isExpiringSoon ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${isExpiringSoon ? 'bg-red-700 text-white' : 'bg-green-700 text-white'}`}>
                                                         {daysUntilExpiry} days left
                                                     </span>
                                                     <div className="text-xs text-gray-500 mt-1">
@@ -153,7 +153,7 @@ function ManagementRewordTable({
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-700 text-white">
                                                     Expired
                                                 </span>
                                             )}
@@ -166,7 +166,7 @@ function ManagementRewordTable({
                                                     setSelectedCustomer(customer);
                                                     setShowCustomerModal(true);
                                                 }}
-                                                className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-3 py-1"
+                                                className="bg-blue-700 text-white hover:bg-blue-900 text-xs px-3 py-1"
                                             >
                                                 <i className="ri-edit-line mr-1"></i>
                                                 Manage Points
@@ -186,7 +186,7 @@ function ManagementRewordTable({
                         <Button
                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-gray-700 text-white disabled:opacity-50 hover:bg-gray-900"
                         >
                             Previous
                         </Button>
@@ -197,7 +197,7 @@ function ManagementRewordTable({
                                 onClick={() => setCurrentPage(page)}
                                 className={`px-4 py-2 ${currentPage === page
                                     ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700'}`}
+                                    : 'bg-gray-700 text-white hover:bg-gray-900'}`}
                             >
                                 {page}
                             </Button>
@@ -206,7 +206,7 @@ function ManagementRewordTable({
                         <Button
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-gray-100 text-gray-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-gray-700 text-white disabled:opacity-50 hover:bg-gray-900"
                         >
                             Next
                         </Button>
