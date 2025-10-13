@@ -19,9 +19,22 @@ const adminRoleSchema = new Schema({
     orders: { type: permissionSchema, default: {} },
     sales: { type: permissionSchema, default: {} },
     returns: { type: permissionSchema, default: {} },
+    sizes: { type: permissionSchema, default: {} },
+    coupons: { type: permissionSchema, default: {} },
+    admins: { type: permissionSchema, default: {} },
+    userManagement: { type: permissionSchema, default: {} },
+    videos: { type: permissionSchema, default: {} },
+    wishlists: { type: permissionSchema, default: {} },
+    clientRewards: { type: permissionSchema, default: {} },
+    notifications: { type: permissionSchema, default: {} },
+    FAQs: { type: permissionSchema, default: {} },
     marketing: { type: permissionSchema, default: {} },
-    enquiries: { type: permissionSchema, default: {} }
+    enquiries: { type: permissionSchema, default: {} },
+    catalogueUpload: { type: permissionSchema, default: {} },
   },
+
+
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -12,7 +12,8 @@ export default function CategoriesManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -184,6 +185,21 @@ export default function CategoriesManagement() {
     }
   };
 
+
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.categories)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
   return (
     <AdminLayout>
       <ToastContainer />
@@ -198,7 +214,7 @@ export default function CategoriesManagement() {
               Manage product categories with images
             </p>
           </div>
-          <Button
+          {permiton?.write && <Button
             onClick={() => {
               resetForm();
               setShowAddModal(true);
@@ -207,7 +223,7 @@ export default function CategoriesManagement() {
           >
             <i className="ri-add-line"></i>
             <span>Add Category</span>
-          </Button>
+          </Button>}
         </div>
 
         {/* Category Grid */}
@@ -246,14 +262,14 @@ export default function CategoriesManagement() {
 
                 {/* Actions */}
                 <div className="flex space-x-2">
-                  <Button
+                  {permiton?.update && <Button
                     onClick={() => handleEdit(category)}
                     className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
                   >
                     <i className="ri-edit-line mr-1"></i>
                     Edit
-                  </Button>
-                  <Button
+                  </Button>}
+                  {permiton.update && <Button
                     onClick={() => toggleStatus(category._id, category.status)}
                     className={`flex-1 text-sm ${category.status
                       ? "bg-red-50 text-red-600 hover:bg-red-100"
@@ -261,13 +277,13 @@ export default function CategoriesManagement() {
                       }`}
                   >
                     {category.status ? "Deactivate" : "Activate"}
-                  </Button>
-                  <Button
+                  </Button>}
+                  {permiton?.delete && <Button
                     onClick={() => handleDelete(category._id)}
                     className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
                   >
                     <i className="ri-delete-bin-line"></i>
-                  </Button>
+                  </Button>}
                 </div>
               </div>
             </Card>

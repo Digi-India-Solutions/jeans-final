@@ -6,7 +6,8 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
     returnCurrantPage,
     setReturnCurrantPage,
     returnPage,
-    
+    permiton
+
 }) {
     console.log("getFilteredReturns==>", getFilteredReturns()[1])
     return (
@@ -71,7 +72,7 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                         <div className="flex flex-col space-y-1">
-                                            <div className="flex space-x-1">
+                                            {permiton.update && <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handleEdit(returnItem, 'return')}
                                                     className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
@@ -84,34 +85,40 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                                                     </Button>
                                                     <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                                                         <div className="py-1">
-                                                            <button
+                                                            {returnItem?.status !== 'Approved' && <button
                                                                 onClick={() => handleStatusUpdate(returnItem?._id, 'Pending', 'return')}
                                                                 className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Pending
-                                                            </button>
-                                                            <button
+                                                            </button>}
+                                                            {returnItem?.status !== 'Approved' && <button
                                                                 onClick={() => handleStatusUpdate(returnItem?._id, 'Approved', 'return')}
                                                                 className="block px-4 py-2 text-xs text-green-700 hover:bg-green-100 w-full text-left font-medium"
                                                             >
                                                                 ✓ Approve & Add Stock
-                                                            </button>
+                                                            </button>}
                                                             <button
                                                                 onClick={() => handleStatusUpdate(returnItem?._id, 'Rejected', 'return')}
                                                                 className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Rejected
                                                             </button>
-                                                            <button
+                                                            {returnItem?.status !== 'Approved' && <button
                                                                 onClick={() => handleStatusUpdate(returnItem?._id, 'Completed', 'return')}
                                                                 className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
                                                             >
                                                                 Completed
-                                                            </button>
+                                                            </button>}
+                                                            {returnItem?.status === 'Approved' && <button
+                                                                onClick={() => handleStatusUpdate(returnItem?._id, 'Dispatched', 'return')}
+                                                                className="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left"
+                                                            >
+                                                                Dispatched
+                                                            </button>}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div>}
                                             <div className="flex space-x-1">
                                                 <Button
                                                     onClick={() => handlePrint(returnItem, 'return')}
@@ -119,12 +126,12 @@ function ReturnsTable({ getFilteredReturns, handleEdit, handleStatusUpdate, hand
                                                 >
                                                     <i className="ri-printer-line mr-1"></i>Print
                                                 </Button>
-                                                <Button
+                                                {permiton.delete && <Button
                                                     onClick={() => handleDelete(returnItem?._id, 'return')}
                                                     className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
                                                 >
                                                     <i className="ri-delete-bin-line mr-1"></i>Delete
-                                                </Button>
+                                                </Button>}
                                             </div>
                                         </div>
                                     </td>

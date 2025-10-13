@@ -223,14 +223,14 @@ import Button from "../../../components/base/Button";
 
 function OrderTable({
     filteredOrders, getStatusColor, getPaymentTypeColor, setSelectedOrder, canUpdateStatus, setShowOrderModal, openStatusUpdate,
-    openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote,
+    openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton
 }) {
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr>
-                        {["Order Details", "Customer", "Payment Details", "Status", "Total Pcs", "Delivered Pcs",  "Tracking", "Actions",].map((heading) => (
+                        {["Order Details", "Customer", "Payment Details", "Status", "Total Pcs", "Delivered Pcs", "Tracking", "Actions",].map((heading) => (
                             <th
                                 key={heading}
                                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -393,7 +393,7 @@ function OrderTable({
                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium w-40">
                                     <div className="flex flex-col space-y-1">
                                         <div className="flex space-x-1">
-                                            <Button
+                                            {permiton.read && <Button
                                                 onClick={() => {
                                                     setSelectedOrder(order);
                                                     setShowOrderModal(true);
@@ -401,13 +401,13 @@ function OrderTable({
                                                 className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
                                             >
                                                 View
-                                            </Button>
-                                            <Button
+                                            </Button>}
+                                            {permiton.update && <Button
                                                 onClick={() => openEditOrderNote(order)}
                                                 className="bg-purple-50 text-purple-600 hover:bg-purple-100 text-xs px-1 py-1"
                                             >
                                                 Note
-                                            </Button>
+                                            </Button>}
                                             {canUpdateStatus(order?.status) && (
                                                 <Button
                                                     onClick={() => openStatusUpdate(order)}
@@ -417,7 +417,7 @@ function OrderTable({
                                                 </Button>
                                             )}
                                         </div>
-                                        <div className="flex space-x-1">
+                                        {permiton.update && <div className="flex space-x-1">
                                             {order.balanceAmount > 0 && (
                                                 <Button
                                                     onClick={() => openPaymentUpdate(order)}
@@ -443,7 +443,7 @@ function OrderTable({
                                                         Cancel
                                                     </Button>
                                                 )}
-                                        </div>
+                                        </div>}
                                     </div>
                                 </td>
                             </tr>

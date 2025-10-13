@@ -21,6 +21,8 @@ export default function ProductsManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -273,12 +275,7 @@ export default function ProductsManagement() {
     fetchProducts();
   }, [currentPage, filters?.search, filters?.category, filters?.status]);
 
-  // Apply filters when filters or products change
-  // useEffect(() => {
-  //   applyFilters();
-  // }, [filters, products]);
 
-  // Fetch subcategories when category changes in form
   useEffect(() => {
     if (formData.categoryId) {
       fetchSubCategories(formData.categoryId);
@@ -287,6 +284,23 @@ export default function ProductsManagement() {
       setFormData(prev => ({ ...prev, subcategoryId: '' }));
     }
   }, [formData.categoryId]);
+
+
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.products)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
+
   console.log("GGGGGG:==>", filteredProducts);
 
   return (
@@ -299,13 +313,13 @@ export default function ProductsManagement() {
             <h1 className="text-2xl font-bold text-gray-900">Products Management</h1>
             <p className="text-gray-600 mt-1">Manage your product catalog - Stock is managed at sub-product level</p>
           </div>
-          <Button
+          {permiton?.write && <Button
             onClick={() => setShowAddModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
           >
             <i className="ri-add-line"></i>
             <span>Add Product</span>
-          </Button>
+          </Button>}
         </div>
 
         {/* Filters */}
@@ -414,26 +428,26 @@ export default function ProductsManagement() {
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button
+                      {permiton.update && <Button
                         onClick={() => handleEdit(product)}
                         className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
                       >
                         <i className="ri-edit-line mr-1"></i>
                         Edit
-                      </Button>
-                      <Button
+                      </Button>}
+                     {permiton.update && <Button
                         onClick={() => toggleStatus(product)}
                         className={`flex-1 text-sm ${product?.status ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
                       >
                         <i className={`ri-${product.status ? 'close' : 'check'}-line mr-1`}></i>
                         {product.status ? 'Deactivate' : 'Activate'}
-                      </Button>
-                      <Button
+                      </Button>} 
+                      {permiton.delete && <Button
                         onClick={() => handleDelete(product?._id)}
                         className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
                       >
                         <i className="ri-delete-bin-line"></i>
-                      </Button>
+                      </Button>}
                     </div>
                   </div>
                 </Card>

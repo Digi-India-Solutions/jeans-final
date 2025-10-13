@@ -21,6 +21,8 @@ export default function UserRolesManagement() {
   const [currentRolePage, setCurrentRolePage] = useState(1);
   const [totalUserPages, setTotalUserPages] = useState(1);
   const [totalRolePages, setTotalRolePages] = useState(1);
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
 
   const [userForm, setUserForm] = useState({ name: '', email: '', phone: '', password: '', role: '', status: 'Active' });
 
@@ -41,10 +43,30 @@ export default function UserRolesManagement() {
   });
 
   const modules = [
-    { key: 'dashboard', name: 'Dashboard' }, { key: 'banners', name: 'Banners' }, { key: 'categories', name: 'Categories & Sub-Categories' },
-    { key: 'products', name: 'Products & Sub-Products' }, { key: 'orders', name: 'Order Management' }, { key: 'sales', name: 'Sales & Reports' },
-    { key: 'returns', name: 'Returns & Challan' }, { key: 'marketing', name: 'Marketing' }, { key: 'enquiries', name: 'Enquiries' }
+    { key: 'dashboard', name: 'Dashboard' },
+    { key: 'banners', name: 'Banners' },
+    { key: 'categories', name: 'Categories & Sub-Categories' },
+    { key: 'products', name: 'Products & Sub-Products' },
+    { key: 'sizes', name: 'Sizes' },
+    { key: 'coupons', name: 'Coupons & Offers' },
+    { key: 'userManagement', name: 'User Management' },
+    { key: 'admins', name: 'Admin & Staff Roles' },
+    { key: 'videos', name: 'Videos' },
+    { key: 'wishlists', name: 'Wishlists' },
+    { key: 'clientRewards', name: 'Client Rewards' },
+
+    { key: 'notifications', name: 'Notifications' },
+    { key: 'FAQs', name: 'FAQs' },
+
+    { key: 'orders', name: 'Order Management' },
+    { key: 'sales', name: 'Sales & Reports' },
+    { key: 'returns', name: 'Returns & Challan' },
+    { key: 'marketing', name: 'Marketing' },
+    { key: 'enquiries', name: 'Enquiries' },
+    { key: 'catalogueUpload', name: 'Catalogue Upload' }
   ];
+
+
 
   const fetchUsers = async () => {
     try {
@@ -78,6 +100,20 @@ export default function UserRolesManagement() {
   }, [currentUserPage]);
 
 
+  const fetchRolesByRole = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.admins)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRolesByRole()
+  }, [user?.role])
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -86,7 +122,7 @@ export default function UserRolesManagement() {
             <h1 className="text-2xl font-bold text-gray-900">User & Role Management</h1>
             <p className="text-gray-600 mt-1">Manage admin users and their role-based permissions</p>
           </div>
-          <div className="flex space-x-3">
+          {permiton?.write || user?.role === 'Super Admin' && <div className="flex space-x-3">
             {activeTab === 'users' ? (
               <Button onClick={() => setShowUserModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white"              >
                 <i className="ri-user-add-line mr-2"></i>
@@ -101,7 +137,7 @@ export default function UserRolesManagement() {
                 Add Role
               </Button>
             )}
-          </div>
+          </div>}
         </div>
 
         {/* Tabs */}
@@ -129,11 +165,11 @@ export default function UserRolesManagement() {
         </div>
 
         {activeTab === 'users' && (
-          <UsersTable currentUserPage={currentUserPage} setCurrentUserPage={setCurrentUserPage} totalUserPages={totalUserPages} setUsers={setUsers} users={users} setEditingUser={setEditingUser} setUserForm={setUserForm} setShowUserModal={setShowUserModal} />
+          <UsersTable userPermition={user} permiton={permiton} currentUserPage={currentUserPage} setCurrentUserPage={setCurrentUserPage} totalUserPages={totalUserPages} setUsers={setUsers} users={users} setEditingUser={setEditingUser} setUserForm={setUserForm} setShowUserModal={setShowUserModal} />
         )}
 
         {activeTab === 'roles' && (
-          <RolesTable fetchRoles={fetchRoles} currentRolePage={currentRolePage} setCurrentRolePage={setCurrentRolePage} totalRolePages={totalRolePages} modules={modules} setEditingRole={setEditingRole} setRoleForm={setRoleForm} setShowRoleModal={setShowRoleModal} roles={roles} />
+          <RolesTable user={user} permiton={permiton} fetchRoles={fetchRoles} currentRolePage={currentRolePage} setCurrentRolePage={setCurrentRolePage} totalRolePages={totalRolePages} modules={modules} setEditingRole={setEditingRole} setRoleForm={setRoleForm} setShowRoleModal={setShowRoleModal} roles={roles} />
         )}
 
         {/* User Modal */}

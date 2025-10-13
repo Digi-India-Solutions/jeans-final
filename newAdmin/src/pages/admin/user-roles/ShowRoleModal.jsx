@@ -80,11 +80,24 @@ function ShowRoleModal({
                                         banners: { read: false, write: false, update: false, delete: false },
                                         categories: { read: false, write: false, update: false, delete: false },
                                         products: { read: false, write: false, update: false, delete: false },
+                                        sizes: { read: false, write: false, update: false, delete: false },
+                                        coupons: { read: false, write: false, update: false, delete: false },
+                                        userManagement: { read: false, write: false, update: false, delete: false },
+                                        admins: { read: false, write: false, update: false, delete: false },
+                                        videos: { read: false, write: false, update: false, delete: false },
+                                        wishlists: { read: false, write: false, update: false, delete: false },
+                                        clientRewards: { read: false, write: false, update: false, delete: false },
+                                        notifications: { read: false, write: false, update: false, delete: false },
+                                        FAQs: { read: false, write: false, update: false, delete: false },
+
                                         orders: { read: false, write: false, update: false, delete: false },
                                         sales: { read: false, write: false, update: false, delete: false },
                                         returns: { read: false, write: false, update: false, delete: false },
+                                        adminRole: { read: false, write: false, update: false, delete: false },
                                         marketing: { read: false, write: false, update: false, delete: false },
-                                        enquiries: { read: false, write: false, update: false, delete: false }
+                                        enquiries: { read: false, write: false, update: false, delete: false },
+
+                                        catalogueUpload: { read: false, write: false, update: false, delete: false },
                                     }
                                 });
                             }}
@@ -138,15 +151,15 @@ function ShowRoleModal({
                                                 <td className="px-4 py-3 text-center">
                                                     <input
                                                         type="checkbox"
-                                                        checked={roleForm.permissions[module.key].read}
-                                                        onChange={(e) => updatePermission(module.key, 'read', e.target.checked)}
+                                                        checked={roleForm?.permissions[module?.key]?.read}
+                                                        onChange={(e) => updatePermission(module?.key, 'read', e.target.checked)}
                                                         className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <input
                                                         type="checkbox"
-                                                        checked={roleForm.permissions[module.key].write}
+                                                        checked={roleForm?.permissions[module?.key]?.write}
                                                         onChange={(e) => updatePermission(module.key, 'write', e.target.checked)}
                                                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                                     />
@@ -154,16 +167,16 @@ function ShowRoleModal({
                                                 <td className="px-4 py-3 text-center">
                                                     <input
                                                         type="checkbox"
-                                                        checked={roleForm.permissions[module.key].update}
-                                                        onChange={(e) => updatePermission(module.key, 'update', e.target.checked)}
+                                                        checked={roleForm?.permissions[module?.key]?.update}
+                                                        onChange={(e) => updatePermission(module?.key, 'update', e.target.checked)}
                                                         className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <input
                                                         type="checkbox"
-                                                        checked={roleForm.permissions[module.key].delete}
-                                                        onChange={(e) => updatePermission(module.key, 'delete', e.target.checked)}
+                                                        checked={roleForm?.permissions[module?.key]?.delete}
+                                                        onChange={(e) => updatePermission(module?.key, 'delete', e.target.checked)}
                                                         className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                                                     />
                                                 </td>
@@ -183,16 +196,29 @@ function ShowRoleModal({
                                 setRoleForm({
                                     name: '',
                                     description: '',
-                                    permissions: {
+                                   permissions: {
                                         dashboard: { read: false, write: false, update: false, delete: false },
                                         banners: { read: false, write: false, update: false, delete: false },
                                         categories: { read: false, write: false, update: false, delete: false },
                                         products: { read: false, write: false, update: false, delete: false },
+                                        sizes: { read: false, write: false, update: false, delete: false },
+                                        coupons: { read: false, write: false, update: false, delete: false },
+                                        userManagement: { read: false, write: false, update: false, delete: false },
+                                        admins: { read: false, write: false, update: false, delete: false },
+                                        videos: { read: false, write: false, update: false, delete: false },
+                                        wishlists: { read: false, write: false, update: false, delete: false },
+                                        clientRewards: { read: false, write: false, update: false, delete: false },
+                                        Notifications: { read: false, write: false, update: false, delete: false },
+                                        FAQs: { read: false, write: false, update: false, delete: false },
+
                                         orders: { read: false, write: false, update: false, delete: false },
                                         sales: { read: false, write: false, update: false, delete: false },
                                         returns: { read: false, write: false, update: false, delete: false },
+                                        adminRole: { read: false, write: false, update: false, delete: false },
                                         marketing: { read: false, write: false, update: false, delete: false },
-                                        enquiries: { read: false, write: false, update: false, delete: false }
+                                        enquiries: { read: false, write: false, update: false, delete: false },
+
+                                        catalogueUpload: { read: false, write: false, update: false, delete: false },
                                     }
                                 });
                             }}

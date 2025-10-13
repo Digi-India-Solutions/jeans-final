@@ -118,6 +118,8 @@ export default function ReturnsAndChallan() {
   const [returnCurrantPage, setReturnCurrantPage] = useState(1)
   const [returnPage, setReturnPage] = useState(1)
   const [totalReturns, setTotalReturns] = useState(0)
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
 
   // Filter states
   const [filters, setFilters] = useState({ client: '', status: '', dateFrom: '', dateTo: '', search: '' });
@@ -200,7 +202,7 @@ export default function ReturnsAndChallan() {
   // CRUD operations with stock management
   const handleEdit = (item, type) => {
     setEditingItem({ ...item, type });
-    setEditForm({ _id: item?._id, items: item.items, status: item.status, reason: item.items[0]?.reason || '', notes: item?.notes || '' });
+    setEditForm({ _id: item?._id, items: item.items, status: item.status, checkStatus: item.status, reason: item.items[0]?.reason || '', notes: item?.notes || '' });
     setShowEditModal(true);
   };
 
@@ -366,6 +368,21 @@ export default function ReturnsAndChallan() {
 
   /////////////////////////////////////////////////////////////////////////
 
+
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.returns)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -374,7 +391,7 @@ export default function ReturnsAndChallan() {
             <h1 className="text-2xl font-bold text-gray-900">Advanced Returns &amp; Challan Management</h1>
             <p className="text-gray-600 mt-1">Complete management with auto stock adjustments in pcs</p>
           </div>
-          <div className="flex space-x-3">
+          {permiton.write && <div className="flex space-x-3">
             <Button onClick={() => setShowCreateChallanModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white"            >
               <i className="ri-truck-line mr-2"></i>
               Create Challan
@@ -383,7 +400,7 @@ export default function ReturnsAndChallan() {
               <i className="ri-arrow-go-back-line mr-2"></i>
               Create Return
             </Button>
-          </div>
+          </div>}
         </div>
 
         {/* Tabs with Reports */}
@@ -440,7 +457,7 @@ export default function ReturnsAndChallan() {
             handleStatusUpdate={handleStatusUpdate}
             handlePrint={handlePrint}
             handleDelete={handleDelete}
-
+            permiton={permiton}
             challanCurrantPage={challanCurrantPage}
             setChallanCurrantPage={setChallanCurrantPage}
             challanPage={challanPage}
@@ -456,7 +473,7 @@ export default function ReturnsAndChallan() {
             handleStatusUpdate={handleStatusUpdate}
             handlePrint={handlePrint}
             handleDelete={handleDelete}
-
+            permiton={permiton}
             returnCurrantPage={returnCurrantPage}
             setReturnCurrantPage={setReturnCurrantPage}
             returnPage={returnPage}

@@ -3,7 +3,7 @@ import Card from '../../../components/base/Card'
 import Button from '../../../components/base/Button'
 import { getData } from '../../../services/FetchNodeServices';
 
-function UsersTable({ setUsers, users, setEditingUser, setUserForm, setShowUserModal, currentUserPage, setCurrentUserPage, totalUserPages }) {
+function UsersTable({ userPermition, permiton, setUsers, users, setEditingUser, setUserForm, setShowUserModal, currentUserPage, setCurrentUserPage, totalUserPages }) {
 
     const handleDeleteUser = async (id) => {
         if (confirm('Are you sure you want to delete this user?')) {
@@ -31,7 +31,7 @@ function UsersTable({ setUsers, users, setEditingUser, setUserForm, setShowUserM
         setUserForm({ name: user?.name, email: user?.email, phone: user?.phone, oldPassword: user?.password, password: '', role: user?.role, status: user?.status });
         setShowUserModal(true);
     };
-
+    console.log("permitonpermitonpermiton=>>>",permiton,userPermition?.role)
     return (
         <div>
             <Card className="overflow-hidden">
@@ -51,9 +51,9 @@ function UsersTable({ setUsers, users, setEditingUser, setUserForm, setShowUserM
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Activity
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {permiton?.update || permiton?.delete || userPermition?.role === 'Super Admin' && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
-                                </th>
+                                </th>}
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -67,23 +67,23 @@ function UsersTable({ setUsers, users, setEditingUser, setUserForm, setShowUserM
                                                 </span>
                                             </div>
                                             <div className="ml-3">
-                                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                                                <div className="text-sm text-gray-500">ID: {user.id}</div>
+                                                <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                                                <div className="text-sm text-gray-500">ID: {user._id}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{user.email}</div>
-                                        <div className="text-sm text-gray-500">{user.phone}</div>
+                                        <div className="text-sm text-gray-900">{user?.email}</div>
+                                        <div className="text-sm text-gray-500">{user?.phone}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col space-y-1">
                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
-                                                {user.role}
+                                                {user?.role}
                                             </span>
                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                                 }`}>
-                                                {user.status}
+                                                {user?.status}
                                             </span>
                                         </div>
                                     </td>
@@ -93,18 +93,19 @@ function UsersTable({ setUsers, users, setEditingUser, setUserForm, setShowUserM
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
-                                            <Button
+                                            {permiton.update || userPermition?.role === 'Super Admin' && <Button
                                                 onClick={() => handleEditUser(user)}
                                                 className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
                                             >
                                                 Edit
-                                            </Button>
-                                            <Button
+                                            </Button>}
+
+                                            {permiton?.update || userPermition?.role === 'Super Admin' && <Button
                                                 onClick={() => handleDeleteUser(user._id)}
                                                 className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
                                             >
                                                 Delete
-                                            </Button>
+                                            </Button>}
                                         </div>
                                     </td>
                                 </tr>

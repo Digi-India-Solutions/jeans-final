@@ -14,17 +14,12 @@ export default function SubCategoriesManagement() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSubCategory, setEditingSubCategory] = useState(null);
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
 
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    categoryId: "",
-    description: "",
-    image: null,
-    imagePreview: null,
-    banner: null,
-    bannerPreview: null,
-    status: true,
+    name: "", slug: "", categoryId: "", description: "",
+    image: null, imagePreview: null, banner: null, bannerPreview: null, status: true,
   });
 
   const fileInputRef = useRef(null);
@@ -200,6 +195,21 @@ export default function SubCategoriesManagement() {
     setEditingSubCategory(null);
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.categories)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
+
   return (
     <AdminLayout>
       <ToastContainer />
@@ -214,13 +224,13 @@ export default function SubCategoriesManagement() {
               Manage product sub-categories with images
             </p>
           </div>
-          <Button
+          {permiton.write && <Button
             onClick={() => setShowAddModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
           >
             <i className="ri-add-line"></i>
             <span>Add Sub-Category</span>
-          </Button>
+          </Button>}
         </div>
 
         {/* SubCategories Grid */}
@@ -266,14 +276,14 @@ export default function SubCategoriesManagement() {
                   </p>
 
                   <div className="flex space-x-2">
-                    <Button
+                    {permiton.update && <Button
                       onClick={() => handleEdit(subCategory)}
                       className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
                     >
                       <i className="ri-edit-line mr-1"></i>
                       Edit
-                    </Button>
-                    <Button
+                    </Button>}
+                  {permiton.update && <Button
                       onClick={() => toggleStatus(subCategory?._id, subCategory)}
                       className={`flex-1 text-sm ${subCategory.status
                         ? "bg-red-50 text-red-600 hover:bg-red-100"
@@ -283,13 +293,13 @@ export default function SubCategoriesManagement() {
                       {subCategory.status
                         ? "Deactivate"
                         : "Activate"}
-                    </Button>
-                    <Button
+                    </Button>}  
+                    {permiton.delete && <Button
                       onClick={() => handleDelete(subCategory._id)}
                       className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
                     >
                       <i className="ri-delete-bin-line"></i>
-                    </Button>
+                    </Button>}
                   </div>
                 </div>
               </Card>

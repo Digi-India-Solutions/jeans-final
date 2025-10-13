@@ -27,6 +27,8 @@ export default function SubProductsManagement() {
   const [formData, setFormData] = useState({ name: '', color: '', productId: '', lotNumber: '', lotStock: '', pcsInSet: '', selectedSizes: [], singlePicPrice: '', description: '', stock: 'In Stock', images: [], barcode: '', dateOfOpening: '', });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [permiton, setPermiton] = useState('');
 
   const fetchProducts = async () => {
     try {
@@ -420,6 +422,21 @@ export default function SubProductsManagement() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+      console.log("response.data:==>response.data:==>", response?.data[0]?.permissions)
+      setPermiton(response?.data[0]?.permissions?.products)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchRoles()
+  }, [user?.role])
+
   console.log("GGGG:=>", formData);
   return (
     <AdminLayout>
@@ -439,10 +456,10 @@ export default function SubProductsManagement() {
               <i className="ri-printer-line mr-2"></i>
               Bulk Print Labels
             </Button>
-            <Button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white">
+            {permiton?.write && <Button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white">
               <i className="ri-add-line mr-2"></i>
               Add Sub-Product Set
-            </Button>
+            </Button>}
           </div>
         </div>
 
@@ -542,19 +559,19 @@ export default function SubProductsManagement() {
                 </div>
 
                 <div className="flex space-x-2">
-                  <Button
+                  {permiton.update && <Button
                     onClick={() => handleEdit(item)}
                     className="flex-1 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm"
                   >
                     <i className="ri-edit-line mr-1"></i>
                     Edit
-                  </Button>
-                  <Button
+                  </Button>}
+                  {permiton.delete && <Button
                     onClick={() => handleDelete(item?._id)}
                     className="bg-red-50 text-red-600 hover:bg-red-100 px-3"
                   >
                     <i className="ri-delete-bin-line"></i>
-                  </Button>
+                  </Button>}
                 </div>
               </div>
             </Card>

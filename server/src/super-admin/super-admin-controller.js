@@ -39,7 +39,7 @@ exports.superAdminLogin = catchAsyncErrors(async (req, res, next) => {
             return res.status(200).json({ status: false, message: "Super Admin does not exist" })
         }
         const passwordMatch = await bcrypt.compare(password, superAdmin.password)
-
+console.log('passwordMatch::=>', passwordMatch)
         if (passwordMatch) {
             sendToken(superAdmin, 200, res, "Super Admin Login successfully");
         }
