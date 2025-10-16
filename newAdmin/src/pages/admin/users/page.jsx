@@ -555,7 +555,7 @@ export default function UsersManagement() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredUsers.map(user => (
                       <tr key={user._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-0 py-2 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                               {user?.photo ? (
@@ -582,7 +582,7 @@ export default function UsersManagement() {
                           <div className="text-sm text-gray-900">{user?.email}</div>
                           <div className="text-sm text-gray-500">{user?.phone || 'No phone'}</div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 py-4">
                           <div className="text-sm text-gray-500 max-w-xs truncate">
                             {formatAddress(user?.address)}
                           </div>
