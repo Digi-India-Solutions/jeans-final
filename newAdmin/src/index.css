@@ -46,7 +46,7 @@ button[class*="hover:bg-blue-100"], button[class*="hover:bg-blue-200"], button[c
 input[type="button"][class*="hover:bg-blue-100"], input[type="button"][class*="hover:bg-blue-200"], input[type="button"][class*="hover:bg-blue-300"],
 input[type="submit"][class*="hover:bg-blue-100"], input[type="submit"][class*="hover:bg-blue-200"], input[type="submit"][class*="hover:bg-blue-300"],
 a[class*="hover:bg-blue-100"], a[class*="hover:bg-blue-200"], a[class*="hover:bg-blue-300"]:hover {
-  background-color: #1E40AF !important; /* tailwind blue-900 */
+  background-color: #3a68ff !important; /* tailwind blue-900 */
   color: #ffffff !important;
 }
 
@@ -55,14 +55,14 @@ button[class*="bg-green-100"], button[class*="bg-green-200"], button[class*="bg-
 input[type="button"][class*="bg-green-100"], input[type="button"][class*="bg-green-200"], input[type="button"][class*="bg-green-300"],
 input[type="submit"][class*="bg-green-100"], input[type="submit"][class*="bg-green-200"], input[type="submit"][class*="bg-green-300"],
 a[class*="bg-green-100"], a[class*="bg-green-200"], a[class*="bg-green-300"] {
-  background-color: #15803D !important; /* tailwind green-700 */
+  background-color: #13c454 !important; /* tailwind green-700 */
   color: #ffffff !important;
 }
 button[class*="hover:bg-green-100"], button[class*="hover:bg-green-200"], button[class*="hover:bg-green-300"],
 input[type="button"][class*="hover:bg-green-100"], input[type="button"][class*="hover:bg-green-200"], input[type="button"][class*="hover:bg-green-300"],
 input[type="submit"][class*="hover:bg-green-100"], input[type="submit"][class*="hover:bg-green-200"], input[type="submit"][class*="hover:bg-green-300"],
 a[class*="hover:bg-green-100"], a[class*="hover:bg-green-200"], a[class*="hover:bg-green-300"]:hover {
-  background-color: #064E3B !important; /* tailwind green-900 */
+  background-color: #13c454 !important; /* tailwind green-900 */
   color: #ffffff !important;
 }
 
@@ -78,7 +78,7 @@ button[class*="hover:bg-red-100"], button[class*="hover:bg-red-200"], button[cla
 input[type="button"][class*="hover:bg-red-100"], input[type="button"][class*="hover:bg-red-200"], input[type="button"][class*="hover:bg-red-300"],
 input[type="submit"][class*="hover:bg-red-100"], input[type="submit"][class*="hover:bg-red-200"], input[type="submit"][class*="hover:bg-red-300"],
 a[class*="hover:bg-red-100"], a[class*="hover:bg-red-200"], a[class*="hover:bg-red-300"]:hover {
-  background-color: #7F1D1D !important; /* darker red */
+  background-color: #ff3030 !important; /* darker red */
   color: #ffffff !important;
 }
 

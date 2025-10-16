@@ -413,11 +413,11 @@ export default function SubProductsManagement() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'In Stock':
-        return 'bg-green-500 text-green-800';
+        return 'bg-green-500 text-white';
       case 'Low Stock':
         return 'bg-yellow-500 text-yellow-800';
       case 'Out of Stock':
-        return 'bg-red-500 text-red-800';
+        return 'bg-red-500 text-white';
       default:
         return 'bg-gray-500 text-gray-800';
     }
