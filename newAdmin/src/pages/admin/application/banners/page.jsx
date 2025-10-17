@@ -228,7 +228,7 @@ export default function BannersManagement() {
                   <div
                     className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${banner.isActive
                       ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
+                      : "bg-red-100 text-red-400"
                       }`}
                   >
                     {banner.isActive ? "Active" : "Inactive"}
@@ -281,7 +281,7 @@ export default function BannersManagement() {
                       onClick={() => toggleStatus(banner?._id, banner)}
                       className={`flex-1 text-sm ${banner?.isActive
                         ? "bg-red-600 text-red-600 hover:bg-red-100"
-                        : "bg-green-50 text-green-600 hover:bg-green-100"
+                        : "bg-green-200 text-green-600 hover:bg-green-100"
                         }`}
                     >
                       {banner?.isActive ? "Deactivate" : "Activate"}

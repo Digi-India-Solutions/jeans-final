@@ -526,116 +526,114 @@ export default function UsersManagement() {
             {/* Users Table */}
             <Card className="overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        User Details
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contact
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Address
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Join Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Orders & Spent
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredUsers.map(user => (
-                      <tr key={user._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                              {user?.photo ? (
-                                <img src={user?.photo} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
-                              ) : (
-                                <i className="ri-user-line text-gray-500"></i>
-                              )}
-                            </div>
-                            <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900 flex items-center">
-                                {user.name}
-                                {user.isUser && (
-                                  <i className="ri-verified-badge-fill text-blue-500 ml-2"></i>
-                                )}
+                <div className="inline-block min-w-full">
+                  {/* vertical scroll area for tbody; thead will be sticky relative to this container */}
+                  <div className="max-h-[400px] overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            User Details
+                          </th>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            Contact
+                          </th>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            Address
+                          </th>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            Status
+                          </th>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            Join Date
+                          </th>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            Orders & Spent
+                          </th>
+                          <th className="sticky top-0 z-20 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filteredUsers.map(user => (
+                          <tr key={user._id} className="hover:bg-gray-50">
+                            <td className="px-0 py-2 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                  {user?.photo ? (
+                                    <img src={user?.photo} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
+                                  ) : (
+                                    <i className="ri-user-line text-gray-500"></i>
+                                  )}
+                                </div>
+                                <div className="ml-3">
+                                  <div className="text-sm font-medium text-gray-900 flex items-center">
+                                    {user.name}
+                                    {user.isUser && (
+                                      <i className="ri-verified-badge-fill text-blue-500 ml-2"></i>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-500">ID: {user?.uniqueUserId || user._id}</div>
+                                  {user.shopname && (
+                                    <div className="text-sm text-gray-500">Shop: {user?.shopname}</div>
+                                  )}
+                                </div>
                               </div>
-                              <div className="text-sm text-gray-500">ID: {user?.uniqueUserId || user._id}</div>
-                              {user.shopname && (
-                                <div className="text-sm text-gray-500">Shop: {user?.shopname}</div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{user?.email}</div>
-                          <div className="text-sm text-gray-500">{user?.phone || 'No phone'}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-500 max-w-xs truncate">
-                            {formatAddress(user?.address)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col space-y-1">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.isActive)}`}>
-                              {user.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                          </div>
-                        </td>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{user?.email}</div>
+                              <div className="text-sm text-gray-500">{user?.phone || 'No phone'}</div>
+                            </td>
+                            <td className="px-3 py-4">
+                              <div className="text-sm text-gray-500 max-w-xs truncate">
+                                {formatAddress(user?.address)}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-col space-y-1">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.isActive)}`}>
+                                  {user.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+                            </td>
 
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(user.createdAt)}
-                        </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {formatDate(user.createdAt)}
+                            </td>
 
-                        {/* <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col space-y-1">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.isActive)}`}>
-                              {OrdersAndSpent(user?._id)}
-                            </span>
-                          </div>
-                        </td> */}
-                        {OrdersAndSpent(user?._id)}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <Button
-                              onClick={() => handleEdit(user)}
-                              className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              onClick={() => toggleStatus(user._id, user.isActive)}
-                              className={`text-xs px-2 py-1 ${user.isActive
-                                ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                                : 'bg-green-50 text-green-600 hover:bg-green-100'
-                                }`}
-                            >
-                              {user.isActive ? 'Deactivate' : 'Activate'}
-                            </Button>
-                            <Button
-                              onClick={() => deleteUser(user._id)}
-                              className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                            {OrdersAndSpent(user?._id)}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex space-x-2">
+                                <Button
+                                  onClick={() => handleEdit(user)}
+                                  className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  onClick={() => toggleStatus(user._id, user.isActive)}
+                                  className={`text-xs px-2 py-1 ${user.isActive
+                                    ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                                    : 'bg-green-50 text-green-600 hover:bg-green-100'
+                                    }`}
+                                >
+                                  {user.isActive ? 'Deactivate' : 'Activate'}
+                                </Button>
+                                <Button
+                                  onClick={() => deleteUser(user._id)}
+                                  className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </Card>
 

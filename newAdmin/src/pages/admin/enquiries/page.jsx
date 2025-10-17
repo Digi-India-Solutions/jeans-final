@@ -360,7 +360,7 @@ export default function EnquiriesManagement() {
                     {enquiry.status === 'New' && (
                       <Button
                         onClick={() => updateEnquiryStatus(enquiry.id, 'In Progress')}
-                        className="bg-yellow-50 text-yellow-600 hover:bg-yellow-100 text-sm px-3 py-1"
+                        className="bg-yellow-400 text-white hover:bg-yellow-200 text-sm px-3 py-1"
                       >
                         <i className="ri-play-line mr-1"></i>
                         Start
@@ -395,7 +395,7 @@ export default function EnquiriesManagement() {
                         const phoneNumber = enquiry.phone.replace(/\s+/g, '');
                         window.open(`tel:${phoneNumber}`, '_self');
                       }}
-                      className="bg-green-50 text-green-600 hover:bg-green-100 text-sm px-3 py-1"
+                      className="bg-green-50 text-green-600 hover:bg-green-300 text-sm px-3 py-1"
                     >
                       <i className="ri-phone-line mr-1"></i>
                       Call
@@ -404,7 +404,7 @@ export default function EnquiriesManagement() {
                       onClick={() => {
                         window.open(`mailto:${enquiry.email}?subject=Re: ${enquiry.subject}`, '_blank');
                       }}
-                      className="bg-purple-50 text-purple-600 hover:bg-purple-100 text-sm px-3 py-1"
+                      className="bg-purple-500 text-white hover:bg-purple-400 text-sm px-3 py-1"
                     >
                       <i className="ri-mail-line mr-1"></i>
                       Email
