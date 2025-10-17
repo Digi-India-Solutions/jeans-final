@@ -27,7 +27,7 @@ export default function SalesChart() {
         </div>
       </div>
       
-      <div className="h-80 flex items-end justify-between space-x-2">
+      <div className="h-80 flex items-end justify-between space-x-2 overflow-hidden">
         {salesData.map((data, index) => (
           <div key={index} className="flex-1 flex flex-col items-center">
             <div 

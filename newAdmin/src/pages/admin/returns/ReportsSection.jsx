@@ -89,7 +89,7 @@ function ReportsSection({ setActiveReportTab, activeReportTab, reportFilters, se
                     onClick={() => setActiveReportTab('deliveries')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeReportTab === 'deliveries'
                         ? 'bg-blue-500 text-white'
-                        : 'text-white hover:text-white'
+                        : 'text-gray '
                         }`}
                 >
                     <i className="ri-truck-line mr-2"></i>
