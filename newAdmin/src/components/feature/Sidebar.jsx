@@ -218,7 +218,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { postData } from '../../services/FetchNodeServices';
 
 export default function Sidebar({ isOpen, onClose, isDarkMode }) {
-  const [expandedItems, setExpandedItems] = useState({ 1: true });
+  const [expandedItems, setExpandedItems] = useState({  });
   const [permissions, setPermissions] = useState({});
   const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   const location = useLocation();
@@ -320,10 +320,10 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
               onClick={onClose}
               className={`lg:hidden p-1 rounded-md transition-colors ${isDarkMode
                 ? 'hover:bg-gray-700 text-gray-400'
-                : 'hover:bg-gray-100 text-gray-500'
+                : 'bg-blue-50 text-black hover:text-blue-500 rounded-3xl'
                 }`}
             >
-              <i className="ri-close-line"></i>
+              <i className="ri-close-line text-blue-700"></i>
             </button>
           </div>
 
@@ -338,11 +338,11 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
                         onClick={() => toggleExpanded(index)}
                         className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-lg transition-colors ${isDarkMode
                           ? 'text-gray-300 hover:bg-gray-700'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'bg-blue-50 hover:text-blue-500 rounded-3xl'
                           }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <i className={`${item.icon} text-lg`}></i>
+                          <i className={`${item.icon} text-blue-500 text-lg`}></i>
                           <span className="font-medium">{item.title}</span>
                         </div>
                         <i
@@ -357,10 +357,10 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
                               <button
                                 onClick={() => handleNavigation(child.path)}
                                 className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${location.pathname === child.path
-                                  ? 'bg-blue-100 text-blue-700'
+                                  ? 'bg-blue-100 text-blue-200'
                                   : isDarkMode
                                     ? 'text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-                                    : 'text-gray-600 hover:bg-gray-100'
+                                    : 'bg-blue-50 hover:text-blue-500 rounded-3xl'
                                   }`}
                               >
                                 {child.title}
@@ -377,10 +377,10 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
                         ? 'bg-blue-100 text-blue-700'
                         : isDarkMode
                           ? 'text-gray-300 hover:bg-gray-700'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'bg-blue-50 hover:text-blue-500 rounded-3xl'
                         }`}
                     >
-                      <i className={`${item.icon} text-lg`}></i>
+                      <i className={`${item.icon} text-lg text-blue-500`}></i>
                       <span className="font-medium">{item.title}</span>
                     </button>
                   )}

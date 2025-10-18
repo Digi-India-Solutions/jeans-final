@@ -151,8 +151,8 @@ export default function VideosManagement() {
 
   const getStatusColor = (status) => {
     return status 
-      ? 'bg-green-100 text-green-800' 
-      : 'bg-yellow-100 text-yellow-800';
+      ? 'bg-green-100 text-white' 
+      : 'bg-yellow-100 text-white';
   };
 
   const extractYouTubeVideoId = (url) => {
@@ -296,7 +296,7 @@ export default function VideosManagement() {
                         </Button>
                         <Button
                           onClick={() => toggleStatus(video._id)}
-                          className={`px-3 ${video.status ? 'bg-yellow-400 text-yellow-600 hover:bg-yellow-900' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                          className={`px-3 ${video.status ? 'bg-yellow-400 text-white hover:bg-yellow-900' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
                         >
                           <i className={video.status ? 'ri-pause-line' : 'ri-play-line'}></i>
                         </Button>

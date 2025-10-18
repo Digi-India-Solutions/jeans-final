@@ -301,7 +301,7 @@ export default function FAQsManagement() {
                       <Button
                         onClick={() => toggleStatus(faq._id, faq?.isActive)}
                         className={`px-2 py-1 text-xs ${faq.isActive
-                          ? 'bg-yellow-500 text-yellow-600 hover:bg-yellow-900'
+                          ? 'bg-yellow-500 text-white-600 hover:bg-yellow-900'
                           : 'bg-green-500 text-green-600 hover:bg-green-900'
                           }`}
                       >

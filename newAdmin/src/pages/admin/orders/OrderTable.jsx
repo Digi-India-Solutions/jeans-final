@@ -226,10 +226,10 @@ function OrderTable({
     openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton
 }) {
     return (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[600px]">
             <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
+                <thead className="bg-gray-50 sticky top-0 bg-gray-50 z-10">
+                    <tr className="sticky top-0 bg-gray-50 z-10">
                         {["Order Details", "Customer", "Payment Details", "Status", "Total Pcs", "Delivered Pcs", "Tracking", "Actions",].map((heading) => (
                             <th
                                 key={heading}
@@ -454,8 +454,8 @@ function OrderTable({
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex justify-center mt-6">
-                    <div className="flex space-x-2">
+                <div className="flex justify-center sticky top-0 bg-gray-50 z-10">
+                    <div className="flex space-x-2 sticky top-0 bg-gray-50 z-10">
                         <Button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}

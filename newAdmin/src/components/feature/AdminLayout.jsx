@@ -41,13 +41,13 @@ export default function AdminLayout({ children }) {
       <Sidebar 
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
-        isDarkMode={isDarkMode}
+        // isDarkMode={isDarkMode}
       />
       
       <div className="lg:ml-64">
         <TopBar 
           onMenuClick={toggleSidebar}
-          isDarkMode={isDarkMode}
+          // isDarkMode={isDarkMode}
           onThemeToggle={toggleTheme}
         />
         
