@@ -1,88 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
+import UploadCatlogueModal from './UploadCatlogueModal';
+import ViewCatlogueModal from './ViewCatlogueModal';
+import { getData } from '../../../services/FetchNodeServices';
 
 export default function CatalogueUpload() {
-  const [catalogues, setCatalogues] = useState([
-    {
-      id: 1,
-      fileName: 'Spring_Collection_2024.pdf',
-      originalName: 'Spring Collection 2024 - Premium Jeans & Shirts.pdf',
-      uploadDate: '2024-01-15',
-      fileSize: '2.4 MB',
-      downloadCount: 12,
-      fileUrl: '#'
-    },
-    {
-      id: 2,
-      fileName: 'Winter_Formal_Collection.pdf',
-      originalName: 'Winter Formal Collection - Business Wear.pdf',
-      uploadDate: '2024-01-10',
-      fileSize: '3.1 MB',
-      downloadCount: 8,
-      fileUrl: '#'
-    },
-    {
-      id: 3,
-      fileName: 'Casual_Weekend_Styles.pdf',
-      originalName: 'Casual Weekend Styles - Comfort Wear Catalogue.pdf',
-      uploadDate: '2024-01-08',
-      fileSize: '1.8 MB',
-      downloadCount: 15,
-      fileUrl: '#'
-    }
-  ]);
+  const [catalogues, setCatalogues] = useState([]);
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCatalogue, setSelectedCatalogue] = useState(null);
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploadPreview, setUploadPreview] = useState('');
-  const [filters, setFilters] = useState({
-    search: '',
-    dateFrom: '',
-    dateTo: ''
-  });
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.type === 'application/pdf') {
-        setUploadFile(file);
-        setUploadPreview(file.name);
-      } else {
-        alert('Please select a PDF file only');
-        event.target.value = '';
-      }
-    }
-  };
-
-  const uploadCatalogue = () => {
-    if (!uploadFile) {
-      alert('Please select a PDF file to upload');
-      return;
-    }
-
-    const newCatalogue = {
-      id: Date.now(),
-      fileName: uploadFile.name.replace(/[^a-zA-Z0-9.-]/g, '_'),
-      originalName: uploadFile.name,
-      uploadDate: new Date().toISOString().split('T')[0],
-      fileSize: `${(uploadFile.size / (1024 * 1024)).toFixed(1)} MB`,
-      downloadCount: 0,
-      fileUrl: URL.createObjectURL(uploadFile)
-    };
-
-    setCatalogues([newCatalogue, ...catalogues]);
-    
-    // Reset upload state
-    setUploadFile(null);
-    setUploadPreview('');
-    setShowUploadModal(false);
-    
-    alert('Catalogue uploaded successfully!');
-  };
+  const [filters, setFilters] = useState({ search: '', dateFrom: '', dateTo: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDocuments, setTotalDocuments] = useState(0)
+  const [totalDownloads, setTotalDownloads] = useState(0)
+  const [totalSize, setTotalSize] = useState(0)
+  const [totalToday, setTotalToday] = useState(0)
 
   const deleteCatalogue = (id) => {
     if (confirm('Are you sure you want to delete this catalogue?')) {
@@ -94,10 +30,10 @@ export default function CatalogueUpload() {
   const viewCatalogue = (catalogue) => {
     setSelectedCatalogue(catalogue);
     setShowViewModal(true);
-    
+
     // Increment download count
-    setCatalogues(catalogues.map(cat => 
-      cat.id === catalogue.id 
+    setCatalogues(catalogues.map(cat =>
+      cat.id === catalogue.id
         ? { ...cat, downloadCount: cat.downloadCount + 1 }
         : cat
     ));
@@ -109,10 +45,10 @@ export default function CatalogueUpload() {
     link.href = catalogue.fileUrl;
     link.download = catalogue.originalName;
     link.click();
-    
+
     // Increment download count
-    setCatalogues(catalogues.map(cat => 
-      cat.id === catalogue.id 
+    setCatalogues(catalogues.map(cat =>
+      cat.id === catalogue.id
         ? { ...cat, downloadCount: cat.downloadCount + 1 }
         : cat
     ));
@@ -120,32 +56,49 @@ export default function CatalogueUpload() {
 
   const getFilteredCatalogues = () => {
     let filtered = catalogues;
+    // if (filters.search) {
+    //   filtered = filtered.filter(cat =>
+    //     cat.originalName.toLowerCase().includes(filters.search.toLowerCase()) ||
+    //     cat.fileName.toLowerCase().includes(filters.search.toLowerCase())
+    //   );
+    // }
 
-    if (filters.search) {
-      filtered = filtered.filter(cat => 
-        cat.originalName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        cat.fileName.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
+    // if (filters.dateFrom) {
+    //   filtered = filtered.filter(cat => cat.uploadDate >= filters.dateFrom);
+    // }
 
-    if (filters.dateFrom) {
-      filtered = filtered.filter(cat => cat.uploadDate >= filters.dateFrom);
-    }
-
-    if (filters.dateTo) {
-      filtered = filtered.filter(cat => cat.uploadDate <= filters.dateTo);
-    }
+    // if (filters.dateTo) {
+    //   filtered = filtered.filter(cat => cat.uploadDate <= filters.dateTo);
+    // }
 
     return filtered;
   };
 
   const clearFilters = () => {
-    setFilters({
-      search: '',
-      dateFrom: '',
-      dateTo: ''
-    });
+    setFilters({ search: '', dateFrom: '', dateTo: '' });
   };
+  const fetchCatalogues = async () => {
+    try {
+      const response = await getData(`api/catalogues/get-all-catalogue-pdf-with-pagination?page=${currentPage}&limit=2&search=${filters?.search}&dateFrom=${filters?.dateFrom}&dateTo=${filters?.dateTo}`);
+
+      console.log("datadatadata:=>", response);
+      if (response.status === true) {
+        setCatalogues(response?.data);
+        setTotalPages(response?.pagination?.totalPages);
+        setTotalDocuments(response?.pagination?.totalDocuments)
+        setTotalDownloads(response?.pagination?.totalDownloadCount)
+        setTotalSize(response?.pagination?.totalFileSize)
+        setTotalToday(response?.pagination?.totalToday)
+      }
+
+    } catch (error) {
+      console.error('Error fetching catalogues:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCatalogues();
+  }, [currentPage, filters?.search, filters?.dateFrom && filters?.dateTo]);
 
   return (
     <AdminLayout>
@@ -170,20 +123,14 @@ export default function CatalogueUpload() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                <input
-                  type="text"
-                  placeholder="File name..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({...filters, search: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
+                <input type="text" placeholder="File name..." value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
                 <input
                   type="date"
                   value={filters.dateFrom}
-                  onChange={(e) => setFilters({...filters, dateFrom: e.target.value})}
+                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -192,7 +139,7 @@ export default function CatalogueUpload() {
                 <input
                   type="date"
                   value={filters.dateTo}
-                  onChange={(e) => setFilters({...filters, dateTo: e.target.value})}
+                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -215,7 +162,7 @@ export default function CatalogueUpload() {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                 <i className="ri-file-pdf-line text-xl text-blue-600"></i>
               </div>
-              <div className="text-2xl font-bold text-blue-600">{catalogues.length}</div>
+              <div className="text-2xl font-bold text-blue-600">{totalDocuments}</div>
               <div className="text-sm text-gray-600">Total Catalogues</div>
             </div>
           </Card>
@@ -225,7 +172,8 @@ export default function CatalogueUpload() {
                 <i className="ri-download-line text-xl text-green-600"></i>
               </div>
               <div className="text-2xl font-bold text-green-600">
-                {catalogues.reduce((sum, cat) => sum + cat.downloadCount, 0)}
+                {/* {catalogues.reduce((sum, cat) => sum + cat.downloadCount, 0)} */}
+                {totalDownloads}
               </div>
               <div className="text-sm text-gray-600">Total Downloads</div>
             </div>
@@ -236,7 +184,8 @@ export default function CatalogueUpload() {
                 <i className="ri-hard-drive-line text-xl text-purple-600"></i>
               </div>
               <div className="text-2xl font-bold text-purple-600">
-                {catalogues.reduce((sum, cat) => sum + parseFloat(cat.fileSize), 0).toFixed(1)} MB
+                {/* {catalogues.reduce((sum, cat) => sum + parseFloat(cat.fileSize), 0).toFixed(1)} MB */}
+                {totalSize}
               </div>
               <div className="text-sm text-gray-600">Total Size</div>
             </div>
@@ -247,7 +196,8 @@ export default function CatalogueUpload() {
                 <i className="ri-calendar-line text-xl text-orange-600"></i>
               </div>
               <div className="text-2xl font-bold text-orange-600">
-                {catalogues.filter(cat => cat.uploadDate === new Date().toISOString().split('T')[0]).length}
+                {/* {catalogues.filter(cat => cat.uploadDate.split('T')[0] === new Date().toISOString().split('T')[0]).length} */}
+                {totalToday}
               </div>
               <div className="text-sm text-gray-600">Today's Uploads</div>
             </div>
@@ -287,8 +237,8 @@ export default function CatalogueUpload() {
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900" title={catalogue.originalName}>
-                            {catalogue.originalName.length > 50 
-                              ? catalogue.originalName.substring(0, 50) + '...' 
+                            {catalogue.originalName.length > 50
+                              ? catalogue.originalName.substring(0, 50) + '...'
                               : catalogue.originalName}
                           </div>
                           <div className="text-sm text-gray-500">{catalogue.fileName}</div>
@@ -336,6 +286,40 @@ export default function CatalogueUpload() {
                 ))}
               </tbody>
             </table>
+            {/* pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-6">
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-gray-900 text-gray-700 "
+                  >
+                    Previous
+                  </Button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <Button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 ${currentPage === page
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-400 text-gray-700'}`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+
+                  <Button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-gray-900 text-gray-700 disabled:opacity-50"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -348,188 +332,12 @@ export default function CatalogueUpload() {
 
         {/* Upload Modal */}
         {showUploadModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Upload New Catalogue</h2>
-                  <button
-                    onClick={() => {
-                      setShowUploadModal(false);
-                      setUploadFile(null);
-                      setUploadPreview('');
-                    }}
-                    className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
-                  >
-                    <i className="ri-close-line"></i>
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Select PDF File
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                      {uploadPreview ? (
-                        <div className="text-center">
-                          <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <i className="ri-file-pdf-line text-2xl text-red-600"></i>
-                          </div>
-                          <div className="text-sm font-medium text-gray-900 mb-2">
-                            {uploadPreview}
-                          </div>
-                          <div className="text-xs text-gray-500 mb-4">
-                            {uploadFile && `${(uploadFile.size / (1024 * 1024)).toFixed(1)} MB`}
-                          </div>
-                          <Button
-                            onClick={() => {
-                              setUploadFile(null);
-                              setUploadPreview('');
-                              document.getElementById('catalogue-upload').value = '';
-                            }}
-                            className="bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm"
-                          >
-                            <i className="ri-close-line mr-1"></i>
-                            Remove
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <i className="ri-upload-cloud-line text-3xl text-gray-400 mb-4"></i>
-                          <div className="text-sm text-gray-600 mb-4">
-                            Drag and drop your PDF file here, or click to browse
-                          </div>
-                          <input
-                            type="file"
-                            accept=".pdf"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                            id="catalogue-upload"
-                          />
-                          <label
-                            htmlFor="catalogue-upload"
-                            className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg cursor-pointer"
-                          >
-                            <i className="ri-file-pdf-line mr-2"></i>
-                            Choose PDF File
-                          </label>
-                          <div className="text-xs text-gray-500 mt-2">
-                            Maximum file size: 10MB
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3 mt-6">
-                  <Button
-                    onClick={() => {
-                      setShowUploadModal(false);
-                      setUploadFile(null);
-                      setUploadPreview('');
-                    }}
-                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={uploadCatalogue}
-                    className="flex-1 bg-gray-700 text-white hover:bg-gray-900"
-                    disabled={!uploadFile}
-                  >
-                    <i className="ri-upload-line mr-2"></i>
-                    Upload Catalogue
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <UploadCatlogueModal setShowUploadModal={setShowUploadModal} setCatalogues={setCatalogues} catalogues={catalogues} />
         )}
 
         {/* View Modal */}
         {showViewModal && selectedCatalogue && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">View Catalogue</h2>
-                    <p className="text-gray-600">{selectedCatalogue.originalName}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setShowViewModal(false);
-                      setSelectedCatalogue(null);
-                    }}
-                    className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center"
-                  >
-                    <i className="ri-close-line"></i>
-                  </button>
-                </div>
-
-                {/* File Info */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-500">File Size</div>
-                    <div className="font-semibold">{selectedCatalogue.fileSize}</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-500">Upload Date</div>
-                    <div className="font-semibold">{selectedCatalogue.uploadDate}</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-500">Downloads</div>
-                    <div className="font-semibold">{selectedCatalogue.downloadCount}</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-500">Status</div>
-                    <div className="font-semibold text-green-600">Available</div>
-                  </div>
-                </div>
-
-                {/* PDF Preview Placeholder */}
-                <div className="bg-gray-100 rounded-lg p-12 text-center mb-6">
-                  <div className="w-24 h-24 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <i className="ri-file-pdf-line text-4xl text-red-600"></i>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF Preview</h3>
-                  <p className="text-gray-600 mb-4">
-                    PDF preview functionality would be available here in the full implementation
-                  </p>
-                  <div className="flex justify-center space-x-3">
-                    <Button
-                      onClick={() => downloadCatalogue(selectedCatalogue)}
-                      className="bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      <i className="ri-download-line mr-2"></i>
-                      Download PDF
-                    </Button>
-                    <Button
-                      onClick={() => window.open(selectedCatalogue.fileUrl, '_blank')}
-                      className="bg-green-600 text-white hover:bg-green-700"
-                    >
-                      <i className="ri-external-link-line mr-2"></i>
-                      Open in New Tab
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => {
-                      setShowViewModal(false);
-                      setSelectedCatalogue(null);
-                    }}
-                    className="bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ViewCatlogueModal downloadCatalogue={downloadCatalogue} setShowViewModal={setShowViewModal} selectedCatalogue={selectedCatalogue} setSelectedCatalogue={setSelectedCatalogue} />
         )}
       </div>
     </AdminLayout>
