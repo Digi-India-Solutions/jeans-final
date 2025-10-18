@@ -304,7 +304,7 @@ export default function NotificationsManagement() {
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               activeTab === 'notifications'
                 ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-white '
             }`}
           >
             Push Notifications
@@ -314,7 +314,7 @@ export default function NotificationsManagement() {
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               activeTab === 'templates'
                 ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-900 hover:text-gray-900'
+                : 'text-white hover:text-white'
             }`}
           >
             Message Templates

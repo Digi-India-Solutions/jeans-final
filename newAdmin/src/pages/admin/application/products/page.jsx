@@ -437,7 +437,7 @@ export default function ProductsManagement() {
                       </Button>}
                      {permiton.update && <Button
                         onClick={() => toggleStatus(product)}
-                        className={`flex-1 text-sm ${product?.status ? 'bg-yellow-500 text-red-900 hover:bg-yellow-900' : 'bg-green-500 text-green-600 hover:bg-green-900'}`}
+                        className={`flex-1 text-sm ${product?.status ? 'bg-red-500 text-red-900 hover:bg-red-900' : 'bg-green-500 text-green-600 hover:bg-green-900'}`}
                       >
                         <i className={`ri-${product.status ? 'close' : 'check'}-line mr-1`}></i>
                         {product.status ? 'Deactivate' : 'Activate'}
