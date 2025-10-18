@@ -18,6 +18,37 @@ const uploadImage = async (file) => {
     }
 }
 
+const uploadsPdf = async (file) => {
+  try {
+    const uploadResponse = await cloudnary.uploader.upload(file, {
+      folder: "catalogues",
+      resource_type: "raw", // ✅ FIXED — ensures PDF works
+      format: "pdf", // optional, helps Cloudinary recognize content type
+    });
+    return uploadResponse
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    throw new Error("Failed to upload file to Cloudinary");
+  }
+};
+
+// const deletePdf = async (imageUrls) => {
+//   try {
+//     const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+//     for (const url of urls) {
+//       if (typeof url === "string" && url.includes("/")) {
+//         const parts = url.split("/");
+//         const publicId = `${parts[parts.length - 2]}/${parts.pop().split(".")[0]}`;
+//         await cloudinary.uploader.destroy(publicId, { resource_type: "raw" }); // ✅ raw for PDFs
+//         console.log(`File deleted: ${publicId}`);
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Failed to delete file(s) from Cloudinary:", error);
+//   }
+// };
+
+
 
 // const deleteImage = async (imageUrl) => {
 //     try {
@@ -48,5 +79,5 @@ const deleteImage = async (imageUrls) => {
 };
 
 module.exports = {
-    uploadImage, deleteImage
+    uploadImage, deleteImage ,uploadsPdf
 }

@@ -37,6 +37,7 @@ const notificationRoutes = require("./src/Notification/notification-routes");
 const salesAndReportsRoutes = require("./src/SalesAndReports/salesAndReports-routes");
 const challanRoutes = require("./src/challan/challan-routes");
 const returnRoutes = require("./src/return/return-routes");
+const cataloguesRoutes = require("./src/catalogues/catalogues-routes");
 
 
 app.use("/api/admin", superAdminRoutes);
@@ -62,6 +63,7 @@ app.use("/api/notification", notificationRoutes)
 app.use("/api/salesAndReports", salesAndReportsRoutes)
 app.use("/api/challan", challanRoutes)
 app.use("/api/return", returnRoutes)
+app.use("/api/catalogues", cataloguesRoutes)
 
 const connectDatabase = require("./db/database");
 

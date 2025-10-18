@@ -505,9 +505,9 @@ export default function SubProductsManagement() {
                 </div>
 
                 {item?.dateOfOpening && (
-                  <div className="mb-3 text-sm">
-                    <span className="text-gray-500">Date of Opening:</span>
-                    <p className="font-medium text-gray-700">{item?.dateOfOpening}</p>
+                  <div className="mb-3 text-sm ">
+                    <span className="text-gray-500">Date of Opening: </span>
+                    <p className="font-medium text-gray-700">{ item?.dateOfOpening.split('T')[0]}</p>
                   </div>
                 )}
 
