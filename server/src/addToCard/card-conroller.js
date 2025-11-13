@@ -169,12 +169,14 @@ exports.getCardById = catchAsyncErrors(async (req, res) => {
         //     return res.status(400).json({ success: false, message: 'Invalid user ID' });
         // }
         let card = await Card.findOne({ user: id })
-            .populate({ path: 'items.subProduct', populate: { path: 'productId', select: "productName sizes " }, select: 'name subProductImages price finalPrice stock sizes set' })
+            .populate({ path: 'items.subProduct', populate: { path: 'productId', select: "productName sizes" } })
             .populate({ path: 'user', select: 'name email phone' });
+        // card.items.map((item) => Number(item?.subProduct.pcsInSet) * item?.quantity).reduce((a, b) => a + b, 0)
+        // console.log("XXXXXXXXXXX2=>",);
 
         let Totalquantity = card.items.map((item) => item?.quantity).reduce((a, b) => a + b, 0)
-        let TotlePsc = card.items.map((item) => Number(item?.subProduct.set) * item?.quantity).reduce((a, b) => a + b, 0)
-        console.log("XXXXXXXXXXX2=>", card.items.map((item) => Number(item?.subProduct.set) * item?.quantity).reduce((a, b) => a + b, 0));
+        let TotlePsc = card.items.filter((item) => !isNaN(Number(item?.subProduct?.pcsInSet))).map((item) => Number(item.subProduct.pcsInSet) * item.quantity).reduce((a, b) => a + b, 0)
+        // console.log("XXXXXXXXXXX2=>", card.items.map((item) => Number(item?.subProduct.set) * item?.quantity).reduce((a, b) => a + b, 0));
         // if (!card) {
         //     card = new Card({ user: id, items: [], totalAmount: 0, });
         //     await card.save();
