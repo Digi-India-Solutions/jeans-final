@@ -223,7 +223,8 @@ import Button from "../../../components/base/Button";
 
 function OrderTable({
     filteredOrders, getStatusColor, getPaymentTypeColor, setSelectedOrder, canUpdateStatus, setShowOrderModal, openStatusUpdate,
-    openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton ,openDeleteOrder
+    openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton, openDeleteOrder,
+    showCreateOrderModal, setShowCreateOrderModal
 }) {
     return (
         <div className="overflow-x-auto max-h-[600px]">
@@ -429,6 +430,15 @@ function OrderTable({
                                             )}
                                         </div>
                                         {permiton.update && <div className="flex space-x-1">
+                                            <Button
+                                                onClick={() => {
+                                                    setSelectedOrder(order);
+                                                    setShowCreateOrderModal(true)
+                                                }}
+                                                className="bg-emerald-500 text-white hover:bg-emerald-600 text-xs px-2 py-1 rounded"
+                                            >
+                                                Edit Order
+                                            </Button>
                                             {order.balanceAmount > 0 && (
                                                 <Button
                                                     onClick={() => openPaymentUpdate(order)}
@@ -455,6 +465,7 @@ function OrderTable({
                                                     </Button>
                                                 )}
                                         </div>}
+
                                     </div>
                                 </td>
                             </tr>
