@@ -24,6 +24,7 @@ const adminRoleSchema = new Schema({
     admins: { type: permissionSchema, default: {} },
     userManagement: { type: permissionSchema, default: {} },
     videos: { type: permissionSchema, default: {} },
+    carts: { type: permissionSchema, default: {} },
     wishlists: { type: permissionSchema, default: {} },
     clientRewards: { type: permissionSchema, default: {} },
     notifications: { type: permissionSchema, default: {} },

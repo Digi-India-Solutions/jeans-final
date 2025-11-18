@@ -6,6 +6,7 @@ import NotFound from "../pages/NotFound";
 // Admin Pages
 import AdminDashboard from "../pages/admin/dashboard/page";
 import OrdersManagement from "../pages/admin/orders/page";
+import RecycledOrderManagement from "../pages/admin/recycledOrder/page";
 import ReturnsAndChallan from "../pages/admin/returns/page";
 import SalesReports from "../pages/admin/sales/page";
 import MarketingPage from "../pages/admin/marketing/page";
@@ -29,11 +30,9 @@ import Login from "../components/auth/Login";
 import ResetPassword from "../components/auth/ResetPassword";
 // User & Role Management
 import UserRolesManagement from "../pages/admin/user-roles/page";
-
 // Challan Management
 import ChallanCreate from "../pages/admin/challan/create/page";
 import CartsManagement from "../pages/admin/application/cart/page"
-
 
 const CatalogueUpload = lazy(() => import('../pages/admin/catalogue/page'));
 
@@ -56,6 +55,7 @@ const adminRoutes: RouteObject[] = [
       { path: "", element: <AdminDashboard /> },
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "orders", element: <OrdersManagement /> },
+      { path: "recycledOrder", element: <RecycledOrderManagement /> },
       { path: "returns", element: <ReturnsAndChallan /> },
       { path: "sales", element: <SalesReports /> },
       { path: "marketing", element: <MarketingPage /> },

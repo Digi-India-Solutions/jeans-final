@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { createOrder, createOrderByAdmin, createOrderByclient, getAllOrdersByAdminWithPagination, updateOrderNoteByAdmin,
+const { createOrder, createOrderByAdmin, createOrderByclient, getAllOrdersByAdminWithPagination, getAllRecycledOrdersByAdminWithPagination, updateOrderNoteByAdmin,
     getAllOrders, getOrderByID, changeStatus, changeStatusByAdmin, getAllOrdersByUser, verifyPayment, deleteOrderByID,
-    updateOrderPaymentByAdmin, FilterOrdersByAdmin ,getAllAdminOrders } = require("./orders-controller");
+    updateOrderPaymentByAdmin, FilterOrdersByAdmin, getAllAdminOrders,
+    moveToRecycleBin,
+    moveToOrder } = require("./orders-controller");
 
 
 router.post("/create-order", createOrder);
@@ -22,6 +24,8 @@ router.get("/get-all-Admin-orders", getAllAdminOrders);
 
 router.get("/get-all-orders-by-admin-with-pagination", getAllOrdersByAdminWithPagination);
 
+router.get("/get-all-recycled-orders-by-admin-with-pagination", getAllRecycledOrdersByAdminWithPagination);
+
 router.get("/get-order-by-id/:id", getOrderByID);
 
 router.post("/change-status/:id", changeStatus)
@@ -34,7 +38,11 @@ router.post("/update-order-notes-by-admin/:orderId", updateOrderNoteByAdmin)
 
 // router.post("/update-order/:id", updateOrderByID);
 
-router.post("/order-delete/:id", deleteOrderByID);
+router.get("/move-to-recycle-bin/:id", moveToRecycleBin);
+
+router.get("/move-to-order/:id", moveToOrder);
+
+router.get("/order-delete/:id", deleteOrderByID);
 
 router.get("/get-all-orders-by-user/:id", getAllOrdersByUser);
 

@@ -25,18 +25,50 @@ exports.createEnquiry = catchAsyncErrors(async (req, res, next) => {
 // Get All with Pagination
 exports.getAllEnquiries = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { pageNumber = 1 } = req.query;
-        const pageSize = 10;
-        const total = await Enquiry.countDocuments();
+        let { pageNumber = 1, filters = "{}" } = req.query;
 
-        const enquiries = await Enquiry.find({}).populate("userId").sort({ createdAt: -1 }).skip((pageNumber - 1) * pageSize).limit(pageSize);
-//  console.log("DDDDDDDD:==>", enquiries);
-        res.status(200).json({ status: true, data: enquiries, total, totalPages: Math.ceil(total / pageSize), currentPage: parseInt(pageNumber), });
+        // Safe parse filter
+        let filterObj = {};
+        try {
+            filterObj = JSON.parse(filters);
+        } catch (err) {
+            filterObj = {};
+        }
+
+        const { type, status, priority, search } = filterObj;
+
+        // Build MongoDB query object
+        let query = {};
+
+        if (type) query.type = type;
+        if (status) query.status = status;
+        if (priority) query.priority = priority;
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                { subject: { $regex: search, $options: "i" } },
+                { message: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        const pageSize = 10;
+        pageNumber = parseInt(pageNumber);
+
+        const total = await Enquiry.countDocuments(query);
+        const enquiries = await Enquiry?.find(query).populate("userId").sort({ createdAt: -1 }).skip((pageNumber - 1) * pageSize).limit(pageSize);
+
+        res.status(200).json({
+            status: true, message: "Enquiries fetched successfully",
+            data: enquiries, total, totalPages: Math.ceil(total / pageSize), currentPage: pageNumber,
+        });
+
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
-
 });
+
 
 // Change Status
 // exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
@@ -83,4 +115,49 @@ exports.deleteEnquiryByID = catchAsyncErrors(async (req, res, next) => {
 exports.getEnquiryList = catchAsyncErrors(async (req, res, next) => {
     const enquiries = await Enquiry.find({}).populate("userId").sort({ createdAt: -1 });
     res.status(200).json({ status: true, message: "Enquiries fetched", data: enquiries });
+});
+
+
+exports.getEnquiriesByFilters = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { filters } = req.body;
+        let { type, status, search } = filters;
+        console.log("XXXXXX::=>XXXXXX::=>", filters);
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+
+        let query = {};
+
+        if (type) query.type = type;
+        if (status) query.status = status;
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                { subject: { $regex: search, $options: "i" } },
+                { message: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        // Total count
+        const total = await Enquiry.countDocuments(query);
+
+        const enquiries = await Enquiry.find(query).populate("userId").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit);
+
+        res.status(200).json({
+            status: true,
+            message: "Enquiries fetched",
+            data: enquiries,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
 });
