@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { createOrder, createOrderByAdmin, createOrderByclient, getAllOrdersByAdminWithPagination, getAllRecycledOrdersByAdminWithPagination, updateOrderNoteByAdmin,
     getAllOrders, getOrderByID, changeStatus, changeStatusByAdmin, getAllOrdersByUser, verifyPayment, deleteOrderByID,
-    updateOrderPaymentByAdmin, FilterOrdersByAdmin, getAllAdminOrders,
+    updateOrderPaymentByAdmin, FilterOrdersByAdmin, getAllAdminOrders,updateOrderByID,
     moveToRecycleBin,
     moveToOrder } = require("./orders-controller");
 
@@ -36,7 +36,7 @@ router.post("/update-order-payment-by-admin/:orderId", updateOrderPaymentByAdmin
 
 router.post("/update-order-notes-by-admin/:orderId", updateOrderNoteByAdmin)
 
-// router.post("/update-order/:id", updateOrderByID);
+router.post("/update-full-order-by-admin/:id", updateOrderByID);
 
 router.get("/move-to-recycle-bin/:id", moveToRecycleBin);
 

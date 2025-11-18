@@ -142,7 +142,7 @@ export default function OrdersManagement() {
     }
   ]);
 
-  const [newOrderForm, setNewOrderForm] = useState({ customerId: '', customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [], customerAvailablePoints: 0, redeemPoints: 0, pointsToEarn: 0 });
+  const [newOrderForm, setNewOrderForm] = useState({ ...selectedOrder } || { customerId: '', customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [], customerAvailablePoints: 0, redeemPoints: 0, pointsToEarn: 0 });
 
   const deliveryVendors = ['BlueDart', 'Delhivery', 'DTDC', 'FedEx', 'India Post', 'Aramex'];
 
@@ -417,8 +417,8 @@ export default function OrdersManagement() {
   // };
 
   const getTotalPaidAmount = () => {
-    return newOrderForm.payments.reduce((sum, payment) => {
-      return sum + (parseFloat(payment.amount) || 0);
+    return newOrderForm?.payments?.reduce((sum, payment) => {
+      return sum + (parseFloat(payment?.amount) || 0);
     }, 0);
   };
 
@@ -956,6 +956,8 @@ export default function OrdersManagement() {
             openEditOrderNote={openEditOrderNote}
             openDeleteOrder={openDeleteOrder}
             permiton={permiton}
+            showCreateOrderModal={showCreateOrderModal}
+            setShowCreateOrderModal={setShowCreateOrderModal}
           />
         </Card>
 
@@ -978,6 +980,7 @@ export default function OrdersManagement() {
         {/* Create Order Modal */}
         {showCreateOrderModal && (
           <CreateOrderModal
+            // selectedOrder={selectedOrder}
             subProducts={subProducts}
             getTotalPaidAmount={getTotalPaidAmount}
             calculatePointsValue={calculatePointsValue}

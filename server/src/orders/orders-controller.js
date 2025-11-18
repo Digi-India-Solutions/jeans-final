@@ -166,118 +166,156 @@ exports.createOrder = catchAsyncErrors(async (req, res, next) => {
 
 exports.verifyPayment = async (req, res) => {
     try {
-        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, userId, rewardPointsUsed, orderUniqueId } = req.body;
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            order_id,
+            userId,
+            rewardPointsUsed,
+            orderUniqueId
+        } = req.body;
 
-        // console.log("Payment verification payload:", req.body);
-
+        // Fetch cart
         const cart = await Cart.findOne({ user: userId });
 
-
-        // 1. Validate order exists
-        const order = await Order.findById(order_id).populate("userId");
+        // 1️⃣ Validate order
+        const order = await AdminOrder.findById(order_id).populate("customer.userId");
         if (!order) {
-            return res.status(201).json({ error: "Order not found" });
+            return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        // 1.a Prevent verifying the same payment twice
-        if (order?.paymentStatus === "Complete Payment") {
-            return res.status(200).json({ message: "Payment already verified", orderId: order?._id });
+        // 2️⃣ Prevent duplicate verification
+        if (order.paymentType === "Complete Payment") {
+            return res.status(200).json({
+                success: true,
+                message: "Payment already verified",
+                orderId: order._id
+            });
         }
 
-        // 2. Build the expected signature
-        const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-        const secret = process.env.RAZORPAY_KEY_SECRET;
-        if (!secret) {
-            console.error("Missing RAZORPAY_SECRET in environment");
-            return res.status(400).json({ error: "Server misconfiguration" });
-        }
-
+        // 3️⃣ Razorpay Signature Verification
+        const signBody = `${razorpay_order_id}|${razorpay_payment_id}`;
         const expectedSignature = crypto
-            .createHmac("sha256", secret)
-            .update(body)
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(signBody)
             .digest("hex");
 
-        console.log("razorpay_order_id:", razorpay_order_id, "razorpay_payment_id:", razorpay_payment_id);
-        console.log("expectedSignature:", expectedSignature, "razorpay_signature:", razorpay_signature);
+        const signatureMatch =
+            expectedSignature === razorpay_signature;
 
-        // 3. Safe compare (prevents timing attacks)
-        const sigBuffer = Buffer.from(razorpay_signature, "hex");
-        const expBuffer = Buffer.from(expectedSignature, "hex");
-
-        const signaturesMatch = sigBuffer.length === expBuffer.length && crypto.timingSafeEqual(sigBuffer, expBuffer);
-
-        if (!signaturesMatch) {
-            console.warn("Signature verification failed");
-            return res.status(400).json({ error: "Payment verification failed" });
+        if (!signatureMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "Payment verification failed"
+            });
         }
 
-        // 4. Update order on success
-        order.paymentStatus = order.pendingAmount === 0 ? "Complete Payment" : "Partial Payment";
-        order.paymentInfo = { transactionId: razorpay_payment_id, orderId: razorpay_order_id, paymentId: razorpay_payment_id, razorpaySignature: razorpay_signature, };
-        order.recivedAmount = order.recivedAmount;
-        order.pendingAmount = order.pendingAmount || 0;
+        // 4️⃣ Update order payment fields
+        const previousPaid = order.paidAmount || 0;
+        const newPaidAmount = previousPaid + order.balanceAmount;
 
-        const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
-        order.reworPoins = earnedPoints || 0;
-        await order.save();
+        order.paidAmount = newPaidAmount;
+        order.balanceAmount = Math.max(order.total - newPaidAmount, 0);
 
-        cart.items = [];
-        cart.totalAmount = 0;
-        await cart.save();
+        order.paymentType = order.balanceAmount === 0 ? "Complete Payment" : "Partial Payment";
 
-        // /////////////ADD POINTS//////////////////////////////
+        order.paymentInfo = {
+            transactionId: razorpay_payment_id,
+            razorpayOrderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+        };
+
+        // Add payment log
+        order.payments.push({
+            method: "Online",
+            amount: order.total,
+        });
+
+        // 5️⃣ Reward Points
         // let userPoints = await RewardPoints.findOne({ userId });
+
+        // // Deduct used points
         // if (rewardPointsUsed > 0) {
-        //     if (!userPoints || userPoints?.points < rewardPointsUsed) {
-        //         return res.status(400).json({ success: false, message: "Insufficient reward points." });
+        //     if (!userPoints || userPoints.points < rewardPointsUsed) {
+        //         return res.status(400).json({ success: false, message: "Insufficient reward points" });
         //     }
+
         //     userPoints.points -= rewardPointsUsed;
-        //     userPoints.history.push({ type: "redeemed", amount: rewardPointsUsed, description: `Points redeemed for Order ${orderUniqueId}`, });
-        //     await userPoints.save();
+        //     userPoints.history.push({
+        //         type: "redeemed",
+        //         amount: rewardPointsUsed,
+        //         description: `Points redeemed for Order ${orderUniqueId}`
+        //     });
+        // }
 
-        //     let userPoints2 = await RewardPoints.findOne({ userId });
+        // // Earn new points
+        // const earnedPoints = Math.floor(order.total * 0.04);
 
-        //     const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
-
-        //     if (!userPoints2) {
-        //         userPoints2 = new RewardPoints({
-        //             userId,
-        //             points: earnedPoints,
-        //             history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
-        //         });
-        //     } else {
-        //         userPoints2.points += earnedPoints;
-        //         userPoints2.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
-        //     }
-        //     await userPoints2.save();
+        // if (!userPoints) {
+        //     userPoints = new RewardPoints({
+        //         userId,
+        //         points: earnedPoints,
+        //         history: [{
+        //             type: "earned",
+        //             amount: earnedPoints,
+        //             description: `Points earned for Order ${orderUniqueId}`
+        //         }]
+        //     });
         // } else {
-        //     // Earn 4% points
-        //     const earnedPoints = Math.floor((order.totalAmount * 4) / 100);
-
-        //     if (!userPoints) {
-        //         userPoints = new RewardPoints({
-        //             userId,
-        //             points: earnedPoints,
-        //             history: [{ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, }],
-        //         });
-        //     } else {
-        //         userPoints.points += earnedPoints;
-        //         userPoints.history.push({ type: "earned", amount: earnedPoints, description: `Points earned for Order ${orderUniqueId}`, });
-        //     }
+        //     userPoints.points += earnedPoints;
+        //     userPoints.history.push({
+        //         type: "earned",
+        //         amount: earnedPoints,
+        //         description: `Points earned for Order ${orderUniqueId}`
+        //     });
         // }
 
         // await userPoints.save();
-        // //////////////////////////////////////////////////////////////////////////////////////////////
+        await order.save();
 
-        sendThankYouEmail({ email: order?.userId?.email, name: order?.userId?.name, phone: order?.userId?.phone });
-        sendThankYouEmailAdmin({ email: order?.userId?.email, name: order?.userId?.name, phone: order?.userId?.phone });
-        sendOrderThankByUserOnWhatsapp({ name: order?.userId?.name, mobile: order?.userId?.phone, email: order?.userId?.email });
-        return res.status(200).json({ message: "Payment verified successfully", orderId: order?._id });
+        // 6️⃣ Clear Cart After Payment
+        // if (cart) {
+        //     cart.items = [];
+        //     cart.totalAmount = 0;
+        //     await cart.save();
+        // }
+
+        // 7️⃣ Notifications
+        sendThankYouEmail({
+            email: order.customer.email,
+            name: order.customer.name,
+            phone: order.customer.phone
+        });
+
+        sendThankYouEmailAdmin({
+            email: order.customer.email,
+            name: order.customer.name,
+            phone: order.customer.phone
+        });
+
+        sendOrderThankByUserOnWhatsapp({
+            name: order.customer.name,
+            mobile: order.customer.phone,
+            email: order.customer.email
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment verified successfully",
+            orderId: order._id
+        });
+
     } catch (error) {
-        console.error("Error verifying Razorpay payment:", error);
-        return res.status(500).json({ error: "Server error while verifying payment" });
+        console.error("Verify Payment Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error verifying payment"
+        });
     }
-}
+};
+
 
 const generateOrderNumber = async () => {
     const totalOrders = await AdminOrder.findOne().sort({ createdAt: -1 })
@@ -1067,24 +1105,24 @@ exports.FilterOrdersByAdmin = catchAsyncErrors(async (req, res, next) => {
 });
 
 
-// exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const orderID = req.params.id;
+exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderID = req.params.id;
+        console.log("SSSSSSXXXX:=>", orderID)
+        // const orderData = await Order.findByIdAndUpdate(orderID, req.body, {
+        //     new: true,
+        //     runValidators: true
+        // });
 
-//         const orderData = await Order.findByIdAndUpdate(orderID, req.body, {
-//             new: true,
-//             runValidators: true
-//         });
+        // if (!orderData) {
+        //     return next(new ErrorHandler("Order not found!", 400));
+        // }
 
-//         if (!orderData) {
-//             return next(new ErrorHandler("Order not found!", 400));
-//         }
-
-//         sendResponse(res, 200, "Order Data Fetched Successfully", orderData);
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
+        // sendResponse(res, 200, "Order Data Fetched Successfully", orderData);
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
 
 
 // exports.searchOrders = catchAsyncErrors(async (req, res, next) => {
@@ -1128,249 +1166,249 @@ exports.FilterOrdersByAdmin = catchAsyncErrors(async (req, res, next) => {
 //     }
 // });
 
-// // exports.getAllSales = catchAsyncErrors(async (req, res, next) => {
-// //     try {
-// //         const { pageNumber } = req.query;
-
-// //         const totalSales = await Order.countDocuments();
-
-// //         const sales = await Order.find({})
-// //             .sort({ createdAt: -1 })
-// //             .skip((pageNumber - 1) * 15)
-// //             .limit(15)
-// //             .populate("userId", "name email uniqueUserId")
-// //             .populate("productId", "name price uniqueProductId")
-// //             .populate("accessoryId", "titel description price images")
-
-// //         sendResponse(res, 200, "Sales Fetched Successfully", {
-// //             totalSales,
-// //             totalPages: Math.ceil(totalSales / 15),
-// //             currentPage: parseInt(pageNumber, 10),
-// //             sales
-// //         });
-
-// //     } catch (error) {
-// //         return next(new ErrorHandler(error.message, 500));
-// //     }
-// // })
-
-// // exports.getAllSalesByDate = catchAsyncErrors(async (req, res, next) => {
-// //     try {
-// //         const { from, to } = req.body;
-
-// //         const fromDate = new Date(from);
-// //         const toDate = new Date(to);
-// //         toDate.setHours(23, 59, 59, 999);
-
-// //         const usertransaction = await Order.find({
-// //             createdAt: {
-// //                 $gte: fromDate,
-// //                 $lte: toDate
-// //             }
-// //         })
-// //             .populate({ path: 'userId', select: 'name email address phone' })
-// //             .populate("productId", "name price uniqueProductId")
-// //             .populate("accessoryId", "titel description price images")
-// //             .sort({ createdAt: -1 })
-
-// //         const totalSales = usertransaction.reduce((acc, transaction) => acc + transaction.amount, 0);
-
-// //         sendResponse(res, 200, 'users Transactions fetched successfully.', {
-// //             totalSales,
-// //             salesRecords: usertransaction,
-// //             fromDate: fromDate,
-// //             toDate: toDate,
-// //         });
-
-// //     } catch (error) {
-// //         return next(new ErrorHandler(error.message, 500));
-// //     }
-// // });
-
-// exports.getTotalEcommerceSales = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const result = await Order.aggregate([
-//             {
-//                 $group: {
-//                     _id: null,
-//                     totalSales: { $sum: "$amount" },
-//                 }
-//             }
-//         ]);
-
-//         const totalSales = result.length > 0 ? result[0].totalSales : 0;
-
-//         sendResponse(res, 200, "Total Ecommerce Sales Fetched Successfully", totalSales);
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-
-// });
-
-// exports.getAdminDashboardStaticsByDate = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { from, to } = req.body;
-
-//         const fromDate = new Date(from);
-//         const toDate = new Date(to);
-//         toDate.setHours(23, 59, 59, 999);
-
-//         const ecommerceSales = await Order.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             }
-//         })
-
-//         const totalEcommerceSales = ecommerceSales.reduce((acc, transaction) => acc + transaction.amount, 0);
-
-//         const rentalSales = await Invoice.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             }
-//         });
-
-//         const totalRentalSale = rentalSales.reduce((acc, transaction) => acc + transaction.paymentAmount, 0);
-
-//         const gpsRequests = await Request.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             }
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const uninstall = await Uninstall.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             }
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const returns = await Return.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             }
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const claims = await Claim.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             }
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         sendResponse(res, 200, "Dashboard Statics Fetched Successfully", {
-//             totalEcommerceSales,
-//             totalRentalSale,
-//             gpsRequests,
-//             uninstall,
-//             returns,
-//             claims
-//         });
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// });
-
-// exports.getClientDashboardStaticsByDate = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { from, to } = req.body;
-
-//         const fromDate = new Date(from);
-//         const toDate = new Date(to);
-//         toDate.setHours(23, 59, 59, 999);
-
-//         const gpsRequests = await Request.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             },
-//             clientId: req?.user?._id
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const uninstall = await Uninstall.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             },
-//             clientId: req?.user?._id
-
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const returns = await Return.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             },
-//             clientId: req?.user?._id
-
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const claims = await Claim.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             },
-//             clientId: req?.user?._id
-
-//         })
-//             .populate("clientId", "companyName uniqueClientId email contactNo address");
-
-//         const inventory = await Inventory.find({
-//             createdAt: {
-//                 $gte: fromDate,
-//                 $lte: toDate
-//             },
-//             clientId: req?.user?._id
-//         })
-
-//         sendResponse(res, 200, "Dashboard Statics Fetched Successfully", {
-//             gpsRequests,
-//             uninstall,
-//             returns,
-//             claims,
-//             inventory
-//         });
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// });
-
-// exports.getMyBookings = catchAsyncErrors(async (req, res, next) => {
+// exports.getAllSales = catchAsyncErrors(async (req, res, next) => {
 //     try {
 //         const { pageNumber } = req.query;
 
-//         const totalBookings = await Order.countDocuments({ userId: req.user._id });
+//         const totalSales = await Order.countDocuments();
 
-//         const bookings = await Order.find({ userId: req.user._id })
+//         const sales = await Order.find({})
 //             .sort({ createdAt: -1 })
 //             .skip((pageNumber - 1) * 15)
 //             .limit(15)
+//             .populate("userId", "name email uniqueUserId")
+//             .populate("productId", "name price uniqueProductId")
 //             .populate("accessoryId", "titel description price images")
-//             .populate("productId", "name price uniqueProductId");
 
-//         sendResponse(res, 200, "Bookings Fetched Successfully", {
-//             totalBookings,
-//             totalPages: Math.ceil(totalBookings / 15),
+//         sendResponse(res, 200, "Sales Fetched Successfully", {
+//             totalSales,
+//             totalPages: Math.ceil(totalSales / 15),
 //             currentPage: parseInt(pageNumber, 10),
-//             bookings
+//             sales
 //         });
+
 //     } catch (error) {
 //         return next(new ErrorHandler(error.message, 500));
 //     }
 // })
+
+// exports.getAllSalesByDate = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const { from, to } = req.body;
+
+//         const fromDate = new Date(from);
+//         const toDate = new Date(to);
+//         toDate.setHours(23, 59, 59, 999);
+
+//         const usertransaction = await Order.find({
+//             createdAt: {
+//                 $gte: fromDate,
+//                 $lte: toDate
+//             }
+//         })
+//             .populate({ path: 'userId', select: 'name email address phone' })
+//             .populate("productId", "name price uniqueProductId")
+//             .populate("accessoryId", "titel description price images")
+//             .sort({ createdAt: -1 })
+
+//         const totalSales = usertransaction.reduce((acc, transaction) => acc + transaction.amount, 0);
+
+//         sendResponse(res, 200, 'users Transactions fetched successfully.', {
+//             totalSales,
+//             salesRecords: usertransaction,
+//             fromDate: fromDate,
+//             toDate: toDate,
+//         });
+
+//     } catch (error) {
+//         return next(new ErrorHandler(error.message, 500));
+//     }
+// });
+
+exports.getTotalEcommerceSales = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const result = await Order.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalSales: { $sum: "$amount" },
+                }
+            }
+        ]);
+
+        const totalSales = result.length > 0 ? result[0].totalSales : 0;
+
+        sendResponse(res, 200, "Total Ecommerce Sales Fetched Successfully", totalSales);
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+
+});
+
+exports.getAdminDashboardStaticsByDate = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { from, to } = req.body;
+
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+
+        const ecommerceSales = await Order.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            }
+        })
+
+        const totalEcommerceSales = ecommerceSales.reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        const rentalSales = await Invoice.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            }
+        });
+
+        const totalRentalSale = rentalSales.reduce((acc, transaction) => acc + transaction.paymentAmount, 0);
+
+        const gpsRequests = await Request.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            }
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const uninstall = await Uninstall.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            }
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const returns = await Return.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            }
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const claims = await Claim.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            }
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        sendResponse(res, 200, "Dashboard Statics Fetched Successfully", {
+            totalEcommerceSales,
+            totalRentalSale,
+            gpsRequests,
+            uninstall,
+            returns,
+            claims
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+exports.getClientDashboardStaticsByDate = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { from, to } = req.body;
+
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        toDate.setHours(23, 59, 59, 999);
+
+        const gpsRequests = await Request.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            },
+            clientId: req?.user?._id
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const uninstall = await Uninstall.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            },
+            clientId: req?.user?._id
+
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const returns = await Return.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            },
+            clientId: req?.user?._id
+
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const claims = await Claim.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            },
+            clientId: req?.user?._id
+
+        })
+            .populate("clientId", "companyName uniqueClientId email contactNo address");
+
+        const inventory = await Inventory.find({
+            createdAt: {
+                $gte: fromDate,
+                $lte: toDate
+            },
+            clientId: req?.user?._id
+        })
+
+        sendResponse(res, 200, "Dashboard Statics Fetched Successfully", {
+            gpsRequests,
+            uninstall,
+            returns,
+            claims,
+            inventory
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+exports.getMyBookings = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const { pageNumber } = req.query;
+
+        const totalBookings = await Order.countDocuments({ userId: req.user._id });
+
+        const bookings = await Order.find({ userId: req.user._id })
+            .sort({ createdAt: -1 })
+            .skip((pageNumber - 1) * 15)
+            .limit(15)
+            .populate("accessoryId", "titel description price images")
+            .populate("productId", "name price uniqueProductId");
+
+        sendResponse(res, 200, "Bookings Fetched Successfully", {
+            totalBookings,
+            totalPages: Math.ceil(totalBookings / 15),
+            currentPage: parseInt(pageNumber, 10),
+            bookings
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+})
 
 
 

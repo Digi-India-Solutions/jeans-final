@@ -31,7 +31,7 @@ export default function CreateUserModels({ showUserModal, setShowUserModal, fetc
     }, []);
 
     const fetchUsers = async () => {
-        setIsLoading(true);
+        // setIsLoading(true);
         try {
             const response = await getData("api/user/get-all-user");
             if (response.success) {
@@ -45,7 +45,7 @@ export default function CreateUserModels({ showUserModal, setShowUserModal, fetc
             toast.error("Unable to fetch users");
             console.error("Fetch users error:", error);
         } finally {
-            setIsLoading(false);
+            // setIsLoading(false);
         }
     };
 
