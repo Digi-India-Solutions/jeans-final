@@ -306,7 +306,7 @@ const orderSchema = new Schema({
     sentToShipRocket: { type: Boolean, default: false },
     discountCupan: { type: Number, default: 0 },
     reworPoins: { type: Number, default: 0 },
-
+    recycleBin: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });
@@ -379,7 +379,7 @@ const adminOrderSchema = new Schema({
 
     pointsEarned: { type: Number, default: 0 },
     pointsEarnedValue: { type: Number, default: 0 },
-
+    recycleBin: { type: Boolean, default: false },
     statusHistory: [{
         status: { type: String, required: true },
         date: { type: String, required: true }, // format: YYYY-MM-DD

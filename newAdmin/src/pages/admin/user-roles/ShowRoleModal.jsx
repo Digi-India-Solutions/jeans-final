@@ -89,7 +89,7 @@ function ShowRoleModal({
                                         clientRewards: { read: false, write: false, update: false, delete: false },
                                         notifications: { read: false, write: false, update: false, delete: false },
                                         FAQs: { read: false, write: false, update: false, delete: false },
-
+                                        carts: { read: false, write: false, update: false, delete: false },
                                         orders: { read: false, write: false, update: false, delete: false },
                                         sales: { read: false, write: false, update: false, delete: false },
                                         returns: { read: false, write: false, update: false, delete: false },
@@ -196,7 +196,7 @@ function ShowRoleModal({
                                 setRoleForm({
                                     name: '',
                                     description: '',
-                                   permissions: {
+                                    permissions: {
                                         dashboard: { read: false, write: false, update: false, delete: false },
                                         banners: { read: false, write: false, update: false, delete: false },
                                         categories: { read: false, write: false, update: false, delete: false },
@@ -206,18 +206,17 @@ function ShowRoleModal({
                                         userManagement: { read: false, write: false, update: false, delete: false },
                                         admins: { read: false, write: false, update: false, delete: false },
                                         videos: { read: false, write: false, update: false, delete: false },
+                                        carts: { read: false, write: false, update: false, delete: false },
                                         wishlists: { read: false, write: false, update: false, delete: false },
                                         clientRewards: { read: false, write: false, update: false, delete: false },
                                         Notifications: { read: false, write: false, update: false, delete: false },
                                         FAQs: { read: false, write: false, update: false, delete: false },
-
                                         orders: { read: false, write: false, update: false, delete: false },
                                         sales: { read: false, write: false, update: false, delete: false },
                                         returns: { read: false, write: false, update: false, delete: false },
                                         adminRole: { read: false, write: false, update: false, delete: false },
                                         marketing: { read: false, write: false, update: false, delete: false },
                                         enquiries: { read: false, write: false, update: false, delete: false },
-
                                         catalogueUpload: { read: false, write: false, update: false, delete: false },
                                     }
                                 });

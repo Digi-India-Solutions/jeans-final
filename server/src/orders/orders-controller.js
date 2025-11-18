@@ -1,5 +1,6 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
 const { Order, AdminOrder } = require("./orders-model");
+// const AdminOrder = require("./orders-model");
 const User = require("../users/users-model");
 const { RewardPoints } = require("../rewordsPoints/rewordsPoints-model");
 const ShortUniqueId = require("short-unique-id");
@@ -279,9 +280,9 @@ exports.verifyPayment = async (req, res) => {
 }
 
 const generateOrderNumber = async () => {
+    const totalOrders = await AdminOrder.find({ sort: { createdAt: -1 } })
 
-    const totalOrders = await AdminOrder.countDocuments();
-
+    console.log("SSSSSSSSS:=>", totalOrders)
 
     const dateObj = new Date();
     const year = dateObj.getFullYear();
@@ -620,7 +621,7 @@ exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, ne
         const skip = (page - 1) * limit;
 
         // ✅ Search conditions
-        let query = {};
+        let query = { recycleBin: false };
         if (search) {
             query = {
                 $or: [
@@ -640,6 +641,53 @@ exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, ne
             AdminOrder.countDocuments(query)
         ]);
 
+        console.log("XXXXXX::=>", orders);
+        res.status(200).json({
+            success: true,
+            orders,
+            pagination: {
+                totalOrders,
+                currentPage: page,
+                totalPages: Math.ceil(totalOrders / limit),
+                limit,
+            },
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message || "Failed to fetch orders.", 500));
+    }
+});
+
+exports.getAllRecycledOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const search = req.query.search?.trim() || "";
+        console.log("XXXXXX::=>XXXXXX::=>", search);
+        const skip = (page - 1) * limit;
+
+        // ✅ Search conditions
+        let query = { recycleBin: true };
+
+        if (search) {
+            query = {
+                $or: [
+                    { "customer.name": { $regex: search, $options: "i" } },
+                    { "customer.email": { $regex: search, $options: "i" } },
+                    { "customer.phone": { $regex: search, $options: "i" } },
+                    { orderNumber: { $regex: search, $options: "i" } },
+                    { paymentMethod: { $regex: search, $options: "i" } },
+                    { status: { $regex: search, $options: "i" } },
+                ],
+            };
+        }
+
+        // ✅ Fetch orders
+        const [orders, totalOrders] = await Promise.all([
+            AdminOrder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
+            AdminOrder.countDocuments(query)
+        ]);
+
+        console.log("XXXXXX::=>", orders);
         res.status(200).json({
             success: true,
             orders,
@@ -887,19 +935,72 @@ exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const orderID = req.params.id;
         console.log("orderID:=>", orderID);
-        const orderData = await Order.findByIdAndDelete(orderID);
+        const orderData = await AdminOrder.findByIdAndDelete(orderID);
 
         if (!orderData) {
             return res.status(204).json({ status: false, message: "Order not found" });
-            // return next(new ErrorHandler("Order not found!", 400));
         }
         return res.status(200).json({ status: true, message: "Payment verified successfully", data: orderData });
-        // sendResponse(res, 200, "Order deleted successfully", orderData);
 
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
 })
+
+
+exports.moveToRecycleBin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderID = req.params.id;
+
+        const orderData = await AdminOrder.findById(orderID);
+
+        if (!orderData) {
+            return res.status(404).json({
+                status: false, message: "Order not found"
+            });
+        }
+
+        orderData.recycleBin = true;
+
+        await orderData.save();
+
+        return res.status(200).json({
+            status: true,
+            message: "Order moved to recycle bin successfully",
+            data: orderData
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+exports.moveToOrder = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderID = req.params.id;
+
+        const orderData = await AdminOrder.findById(orderID);
+
+        if (!orderData) {
+            return res.status(404).json({
+                status: false, message: "Order not found"
+            });
+        }
+
+        orderData.recycleBin = false;
+
+        await orderData.save();
+
+        return res.status(200).json({
+            status: true,
+            message: "Order moved to recycle bin successfully",
+            data: orderData
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
 
 
 exports.FilterOrdersByAdmin = catchAsyncErrors(async (req, res, next) => {

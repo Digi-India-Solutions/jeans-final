@@ -223,7 +223,7 @@ import Button from "../../../components/base/Button";
 
 function OrderTable({
     filteredOrders, getStatusColor, getPaymentTypeColor, setSelectedOrder, canUpdateStatus, setShowOrderModal, openStatusUpdate,
-    openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton
+    openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton ,openDeleteOrder
 }) {
     return (
         <div className="overflow-x-auto max-h-[600px]">
@@ -408,6 +408,17 @@ function OrderTable({
                                             >
                                                 Note
                                             </Button>}
+                                            {permiton.delete && (
+                                                <div className="flex space-x-1">
+                                                    <Button
+                                                        onClick={() => openDeleteOrder(order)}
+                                                        className="bg-red-500 text-white hover:bg-red-600 text-xs px-2 py-1"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            )}
+
                                             {canUpdateStatus(order?.status) && (
                                                 <Button
                                                     onClick={() => openStatusUpdate(order)}

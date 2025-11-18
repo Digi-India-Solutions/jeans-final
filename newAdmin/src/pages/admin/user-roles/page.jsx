@@ -52,6 +52,7 @@ export default function UserRolesManagement() {
     { key: 'userManagement', name: 'User Management' },
     { key: 'admins', name: 'Admin & Staff Roles' },
     { key: 'videos', name: 'Videos' },
+    { key: 'carts', name: 'Carts' },
     { key: 'wishlists', name: 'Wishlists' },
     { key: 'clientRewards', name: 'Client Rewards' },
 

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import './Login.css';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { postData } from '../../services/FetchNodeServices';
 import jwtDecode from "jwt-decode";
@@ -13,7 +13,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [step, setStep] = useState(1); // 1: login, 2: forgot password
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     // const handleLogin = async (e) => {
     //     e.preventDefault();
     //     const response = await postData('api/admin/admin-login', { email, password });
@@ -51,7 +51,7 @@ const Login = () => {
 
         try {
             const response = await postData("api/admin/admin-login", { email, password });
-
+            console.log("SSSSSSS:=>", response)
             if (response?.status === true) {
                 const token = response?.data?.token;
                 let decodedToken;
@@ -73,6 +73,7 @@ const Login = () => {
             } else {
                 toast.error(response?.message || "Invalid email or password");
             }
+
         } catch (error) {
             console.error("Login error:", error);
             toast.error("Something went wrong during login.");
@@ -101,6 +102,7 @@ const Login = () => {
 
     return (
         <div className="main-login">
+            <ToastContainer />
             <div className="login-container">
                 <h2 className="login-title">
                     {step === 1 ? 'Admin Login' : 'Forgot Password'}

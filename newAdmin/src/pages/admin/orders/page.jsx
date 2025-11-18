@@ -9,6 +9,7 @@ import OrderTable from './OrderTable';
 import { toast } from 'react-toastify';
 import FilteredOrdersCom from './FilteredOrdersCom';
 import CreateNotesModel from './CreateNotesModel';
+import Swal from "sweetalert2";
 
 export default function OrdersManagement() {
   const [editOrderNoteForm, setEditOrderNoteForm] = useState({ orderId: '', orderNote: '' })
@@ -86,6 +87,7 @@ export default function OrdersManagement() {
   const [showStatusUpdateModal, setShowStatusUpdateModal] = useState(false);
   const [showPaymentUpdateModal, setShowPaymentUpdateModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showDeleteOrderModal, setShowDeleteOrderModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('');
   const [productSearchQuery, setProductSearchQuery] = useState('')
   const [filteredSubProducts, setFilteredSubProducts] = useState(subProducts);
@@ -856,6 +858,38 @@ export default function OrdersManagement() {
     setShowEditOrderNoteModal(true);
   };
 
+  const openDeleteOrder = async (order) => {
+    setSelectedOrder(order);
+    setShowDeleteOrderModal(true);
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You will not be able to recover this order!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await getData(`api/order/move-to-recycle-bin/${order?._id}`);
+        if (response.status === true) {
+          Swal.fire("Deleted!", "The cart has been deleted.", "success");
+          fetchAllOrder();
+        } else {
+          Swal.fire("Failed!", response?.message || "Delete failed", "error");
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        Swal.fire("Error!", "Something went wrong!", "error");
+      }
+    }
+
+
+  };
+
   const fetchRoles = async () => {
     try {
       const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
@@ -920,6 +954,7 @@ export default function OrdersManagement() {
             setCurrentPage={setCurrentPage}
             setTotalPages={setTotalPages}
             openEditOrderNote={openEditOrderNote}
+            openDeleteOrder={openDeleteOrder}
             permiton={permiton}
           />
         </Card>

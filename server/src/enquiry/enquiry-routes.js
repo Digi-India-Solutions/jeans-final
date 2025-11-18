@@ -2,11 +2,12 @@ const express = require("express");
 const {
   createEnquiry,
   getAllEnquiries,
-//   changeStatus,
-//   getEnquiryByID,
-//   updateEnquiryByID,
+  //   changeStatus,
+  //   getEnquiryByID,
+  //   updateEnquiryByID,
   deleteEnquiryByID,
-  getEnquiryList
+  getEnquiryList,
+  getEnquiriesByFilters
 } = require("./enquiry-contriller");
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get("/get-all-enquiries", getAllEnquiries);
 // router.post("/update-enquiry/:id", updateEnquiryByID);
 router.get("/delete-enquiry/:id", deleteEnquiryByID);
 router.get("/get_all_enquiry_list", getEnquiryList);
+router.post('/get-enquiries-by-filters', getEnquiriesByFilters)
 
 module.exports = router;

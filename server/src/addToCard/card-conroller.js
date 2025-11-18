@@ -327,6 +327,44 @@ exports.getAllCard = catchAsyncErrors(async (req, res) => {
     }
 });
 
+exports.getAllCardWithPagination = catchAsyncErrors(async (req, res) => {
+    try {
+        // Pagination params
+        let page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+
+        let skip = (page - 1) * limit;
+
+        // Total documents
+        const totalCards = await Card.countDocuments();
+
+        // Fetch paginated cards
+        const cards = await Card.find()
+            .skip(skip)
+            .limit(limit)
+            .populate({
+                path: 'items.subProduct',
+                populate: { path: 'productId', select: 'productName' }
+            })
+            .populate({
+                path: 'user',
+                select: 'name email phone'
+            });
+
+        res.status(200).json({
+            success: true,
+            count: cards.length,
+            totalCards,
+            totalPages: Math.ceil(totalCards / limit),
+            currentPage: page,
+            cards,
+        });
+    } catch (error) {
+        console.error('Get all cards error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch cards', error: error.message });
+    }
+})
+
 exports.applyCoupon = catchAsyncErrors(async (req, res) => {
     try {
         const { couponCode } = req.body;
