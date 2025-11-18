@@ -49,7 +49,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
         </button>
 
         {/* Search */}
-        <div className="relative">
+        {/* <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <i className={`ri-search-line text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}></i>
           </div>
@@ -63,7 +63,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
               : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
               }`}
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right side */}
@@ -78,7 +78,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
         </button> */}
 
         {/* Quick actions */}
-        <div className="hidden md:flex items-center space-x-2">
+        {/* <div className="hidden md:flex items-center space-x-2">
           <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap">
             <i className="ri-add-line mr-1"></i>
             Add Product
@@ -87,11 +87,11 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
             <i className="ri-file-text-line mr-1"></i>
             Create Invoice
           </button>
-        </div>
+        </div> */}
 
         {/* Notifications */}
         <div className="relative notification-dropdown">
-          <button
+          {/* <button
             onClick={() => setShowNotifications(!showNotifications)}
             className={'relative p-2 rounded-lg transition-colors'}
           >
@@ -99,7 +99,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
               4
             </span>
-          </button>
+          </button> */}
 
           {showNotifications && (
             <div className={`absolute right-0 top-12 w-80 rounded-lg shadow-lg border z-50 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -165,7 +165,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
                 <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>admin@garments.com</p>
               </div>
               <div className="py-2">
-                <button className={'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 '}>
+                {/* <button className={'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-opacity-50 flex items-center space-x-2 '}>
                   <i className="ri-user-settings-line"></i>
                   <span>Profile Settings</span>
                 </button>
@@ -177,7 +177,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
                   <i className="ri-question-line"></i>
                   <span>Help & Support</span>
                 </button>
-                <hr className={`my-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} />
+                <hr className={`my-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} /> */}
                 <button onClick={handleLogout} className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center space-x-2 ${isDarkMode ? 'text-red-400 hover:bg-red-900 hover:bg-opacity-20' : 'text-red-600 hover:bg-red-50'
                   }`}>
                   <i className="ri-logout-box-line"></i>

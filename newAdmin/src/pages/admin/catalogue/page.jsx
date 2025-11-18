@@ -79,7 +79,7 @@ export default function CatalogueUpload() {
   };
   const fetchCatalogues = async () => {
     try {
-      const response = await getData(`api/catalogues/get-all-catalogue-pdf-with-pagination?page=${currentPage}&limit=2&search=${filters?.search}&dateFrom=${filters?.dateFrom}&dateTo=${filters?.dateTo}`);
+      const response = await getData(`api/catalogues/get-all-catalogue-pdf-with-pagination?page=${currentPage}&limit=10&search=${filters?.search}&dateFrom=${filters?.dateFrom}&dateTo=${filters?.dateTo}`);
 
       console.log("datadatadata:=>", response);
       if (response.status === true) {
@@ -118,7 +118,7 @@ export default function CatalogueUpload() {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
+        {/* <Card className="mb-6">
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
@@ -153,10 +153,10 @@ export default function CatalogueUpload() {
               </div>
             </div>
           </div>
-        </Card>
+        </Card> */}
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <div className="p-4 text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -172,7 +172,6 @@ export default function CatalogueUpload() {
                 <i className="ri-download-line text-xl text-green-600"></i>
               </div>
               <div className="text-2xl font-bold text-green-600">
-                {/* {catalogues.reduce((sum, cat) => sum + cat.downloadCount, 0)} */}
                 {totalDownloads}
               </div>
               <div className="text-sm text-gray-600">Total Downloads</div>
@@ -184,7 +183,6 @@ export default function CatalogueUpload() {
                 <i className="ri-hard-drive-line text-xl text-purple-600"></i>
               </div>
               <div className="text-2xl font-bold text-purple-600">
-                {/* {catalogues.reduce((sum, cat) => sum + parseFloat(cat.fileSize), 0).toFixed(1)} MB */}
                 {totalSize}
               </div>
               <div className="text-sm text-gray-600">Total Size</div>
@@ -196,13 +194,12 @@ export default function CatalogueUpload() {
                 <i className="ri-calendar-line text-xl text-orange-600"></i>
               </div>
               <div className="text-2xl font-bold text-orange-600">
-                {/* {catalogues.filter(cat => cat.uploadDate.split('T')[0] === new Date().toISOString().split('T')[0]).length} */}
                 {totalToday}
               </div>
               <div className="text-sm text-gray-600">Today's Uploads</div>
             </div>
           </Card>
-        </div>
+        </div> */}
 
         {/* Catalogues Table */}
         <Card className="overflow-hidden">
@@ -219,9 +216,9 @@ export default function CatalogueUpload() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     File Size
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Downloads
-                  </th>
+                  </th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
@@ -251,12 +248,12 @@ export default function CatalogueUpload() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {catalogue.fileSize}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    {/* <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <i className="ri-download-line text-gray-400 mr-1"></i>
                         <span className="text-sm text-gray-900">{catalogue.downloadCount}</span>
                       </div>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <Button
@@ -266,13 +263,13 @@ export default function CatalogueUpload() {
                           <i className="ri-eye-line mr-1"></i>
                           View
                         </Button>
-                        <Button
+                        {/* <Button
                           onClick={() => downloadCatalogue(catalogue)}
                           className="bg-green-50 text-green-600 hover:bg-green-100 text-xs px-2 py-1"
                         >
                           <i className="ri-download-line mr-1"></i>
                           Download
-                        </Button>
+                        </Button> */}
                         <Button
                           onClick={() => deleteCatalogue(catalogue.id)}
                           className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"

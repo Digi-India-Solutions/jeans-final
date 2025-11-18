@@ -34,10 +34,10 @@ function ViewCatlogueModal({ setShowViewModal, selectedCatalogue, setSelectedCat
                             <div className="text-sm text-gray-500">Upload Date</div>
                             <div className="font-semibold">{selectedCatalogue.uploadDate}</div>
                         </div>
-                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        {/* <div className="text-center p-4 bg-gray-50 rounded-lg">
                             <div className="text-sm text-gray-500">Downloads</div>
                             <div className="font-semibold">{selectedCatalogue.downloadCount}</div>
-                        </div>
+                        </div> */}
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
                             <div className="text-sm text-gray-500">Status</div>
                             <div className="font-semibold text-green-600">Available</div>

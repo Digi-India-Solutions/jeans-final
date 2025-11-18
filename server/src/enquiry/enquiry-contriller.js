@@ -89,19 +89,23 @@ exports.getAllEnquiries = catchAsyncErrors(async (req, res, next) => {
 // });
 
 // Update by ID
-// exports.updateEnquiryByID = catchAsyncErrors(async (req, res, next) => {
-//     const { name, phone, email, p_location, message, status } = req.body;
+exports.updateEnquiryByID = catchAsyncErrors(async (req, res, next) => {
+    const { name, phone, email, p_location, message, status, response } = req.body;
 
-//     const enquiry = await Enquiry.findByIdAndUpdate(
-//         req.params.id,
-//         { name, phone, email, p_location, message, status },
-//         { new: true }
-//     );
+    const enquiry = await Enquiry.findById(req.params.id,);
 
-//     if (!enquiry) return next(new ErrorHandler("Enquiry not found", 404));
+    if (!enquiry) return next(new ErrorHandler("Enquiry not found", 404));
+    if (name) enquiry.name = name;
+    if (phone) enquiry.phone = phone;
+    if (email) enquiry.email = email;
+    if (p_location) enquiry.p_location = p_location;
+    if (response) enquiry.message = response;
+    if (status) enquiry.enquirystatus = status || enquiry.enquirystatus;
 
-//     res.status(200).json({ success: true, message: "Enquiry updated", data: enquiry });
-// });
+    enquiry.save();
+
+    res.status(200).json({ success: true, message: "Enquiry updated", data: enquiry });
+});
 
 // Delete by ID
 exports.deleteEnquiryByID = catchAsyncErrors(async (req, res, next) => {

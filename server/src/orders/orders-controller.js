@@ -280,15 +280,13 @@ exports.verifyPayment = async (req, res) => {
 }
 
 const generateOrderNumber = async () => {
-    const totalOrders = await AdminOrder.find({ sort: { createdAt: -1 } })
-
-    console.log("SSSSSSSSS:=>", totalOrders)
+    const totalOrders = await AdminOrder.findOne().sort({ createdAt: -1 })
 
     const dateObj = new Date();
     const year = dateObj.getFullYear();
 
     // Format serial number with leading zeros (4 digits)
-    const formattedSerial = String(totalOrders + 1).padStart(5, "0");
+    const formattedSerial = String(Number(totalOrders.orderNumber.split("-")[2]) + 1).padStart(5, "0");
 
     // Create order number like ORD-2025-0001
     const orderNumber = `ORD-${year}-${formattedSerial}`;
@@ -324,7 +322,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
 
         // ✅ Validate required fields
         if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
-            return next(new ErrorHandler("Customer info and at least 1 item are required.", 400));
+            return next(new ErrorHandler("Customer info and at least 1 item are required.", 200));
         }
         // ✅ Generate unique order number
         const orderNumber = await generateOrderNumber();
@@ -339,7 +337,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
         let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
         if (pointsRedeemed > 0) {
             if (!userPoints || userPoints?.points < pointsRedeemed) {
-                return res.status(400).json({ success: false, message: "Insufficient reward points." });
+                return res.status(200).json({ success: false, message: "Insufficient reward points." });
             }
             userPoints.points -= pointsRedeemed;
             userPoints.history.push({ type: "redeemed", amount: pointsRedeemed, description: `Points redeemed for Order ${orderNumber}`, });

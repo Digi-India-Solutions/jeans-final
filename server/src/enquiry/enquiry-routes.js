@@ -4,7 +4,7 @@ const {
   getAllEnquiries,
   //   changeStatus,
   //   getEnquiryByID,
-  //   updateEnquiryByID,
+    updateEnquiryByID,
   deleteEnquiryByID,
   getEnquiryList,
   getEnquiriesByFilters
@@ -16,7 +16,7 @@ router.post("/create-enquiry", createEnquiry);
 router.get("/get-all-enquiries", getAllEnquiries);
 // router.post("/change-status", changeStatus);
 // router.get("/get_enquiry_by_id/:id", getEnquiryByID);
-// router.post("/update-enquiry/:id", updateEnquiryByID);
+router.post("/update-enquiry/:id", updateEnquiryByID);
 router.get("/delete-enquiry/:id", deleteEnquiryByID);
 router.get("/get_all_enquiry_list", getEnquiryList);
 router.post('/get-enquiries-by-filters', getEnquiriesByFilters)

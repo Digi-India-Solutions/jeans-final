@@ -4,7 +4,7 @@ import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
 import EnquiriesFilter from './EnquiriesFilter';
 import EnquiriesTable from './EnquiriesTable';
-import { getData } from '../../../services/FetchNodeServices';
+import { getData, postData } from '../../../services/FetchNodeServices';
 
 export default function EnquiriesManagement() {
   const [enquiries, setEnquiries] = useState([
@@ -94,13 +94,13 @@ export default function EnquiriesManagement() {
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [filters, setFilters] = useState({ type: '', status: '', priority: '', search: '' });
-  const [responseForm, setResponseForm] = useState({ response: '', status: 'In Progress', assignedTo: '' });
+  const [responseForm, setResponseForm] = useState({ response: '', status: '', assignedTo: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   // Filter enquiries
 
-  const handleResponseSubmit = (e) => {
+  const handleResponseSubmit = async (e) => {
     e.preventDefault();
     setEnquiries(enquiries.map(enquiry =>
       enquiry.id === selectedEnquiry.id
@@ -110,18 +110,19 @@ export default function EnquiriesManagement() {
           status: responseForm.status,
           assignedTo: responseForm.assignedTo,
           lastUpdated: new Date().toISOString().split('T')[0]
-        }
-        : enquiry
+        } : enquiry
     ));
 
-    setShowEnquiryModal(false);
-    setSelectedEnquiry(null);
-    setResponseForm({
-      response: '',
-      status: 'In Progress',
-      assignedTo: ''
-    });
+    const response = await postData(`api/enquiry/update-enquiry/${selectedEnquiry._id}`, responseForm)
+    console.log("response:::=>", response)
+    if (response.success === true) {
+      fetchAllEnquiries();
+      setShowEnquiryModal(false);
+      setSelectedEnquiry(null);
+      setResponseForm({ response: '', status: '', assignedTo: '' });
+    }
   };
+
   const fetchAllEnquiries = async () => {
     try {
       const fil = JSON.stringify(filters);
@@ -151,13 +152,13 @@ export default function EnquiriesManagement() {
           <div className="flex space-x-3">
             <div className="text-sm text-gray-600">
               <span className="font-medium">New: </span>
-              <span className="text-blue-600">{enquiries.filter(e => e.status === 'New').length}</span>
+              <span className="text-blue-600">{enquiries.filter(e => e.enquirystatus === 'New').length}</span>
               <span className="mx-2">•</span>
               <span className="font-medium">In Progress: </span>
-              <span className="text-yellow-600">{enquiries.filter(e => e.status === 'In Progress').length}</span>
+              <span className="text-yellow-600">{enquiries.filter(e => e.enquirystatus === 'In Progress').length}</span>
               <span className="mx-2">•</span>
               <span className="font-medium">Resolved: </span>
-              <span className="text-green-600">{enquiries.filter(e => e.status === 'Resolved').length}</span>
+              <span className="text-green-600">{enquiries.filter(e => e.enquirystatus === 'Resolved').length}</span>
             </div>
           </div>
         </div>
@@ -175,6 +176,7 @@ export default function EnquiriesManagement() {
           enquiries={enquiries} setSelectedEnquiry={setSelectedEnquiry}
           setResponseForm={setResponseForm} setShowEnquiryModal={setShowEnquiryModal}
           currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages}
+          fetchAllEnquiries={fetchAllEnquiries}
         />
 
         {filteredEnquiries.length === 0 && (
@@ -197,7 +199,7 @@ export default function EnquiriesManagement() {
                       setSelectedEnquiry(null);
                       setResponseForm({
                         response: '',
-                        status: 'In Progress',
+                        status: '',
                         assignedTo: ''
                       });
                     }}
@@ -215,15 +217,15 @@ export default function EnquiriesManagement() {
                       <div className="font-medium">{selectedEnquiry.name}</div>
                       <div className="text-sm text-gray-600">{selectedEnquiry.email}</div>
                     </div>
-                    <div>
+                    {/* <div>
                       <span className="text-sm text-gray-500">Type:</span>
                       <div className="font-medium">{selectedEnquiry.type}</div>
-                    </div>
+                    </div> */}
                   </div>
-                  <div className="mb-3">
+                  {/* <div className="mb-3">
                     <span className="text-sm text-gray-500">Subject:</span>
                     <div className="font-medium">{selectedEnquiry.subject}</div>
-                  </div>
+                  </div> */}
                   <div>
                     <span className="text-sm text-gray-500">Message:</span>
                     <div className="text-sm text-gray-700 mt-1">{selectedEnquiry.message}</div>
@@ -244,12 +246,12 @@ export default function EnquiriesManagement() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                       <div className="relative">
                         <select
-                          value={responseForm.status}
+                          value={responseForm?.status || responseForm?.enquirystatus}
                           onChange={(e) => setResponseForm({ ...responseForm, status: e.target.value })}
                           className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                         >
@@ -260,7 +262,7 @@ export default function EnquiriesManagement() {
                         <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       </div>
                     </div>
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
                       <div className="relative">
                         <select
@@ -276,7 +278,7 @@ export default function EnquiriesManagement() {
                         </select>
                         <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="flex space-x-3 pt-4">
@@ -287,7 +289,7 @@ export default function EnquiriesManagement() {
                         setSelectedEnquiry(null);
                         setResponseForm({
                           response: '',
-                          status: 'In Progress',
+                          status: '',
                           assignedTo: ''
                         });
                       }}
