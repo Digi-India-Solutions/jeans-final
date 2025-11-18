@@ -8,6 +8,7 @@ const enquirySchema = new mongoose.Schema({
     p_location: { type: String, required: true },
     message: { type: String, required: true },
     status: { type: Boolean, default: true },
+    enquirystatus: { type: String, default: "New", enum: ['New', 'In Progress', 'Resolved', 'Closed'] },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

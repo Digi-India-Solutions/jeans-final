@@ -1,21 +1,21 @@
 import React from 'react'
 import Button from '../../../components/base/Button';
 import Card from '../../../components/base/Card';
+import { postData } from '../../../services/FetchNodeServices';
 
 function EnquiriesTable({
     filteredEnquiries, setEnquiries, enquiries,
     setSelectedEnquiry, setResponseForm, setShowEnquiryModal,
-    currentPage, totalPages, setCurrentPage
+    currentPage, totalPages, setCurrentPage, fetchAllEnquiries
 }) {
 
-    const updateEnquiryStatus = (id, status) => {
-        setEnquiries(enquiries.map(enquiry =>
-            enquiry._id === id
-                ? {
-                    ...enquiry, status,
-                    lastUpdated: new Date().toISOString().split('T')[0]
-                } : enquiry
-        ));
+    const updateEnquiryStatus = async (id, status) => {
+
+        const update = await postData(`api/enquiry/update-enquiry/${id}`, { status });
+        console.log("update:::=>", update)
+        if (update.success === true) {
+            fetchAllEnquiries();
+        }
     };
 
     const getStatusColor = (status) => {
@@ -57,14 +57,14 @@ function EnquiriesTable({
                                 <div className="flex-1">
                                     <div className="flex items-center space-x-3 mb-2">
                                         <h3 className="font-semibold text-gray-900">{enquiry?.name}</h3>
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(enquiry?.type)}`}>
+                                        {/* <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(enquiry?.type)}`}>
                                             {enquiry?.type}
                                         </span>
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(enquiry?.priority)}`}>
                                             {enquiry?.priority}
-                                        </span>
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(enquiry?.status)}`}>
-                                            {enquiry?.status}
+                                        </span> */}
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(enquiry?.enquirystatus)}`}>
+                                            {enquiry?.enquirystatus}
                                         </span>
                                     </div>
                                     <div className="text-sm text-gray-600 mb-2">
@@ -114,7 +114,7 @@ function EnquiriesTable({
                                     Last updated: {enquiry?.updatedAt.split('T')[0]}
                                 </div>
                                 <div className="flex space-x-2">
-                                    {enquiry.status === 'New' && (
+                                    {enquiry.enquirystatus === 'New' && (
                                         <Button
                                             onClick={() => updateEnquiryStatus(enquiry._id, 'In Progress')}
                                             className="bg-yellow-400 text-white hover:bg-yellow-200 text-sm px-3 py-1"
@@ -138,7 +138,7 @@ function EnquiriesTable({
                                         <i className="ri-reply-line mr-1"></i>
                                         Respond
                                     </Button>
-                                    {enquiry.status === 'In Progress' && (
+                                    {enquiry.enquirystatus === 'In Progress' && (
                                         <Button
                                             onClick={() => updateEnquiryStatus(enquiry._id, 'Resolved')}
                                             className="bg-green-50 text-green-600 hover:bg-green-100 text-sm px-3 py-1"
@@ -147,7 +147,7 @@ function EnquiriesTable({
                                             Resolve
                                         </Button>
                                     )}
-                                    <Button
+                                    {/* <Button
                                         onClick={() => {
                                             const phoneNumber = enquiry.phone.replace(/\s+/g, '');
                                             window.open(`tel:${phoneNumber}`, '_self');
@@ -165,7 +165,7 @@ function EnquiriesTable({
                                     >
                                         <i className="ri-mail-line mr-1"></i>
                                         Email
-                                    </Button>
+                                    </Button> */}
                                 </div>
                             </div>
                         </div>
