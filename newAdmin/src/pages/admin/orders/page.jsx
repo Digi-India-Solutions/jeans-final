@@ -417,6 +417,7 @@ export default function OrdersManagement() {
   // };
 
   const getTotalPaidAmount = () => {
+    console.log("SSSSS::=>", newOrderForm);
     return newOrderForm?.payments?.reduce((sum, payment) => {
       return sum + (parseFloat(payment?.amount) || 0);
     }, 0);

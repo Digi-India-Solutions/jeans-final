@@ -322,14 +322,22 @@ const generateOrderNumber = async () => {
 
     const dateObj = new Date();
     const year = dateObj.getFullYear();
+    console.log('totalOrders==>', totalOrders)
+    if (totalOrders) {
+        const formattedSerial = String(Number(totalOrders.orderNumber.split("-")[2]) + 1).padStart(5, "0");
+        // Create order number like ORD-2025-0001
+        const orderNumber = `ORD-${year}-${formattedSerial}`;
+        console.log('totalOrders==>', orderNumber)
+        return orderNumber
+    } else {
 
+        // Create order number like ORD-2025-0001
+        const orderNumber = `ORD-${year}-'0001`;
+        console.log('totalOrders==>', orderNumber)
+        return orderNumber
+    }
     // Format serial number with leading zeros (4 digits)
-    const formattedSerial = String(Number(totalOrders.orderNumber.split("-")[2]) + 1).padStart(5, "0");
 
-    // Create order number like ORD-2025-0001
-    const orderNumber = `ORD-${year}-${formattedSerial}`;
-    console.log('totalOrders', orderNumber)
-    return orderNumber
 
 };
 
@@ -362,6 +370,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
         if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
             return next(new ErrorHandler("Customer info and at least 1 item are required.", 200));
         }
+        console.log("FFFFFFFF:==>hjh", req.body)
         // ✅ Generate unique order number
         const orderNumber = await generateOrderNumber();
 
@@ -673,8 +682,8 @@ exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, ne
 
         // ✅ Fetch orders
         const [orders, totalOrders] = await Promise.all([
-            AdminOrder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
-            AdminOrder.countDocuments(query)
+            AdminOrder.find({ recycleBin: false, ...query }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
+            AdminOrder.countDocuments({ recycleBin: false, ...query })
         ]);
 
         console.log("XXXXXX::=>", orders);
@@ -719,8 +728,8 @@ exports.getAllRecycledOrdersByAdminWithPagination = catchAsyncErrors(async (req,
 
         // ✅ Fetch orders
         const [orders, totalOrders] = await Promise.all([
-            AdminOrder.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
-            AdminOrder.countDocuments(query)
+            AdminOrder.find({ recycleBin: true, ...query }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
+            AdminOrder.countDocuments({ recycleBin: true, ...query })
         ]);
 
         console.log("XXXXXX::=>", orders);
@@ -982,7 +991,6 @@ exports.deleteOrderByID = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 })
-
 
 exports.moveToRecycleBin = catchAsyncErrors(async (req, res, next) => {
     try {

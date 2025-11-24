@@ -430,7 +430,7 @@ function OrderTable({
                                             )}
                                         </div>
                                         {permiton.update && <div className="flex space-x-1">
-                                            <Button
+                                            {/* <Button
                                                 onClick={() => {
                                                     setSelectedOrder(order);
                                                     setShowCreateOrderModal(true)
@@ -438,7 +438,7 @@ function OrderTable({
                                                 className="bg-emerald-500 text-white hover:bg-emerald-600 text-xs px-2 py-1 rounded"
                                             >
                                                 Edit Order
-                                            </Button>
+                                            </Button> */}
                                             {order.balanceAmount > 0 && (
                                                 <Button
                                                     onClick={() => openPaymentUpdate(order)}

@@ -38,6 +38,7 @@ const salesAndReportsRoutes = require("./src/SalesAndReports/salesAndReports-rou
 const challanRoutes = require("./src/challan/challan-routes");
 const returnRoutes = require("./src/return/return-routes");
 const cataloguesRoutes = require("./src/catalogues/catalogues-routes");
+const dashboardRoutes = require("./src/dashboard/dashboard-routes")
 
 
 app.use("/api/admin", superAdminRoutes);
@@ -64,6 +65,7 @@ app.use("/api/salesAndReports", salesAndReportsRoutes)
 app.use("/api/challan", challanRoutes)
 app.use("/api/return", returnRoutes)
 app.use("/api/catalogues", cataloguesRoutes)
+app.use("/api/dashboard", dashboardRoutes)
 
 const connectDatabase = require("./db/database");
 

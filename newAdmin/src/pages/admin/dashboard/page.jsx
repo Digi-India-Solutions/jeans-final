@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
@@ -6,61 +6,20 @@ import StatsCard from './components/StatsCard';
 import SalesChart from './components/SalesChart';
 import OrdersChart from './components/OrdersChart';
 import RecentOrders from './components/RecentOrders';
-import { postData } from '../../../services/FetchNodeServices';
+import { getData, postData } from '../../../services/FetchNodeServices';
 
 export default function Dashboard() {
   const [dateRange, setDateRange] = useState('This Month');
   const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
+  const [data, setData] = useState([]);
   // Updated stats with piece counts
   const stats = [
-    {
-      title: 'Total Sales',
-      value: '₹4.34L | 2,230 Pcs',
-      change: '+12.5%',
-      changeType: 'positive',
-      icon: 'ri-money-dollar-circle-line',
-      color: 'blue'
-    },
-    {
-      title: 'Jeans Sales',
-      value: '₹2.45L | 980 Pcs',
-      change: '+15.2%',
-      changeType: 'positive',
-      icon: 'ri-shirt-line',
-      color: 'blue'
-    },
-    {
-      title: 'Shirts Sales',
-      value: '₹1.89L | 1,250 Pcs',
-      change: '+8.3%',
-      changeType: 'positive',
-      icon: 'ri-t-shirt-line',
-      color: 'green'
-    },
-    {
-      title: 'Orders',
-      value: '2,230',
-      change: '+18.0%',
-      changeType: 'positive',
-      icon: 'ri-shopping-cart-line',
-      color: 'purple'
-    },
-    {
-      title: 'Users',
-      value: '15,847',
-      change: '+5.2%',
-      changeType: 'positive',
-      icon: 'ri-user-line',
-      color: 'orange'
-    },
-    {
-      title: 'Cart Items',
-      value: '485 | 485 Pcs',
-      change: '+22.1%',
-      changeType: 'positive',
-      icon: 'ri-shopping-bag-line',
-      color: 'pink'
-    }
+    { title: 'Total Sales', value: '₹4.34L | 2,230 Pcs', change: '+12.5%', changeType: 'positive', icon: 'ri-money-dollar-circle-line', color: 'blue' },
+    { title: 'Jeans Sales', value: '₹2.45L | 980 Pcs', change: '+15.2%', changeType: 'positive', icon: 'ri-shirt-line', color: 'blue' },
+    { title: 'Shirts Sales', value: '₹1.89L | 1,250 Pcs', change: '+8.3%', changeType: 'positive', icon: 'ri-t-shirt-line', color: 'green' },
+    { title: 'Orders', value: '2,230', change: '+18.0%', changeType: 'positive', icon: 'ri-shopping-cart-line', color: 'purple' },
+    { title: 'Users', value: '15,847', change: '+5.2%', changeType: 'positive', icon: 'ri-user-line', color: 'orange' },
+    { title: 'Cart Items', value: '485 | 485 Pcs', change: '+22.1%', changeType: 'positive', icon: 'ri-shopping-bag-line', color: 'pink' }
   ];
 
   const recentSales = [
@@ -87,26 +46,12 @@ export default function Dashboard() {
   // Jeans vs Shirts comparison data
   const categoryComparison = {
     jeans: {
-      todaySales: 45000,
-      todayPcs: 18,
-      weeklySales: 315000,
-      weeklyPcs: 126,
-      monthlySales: 2450000,
-      monthlyPcs: 980,
-      ytdSales: 12250000,
-      ytdPcs: 4900,
-      growth: 15.2
+      todaySales: 45000, todayPcs: 18, weeklySales: 315000, weeklyPcs: 126,
+      monthlySales: 2450000, monthlyPcs: 980, ytdSales: 12250000, ytdPcs: 4900, growth: 15.2
     },
     shirts: {
-      todaySales: 32000,
-      todayPcs: 21,
-      weeklySales: 224000,
-      weeklyPcs: 147,
-      monthlySales: 1890000,
-      monthlyPcs: 1250,
-      ytdSales: 9450000,
-      ytdPcs: 6250,
-      growth: 8.3
+      todaySales: 32000, todayPcs: 21, weeklySales: 224000, weeklyPcs: 147,
+      monthlySales: 1890000, monthlyPcs: 1250, ytdSales: 9450000, ytdPcs: 6250, growth: 8.3
     }
   };
 
@@ -118,12 +63,23 @@ export default function Dashboard() {
       console.log(error)
     }
   }
+  const fetchDashboardData = async () => {
+    const response = await getData('api/dashboard/get-dashboard-data');
+    console.log("response:==>", response)
+    if (response?.success === true) {
+      setData(response?.stats)
+    }
+  }
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
 
   useEffect(() => {
     fetchRoles()
   }, [user?.role])
 
-
+console.log("data:==>", data , stats)
   return (
     <AdminLayout>
       <div className="p-6">
@@ -155,7 +111,7 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {stats.map((stat, index) => (
+          {data?.map((stat, index) => (
             <StatsCard key={index} {...stat} />
           ))}
         </div>
