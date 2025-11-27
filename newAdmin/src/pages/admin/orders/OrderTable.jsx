@@ -224,8 +224,33 @@ import Button from "../../../components/base/Button";
 function OrderTable({
     filteredOrders, getStatusColor, getPaymentTypeColor, setSelectedOrder, canUpdateStatus, setShowOrderModal, openStatusUpdate,
     openPaymentUpdate, updateOrderStatus, totalPages, currentPage, setCurrentPage, openEditOrderNote, permiton, openDeleteOrder,
-    showCreateOrderModal, setShowCreateOrderModal
+    showCreateOrderModal, setShowCreateOrderModal, showEditOrderModal, setShowEditOrderModal, setNewOrderForm
 }) {
+
+    const handleUpdateOrder = (order) => {
+        console.log("XXXXXXX::=>", order);
+        setNewOrderForm({
+            ...order,
+            customerId: order?.customer?.userId?._id,
+            customerName: order?.customer?.userId?.name,
+            customerEmail: order?.customer?.userId?.email,
+            customerPhone: order?.customer?.userId?.phone,
+            deliveryAddress: order?.customer?.deliveryAddress,
+            redeemPoints: order?.pointsRedeemed,
+            orderNote: order?.orderNote,
+            items: order?.items.map((item) => ({
+                productId: item?.productId?._id,
+                name: item?.name,
+                quantity: item?.quantity,
+                singlePicPrice: item?.singlePicPrice,
+                pcsInSet: item?.pcsInSet,
+                availableSizes: item?.availableSizes
+            }))
+
+        });
+        setShowEditOrderModal(true)
+    }
+
     return (
         <div className="overflow-x-auto max-h-[600px]">
             <table className="min-w-full divide-y divide-gray-200">
@@ -430,15 +455,14 @@ function OrderTable({
                                             )}
                                         </div>
                                         {permiton.update && <div className="flex space-x-1">
-                                            {/* <Button
+                                            <Button
                                                 onClick={() => {
-                                                    setSelectedOrder(order);
-                                                    setShowCreateOrderModal(true)
+                                                    handleUpdateOrder(order);
                                                 }}
                                                 className="bg-emerald-500 text-white hover:bg-emerald-600 text-xs px-2 py-1 rounded"
                                             >
                                                 Edit Order
-                                            </Button> */}
+                                            </Button>
                                             {order.balanceAmount > 0 && (
                                                 <Button
                                                     onClick={() => openPaymentUpdate(order)}

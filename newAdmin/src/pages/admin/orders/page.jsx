@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import FilteredOrdersCom from './FilteredOrdersCom';
 import CreateNotesModel from './CreateNotesModel';
 import Swal from "sweetalert2";
+import EditOrderModel from './EditOrderModel';
 
 export default function OrdersManagement() {
   const [editOrderNoteForm, setEditOrderNoteForm] = useState({ orderId: '', orderNote: '' })
@@ -83,6 +84,8 @@ export default function OrdersManagement() {
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
+  const [showEditOrderModal, setShowEditOrderModal] = useState(false);
+  const [editOrderModal, setEditOrderModal] = useState({});
   const [showProductSelectionModal, setShowProductSelectionModal] = useState(false);
   const [showStatusUpdateModal, setShowStatusUpdateModal] = useState(false);
   const [showPaymentUpdateModal, setShowPaymentUpdateModal] = useState(false);
@@ -142,7 +145,7 @@ export default function OrdersManagement() {
     }
   ]);
 
-  const [newOrderForm, setNewOrderForm] = useState({ ...selectedOrder } || { customerId: '', customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [], customerAvailablePoints: 0, redeemPoints: 0, pointsToEarn: 0 });
+  const [newOrderForm, setNewOrderForm] = useState({ ...selectedOrder, payments: [{ method: 'Cash', amount: '' }] } || { customerId: '', customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [], customerAvailablePoints: 0, redeemPoints: 0, pointsToEarn: 0 });
 
   const deliveryVendors = ['BlueDart', 'Delhivery', 'DTDC', 'FedEx', 'India Post', 'Aramex'];
 
@@ -216,73 +219,10 @@ export default function OrdersManagement() {
     } else {
       toast.error(response.message);
     }
-    // setOrders(prevOrders => prevOrders.map(order => {
-    //   if (order?._id === orderId) {
-    //     const updatedOrder = {
-    //       ...order,
-    //       status: newStatus,
-    //       statusHistory: [
-    //         ...order.statusHistory,
-    //         {
-    //           status: newStatus,
-    //           date: new Date().toISOString().split('T')[0],
-    //           updatedBy: 'Admin'
-    //         }
-    //       ]
-    //     };
-
-    //     if (newStatus === 'Shipped') {
-    //       updatedOrder.trackingId = trackingId;
-    //       updatedOrder.deliveryVendor = deliveryVendor;
-    //     }
-
-    //     return updatedOrder;
-    //   }
-    //   return order;
-    // }));
-
-    // setFilteredOrders(prev => prev.map(order => {
-    //   if (order.id === orderId) {
-    //     const updatedOrder = {
-    //       ...order,
-    //       status: newStatus,
-    //       statusHistory: [
-    //         ...order.statusHistory,
-    //         {
-    //           status: newStatus,
-    //           date: new Date().toISOString().split('T')[0],
-    //           updatedBy: 'Admin'
-    //         }
-    //       ]
-    //     };
-
-    //     if (newStatus === 'Shipped') {
-    //       updatedOrder.trackingId = trackingId;
-    //       updatedOrder.deliveryVendor = deliveryVendor;
-    //     }
-
-    //     return updatedOrder;
-    //   }
-    //   return order;
-    // }));
   };
 
   const updateOrderPayment = async (orderId, additionalPayment, paymentMethod, notes) => {
-    // setOrders(prevOrders => prevOrders.map(order => {
-    //   if (order?._id === orderId) {
-    //     const newPaidAmount = order?.paidAmount + additionalPayment;
-    //     const newBalanceAmount = Math.max(0, order.total - newPaidAmount);
 
-    //     return {
-    //       ...order,
-    //       paidAmount: newPaidAmount,
-    //       balanceAmount: newBalanceAmount,
-    //       paymentType: newBalanceAmount === 0 ? 'Complete Payment' : 'Partial Payment',
-    //       paymentMethod: paymentMethod || order.paymentMethod
-    //     };
-    //   }
-    //   return order;
-    // }));
     const response = await postData(`api/order/update-order-payment-by-admin/${orderId}`, { orderId, additionalPayment, paymentMethod, notes });
     console.log("response==>", response);
     if (response.success) {
@@ -291,21 +231,6 @@ export default function OrdersManagement() {
     } else {
       toast.error(response.message);
     }
-    // setFilteredOrders(prev => prev.map(order => {
-    //   if (order.id === orderId) {
-    //     const newPaidAmount = order.paidAmount + additionalPayment;
-    //     const newBalanceAmount = Math.max(0, order.total - newPaidAmount);
-
-    //     return {
-    //       ...order,
-    //       paidAmount: newPaidAmount,
-    //       balanceAmount: newBalanceAmount,
-    //       paymentType: newBalanceAmount === 0 ? 'Complete Payment' : 'Partial Payment',
-    //       paymentMethod: paymentMethod || order.paymentMethod
-    //     };
-    //   }
-    //   return order;
-    // }));
   };
 
   const handleStatusUpdate = () => {
@@ -433,7 +358,7 @@ export default function OrdersManagement() {
 
   const calculatePointsValue = (points) => {
     // 1 point = ₹0.50
-    return points * 0.5;
+    return Number(points) * 0.5;
   };
 
   const calculateMaxRedeemablePoints = (cartValue) => {
@@ -463,46 +388,6 @@ export default function OrdersManagement() {
     return colors[paymentType] || 'bg-gray-100 text-gray-800';
   };
 
-  // const handleCustomerSelect = (customerId) => {
-  //   const customer = customers.find(c => c.id === parseInt(customerId));
-  //   if (customer) {
-  //     // Mock available points for selected customer
-  //     const availablePoints = customer.id === 1 ? 2450 : customer.id === 2 ? 890 : customer.id === 3 ? 8920 : 0;
-
-  //     setNewOrderForm({
-  //       ...newOrderForm,
-  //       customerId,
-  //       customerName: customer.name,
-  //       customerEmail: customer.email,
-  //       customerPhone: customer.phone,
-  //       customerType: customer.type,
-  //       deliveryAddress: customer.deliveryAddress,
-  //       customerAvailablePoints: availablePoints,
-  //       redeemPoints: 0
-  //     });
-  //   } else {
-  //     setNewOrderForm({ ...newOrderForm, customerId, customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', customerAvailablePoints: 0, redeemPoints: 0 });
-  //   }
-  // };
-
-
-
-
-
-  // const getFilteredProductsForSelection = () => {
-  //   if (!productSearchQuery.trim()) {
-  //     return filteredSubProducts;
-  //   }
-
-  //   const query = productSearchQuery.toLowerCase();
-  //   return filteredSubProducts.filter(product =>
-  //     product.name.toLowerCase().includes(query) ||
-  //     product.parentProduct.toLowerCase().includes(query) ||
-  //     product.singlePicPrice.toString().includes(query)
-  //   );
-  // };
-
-  // Print order invoice
   const normalizeSizes = (sizes) => {
     if (Array.isArray(sizes)) return sizes;
     if (typeof sizes === "string") {
@@ -959,6 +844,9 @@ export default function OrdersManagement() {
             permiton={permiton}
             showCreateOrderModal={showCreateOrderModal}
             setShowCreateOrderModal={setShowCreateOrderModal}
+            showEditOrderModal={showEditOrderModal}
+            setShowEditOrderModal={setShowEditOrderModal}
+            setNewOrderForm={setNewOrderForm}
           />
         </Card>
 
@@ -990,6 +878,26 @@ export default function OrdersManagement() {
             newOrderForm={newOrderForm}
             setShowProductSelectionModal={setShowProductSelectionModal}
             setShowCreateOrderModal={setShowCreateOrderModal}
+            setShowPrintOrderModal={setShowPrintOrderModal}
+            orders={orders} setOrders={setOrders}
+            setFilteredOrders={setFilteredOrders}
+            filteredOrders={filteredOrders}
+            setOrderToPrint={setOrderToPrint}
+          />
+        )}
+
+        {/* Edit Order Modal */}
+        {showEditOrderModal && (
+          <EditOrderModel
+            // selectedOrder={selectedOrder}
+            subProducts={subProducts}
+            getTotalPaidAmount={getTotalPaidAmount}
+            calculatePointsValue={calculatePointsValue}
+            calculatePointsToEarn={calculatePointsToEarn}
+            setNewOrderForm={setNewOrderForm}
+            newOrderForm={newOrderForm}
+            setShowProductSelectionModal={setShowProductSelectionModal}
+            setShowEditOrderModal={setShowEditOrderModal}
             setShowPrintOrderModal={setShowPrintOrderModal}
             orders={orders} setOrders={setOrders}
             setFilteredOrders={setFilteredOrders}
@@ -1272,7 +1180,9 @@ export default function OrdersManagement() {
                           <div><span className="text-gray-500">Name:</span> {selectedOrder?.customer?.name}</div>
                           <div><span className="text-gray-500">Email:</span> {selectedOrder?.customer?.email}</div>
                           <div><span className="text-gray-500">Phone:</span> {selectedOrder?.customer?.phone}</div>
-                          <div><span className="text-gray-500">Type:</span> {selectedOrder?.customer?.type}</div>
+                          {selectedOrder?.customer?.type &&
+                            <div><span className="text-gray-500">Type:</span> {selectedOrder?.customer?.type}</div>
+                          }
                         </div>
                       </div>
                       <div>

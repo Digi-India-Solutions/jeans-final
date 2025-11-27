@@ -3,12 +3,13 @@ import Button from '../../../components/base/Button';
 import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
 
-function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
+function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowEditOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
     const [showUserModal, setShowUserModal] = useState(false)
+    const [loding, setLoding] = useState(false)
 
-
+    console.log("newOrderForm:UPDATE==>X--", newOrderForm)
     const removeItemFromOrder = (index) => {
         setNewOrderForm({
             ...newOrderForm,
@@ -176,21 +177,6 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         }
     };
 
-    // const updatePaymentMethod = (index, field, value) => {
-    //     const updatedPayments = newOrderForm.payments.map((payment, i) =>
-    //         i === index ? { ...payment, [field]: value } : payment
-    //     );
-    //     const subtotal = getTotalValue();
-    //     const pointsRedemptionValue = calculatePointsValue(newOrderForm.redeemPoints);
-    //     const finalTotal = subtotal - pointsRedemptionValue;
-
-    //     console.log("FFFFFFFFF:==>BBBB==>", updatedPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0), updatedPayments <= finalTotal, finalTotal)
-
-    //     if (updatedPayments <= finalTotal) {
-    //         setNewOrderForm({ ...newOrderForm, payments: updatedPayments });
-    //     }
-    // };
-    console.log("updatedPayments==>", newOrderForm)
     const updatePaymentMethod = (index, field, value) => {
         // Create a new array with the updated payment
         const updatedPayments = newOrderForm.payments.map((payment, i) =>
@@ -219,13 +205,11 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         }
     };
 
-
     const calculateMaxRedeemablePoints = (cartValue) => {
         // Max 30% of cart value can be redeemed
         const maxValue = cartValue * 0.3;
         return Math.floor(maxValue / 0.5); // Convert to points (1 point = ₹0.50)
     };
-
 
     const handleRedeemPointsChange = (points) => {
         const cartValue = getTotalValue();
@@ -261,7 +245,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
     };
 
 
-    const createOrder = async (e) => {
+    const updateOrder = async (e) => {
         e.preventDefault();
         if (newOrderForm.items.length === 0) {
             alert('Please add at least one item to the order');
@@ -316,14 +300,16 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                 { status: 'Pending', date: new Date().toISOString().split('T')[0], updatedBy: 'System' }
             ]
         };
+        setLoding(true)
         // alert(JSON.stringify(newOrder))
-        const response = await postData('api/order/create-order-by-admin', newOrder);
-        if (!response.success) {
-            console.log('Error:', response.message);
+        const response = await postData(`api/order/update-order-by-admin/${newOrderForm?._id}`, newOrder);
+        if (!response?.success) {
+            setLoding(false)
+            console.log('Error:', response?.message);
             return;
         }
-        setOrders([newOrder, ...orders]);
-        setFilteredOrders([newOrder, ...filteredOrders]);
+        setOrders([newOrder]);
+        setFilteredOrders([newOrder]);
 
         // Show print option after order creation
         setOrderToPrint(newOrder);
@@ -343,7 +329,8 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
             redeemPoints: 0,
             pointsToEarn: 0
         });
-        setShowCreateOrderModal(false);
+        setShowEditOrderModal(false);
+        setLoding(false)
     };
 
 
@@ -412,17 +399,17 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         setNewOrderForm(prev => ({ ...prev, items: updatedItems, }));
     };
 
-    console.log("FFFFFFFFF:==>BBBB", newOrderForm)
+    // console.log("FFFFFFFFF:==>BBBB", newOrderForm, finalTotal)
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold">Create New Order</h2>
+                        <h2 className="text-xl font-semibold">Edit New Order</h2>
                         <button
                             onClick={() => {
-                                setShowCreateOrderModal(false);
+                                setShowEditOrderModal(false);
                                 setNewOrderForm({
                                     customerId: '', customerName: '', customerEmail: '', customerPhone: '', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: []
                                 })
@@ -436,7 +423,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Order Form */}
                         <div className="lg:col-span-2">
-                            <form onSubmit={createOrder} className="space-y-4">
+                            <form onSubmit={updateOrder} className="space-y-4">
                                 {/* Customer Information */}
                                 <div>
                                     <h3 className="font-medium mb-3">Customer Information</h3>
@@ -766,7 +753,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                         </button>
                                                         <input
                                                             type="number"
-                                                            value={newOrderForm?.redeemPoints||0}
+                                                            value={newOrderForm?.redeemPoints || 0}
                                                             onChange={(e) => handleRedeemPointsChange(parseInt(e.target.value) || 0)}
                                                             placeholder="Enter points"
                                                             className="flex-1 px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
@@ -786,7 +773,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <div className="text-right">
                                                     <div className="text-sm text-gray-600">Discount Value</div>
                                                     <div className="font-bold text-green-600 text-lg">
-                                                        ₹{calculatePointsValue(newOrderForm?.redeemPoints||0).toFixed(2)}
+                                                        ₹{calculatePointsValue(newOrderForm?.redeemPoints || 0).toFixed(2)}
                                                     </div>
                                                 </div>
                                             </div>
@@ -817,15 +804,15 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <div className="text-xs text-orange-700 bg-orange-200 p-3 rounded">
                                                     <div className="flex justify-between mb-1">
                                                         <span>Redeeming:</span>
-                                                        <span className="font-medium">{newOrderForm?.redeemPoints?.toLocaleString()||0} points</span>
+                                                        <span className="font-medium">{newOrderForm?.redeemPoints?.toLocaleString() || 0} points</span>
                                                     </div>
                                                     <div className="flex justify-between mb-1">
                                                         <span>Discount:</span>
-                                                        <span className="font-medium">₹{calculatePointsValue(newOrderForm?.redeemPoints||0)?.toFixed(2)}</span>
+                                                        <span className="font-medium">₹{calculatePointsValue(newOrderForm?.redeemPoints || 0)?.toFixed(2)}</span>
                                                     </div>
                                                     <div className="flex justify-between font-bold">
                                                         <span>Payable After Discount:</span>
-                                                        <span>₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints ||0))?.toLocaleString()}</span>
+                                                        <span>₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0))?.toLocaleString()}</span>
                                                     </div>
                                                 </div>
                                             )}
@@ -900,7 +887,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                             <div className="flex justify-between text-sm">
                                                 <span>Balance Due:</span>
                                                 {/* <span className="font-medium text-red-600">₹{getBalanceAmount()?.toLocaleString()}</span> */}
-                                                <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0)) - getTotalPaidAmount())?.toLocaleString()}</span>
+                                                <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0)) - getTotalPaidAmount())?.toLocaleString()}</span>
 
                                             </div>
                                         )}
@@ -917,7 +904,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                     <Button
                                         type="button"
                                         onClick={() => {
-                                            setShowCreateOrderModal(false);
+                                            setShowEditOrderModal(false);
                                             setNewOrderForm({ customerId: '', customerName: '', customerEmail: '', customerPhone: '', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [] })
                                         }}
                                         className="flex-1 bg-gray-900 text-gray-700 hover:bg-gray-200"
@@ -925,7 +912,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         Cancel
                                     </Button>
                                     <Button type="submit" className="flex-1 bg-blue-900 text-white hover:bg-blue-700" disabled={newOrderForm?.items?.length === 0}  >
-                                        Create Order
+                                        {loding ? "Updating..." : " Update Order"}
                                     </Button>
                                 </div>
                             </form>
@@ -953,7 +940,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                     {newOrderForm?.redeemPoints > 0 && (
                                         <div className="flex justify-between text-sm">
                                             <span>Points Discount:</span>
-                                            <span className="font-medium text-green-600">-₹{calculatePointsValue(newOrderForm?.redeemPoints||0).toFixed(2)}</span>
+                                            <span className="font-medium text-green-600">-₹{calculatePointsValue(newOrderForm?.redeemPoints || 0).toFixed(2)}</span>
                                         </div>
                                     )}
 
@@ -963,13 +950,13 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span>Balance:</span>
-                                        <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0)) - getTotalPaidAmount())?.toLocaleString()}</span>
+                                        <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0)) - getTotalPaidAmount())?.toLocaleString()}</span>
                                     </div>
 
                                     <div className="border-t pt-3">
                                         <div className="flex justify-between font-medium">
                                             <span>Final Amount:</span>
-                                            <span className="text-lg text-blue-600">₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0))?.toLocaleString()}</span>
+                                            <span className="text-lg text-blue-600">₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0))?.toLocaleString()}</span>
                                         </div>
                                     </div>
 
@@ -977,7 +964,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         <div className="mt-4 pt-3 border-t">
                                             <div className="flex justify-between font-medium">
                                                 <span>Points to Earn:</span>
-                                                <span className="text-orange-600">{calculatePointsToEarn(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0))} pts</span>
+                                                <span className="text-orange-600">{calculatePointsToEarn(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0))} pts</span>
                                             </div>
                                             <div className="text-xs text-gray-500 mt-1">
                                                 ₹100 = 1 point • Points expire in 90 days
@@ -1019,4 +1006,4 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
     )
 }
 
-export default CreateOrderModal
+export default EditOrderModel

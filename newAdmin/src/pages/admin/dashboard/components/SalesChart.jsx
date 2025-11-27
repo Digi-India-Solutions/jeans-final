@@ -1,18 +1,18 @@
-export default function SalesChart() {
-  const salesData = [
-    { month: 'Jan', sales: 45000 },
-    { month: 'Feb', sales: 52000 },
-    { month: 'Mar', sales: 48000 },
-    { month: 'Apr', sales: 61000 },
-    { month: 'May', sales: 55000 },
-    { month: 'Jun', sales: 67000 },
-    { month: 'Jul', sales: 73000 },
-    { month: 'Aug', sales: 69000 },
-    { month: 'Sep', sales: 76000 },
-    { month: 'Oct', sales: 82000 },
-    { month: 'Nov', sales: 89000 },
-    { month: 'Dec', sales: 95000 }
-  ];
+export default function SalesChart({salesData}) {
+  // const salesData = [
+  //   { month: 'Jan', sales: 45000 },
+  //   { month: 'Feb', sales: 52000 },
+  //   { month: 'Mar', sales: 48000 },
+  //   { month: 'Apr', sales: 61000 },
+  //   { month: 'May', sales: 55000 },
+  //   { month: 'Jun', sales: 67000 },
+  //   { month: 'Jul', sales: 73000 },
+  //   { month: 'Aug', sales: 69000 },
+  //   { month: 'Sep', sales: 76000 },
+  //   { month: 'Oct', sales: 82000 },
+  //   { month: 'Nov', sales: 89000 },
+  //   { month: 'Dec', sales: 95000 }
+  // ];
 
   const maxSales = Math.max(...salesData.map(d => d.sales));
 

@@ -47,6 +47,7 @@ export default function SalesReports() {
       ]
     }
   };
+
   const [salesDatas, setSalesData] = useState(salesData);
 
   const topProductsss = [
@@ -422,6 +423,13 @@ export default function SalesReports() {
     );
   };
 
+  const handleExportExcel = async () => {
+    try {
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <AdminLayout>
@@ -446,14 +454,14 @@ export default function SalesReports() {
               </select>
               <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
+            {/* <Button onClick={handleExportExcel} className="bg-green-600 hover:bg-green-700 text-white">
               <i className="ri-download-line mr-2"></i>
               Export Excel
-            </Button>
-            <Button className="bg-red-600 hover:bg-red-700 text-white">
+            </Button> */}
+            {/* <Button className="bg-red-600 hover:bg-red-700 text-white">
               <i className="ri-file-pdf-line mr-2"></i>
               Export PDF
-            </Button>
+            </Button> */}
           </div>
         </div>
 
