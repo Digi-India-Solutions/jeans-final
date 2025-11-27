@@ -319,20 +319,19 @@ exports.verifyPayment = async (req, res) => {
 
 const generateOrderNumber = async () => {
     const totalOrders = await AdminOrder.findOne().sort({ createdAt: -1 })
-
+    console.log('totalOrders==>', totalOrders)
     const dateObj = new Date();
     const year = dateObj.getFullYear();
-    console.log('totalOrders==>', totalOrders)
+    // console.log('totalOrders==>', totalOrders?.orderNumber)
     if (totalOrders) {
-        const formattedSerial = String(Number(totalOrders.orderNumber.split("-")[2]) + 1).padStart(5, "0");
+        const formattedSerial = String(Number(totalOrders?.orderNumber.split("-")[2]) + 1).padStart(5, "0");
         // Create order number like ORD-2025-0001
         const orderNumber = `ORD-${year}-${formattedSerial}`;
         console.log('totalOrders==>', orderNumber)
         return orderNumber
     } else {
-
         // Create order number like ORD-2025-0001
-        const orderNumber = `ORD-${year}-'0001`;
+        const orderNumber = `ORD-${year}-0001`;
         console.log('totalOrders==>', orderNumber)
         return orderNumber
     }
@@ -1113,26 +1112,6 @@ exports.FilterOrdersByAdmin = catchAsyncErrors(async (req, res, next) => {
 });
 
 
-exports.updateOrderByID = catchAsyncErrors(async (req, res, next) => {
-    try {
-        const orderID = req.params.id;
-        console.log("SSSSSSXXXX:=>", orderID)
-        // const orderData = await Order.findByIdAndUpdate(orderID, req.body, {
-        //     new: true,
-        //     runValidators: true
-        // });
-
-        // if (!orderData) {
-        //     return next(new ErrorHandler("Order not found!", 400));
-        // }
-
-        // sendResponse(res, 200, "Order Data Fetched Successfully", orderData);
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-})
-
-
 // exports.searchOrders = catchAsyncErrors(async (req, res, next) => {
 //     try {
 //         const { pageNumber = 1 } = req.query;
@@ -1417,6 +1396,97 @@ exports.getMyBookings = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 })
+
+exports.updateOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderId = req.params.id;
+        const updateData = req.body;
+
+        // Fetch existing order
+        const existingOrder = await AdminOrder.findById(orderId);
+        if (!existingOrder) {
+            return next(new ErrorHandler("Order not found", 404));
+        }
+
+        // --- 1️⃣ HANDLE STATUS HISTORY ---
+        if (updateData.status && updateData.status !== existingOrder.status) {
+            existingOrder.statusHistory.push({
+                status: updateData.status,
+                date: new Date().toISOString().split("T")[0],
+                updatedBy: "Admin",
+                notes: updateData.statusNotes || ""
+            });
+        }
+
+        // --- 2️⃣ HANDLE STOCK (restore old stock → apply new stock) ---
+        if (updateData.items) {
+            for (const oldItem of existingOrder.items) {
+                const product = await subProductsModel.findById(oldItem.productId);
+                if (product) {
+                    product.lotStock += Number(oldItem.quantity); // restore old
+                    await product.save();
+                }
+            }
+
+            for (const newItem of updateData.items) {
+                const product = await subProductsModel.findById(newItem.productId);
+                if (product) {
+                    const newQty = Number(newItem.quantity) || 0;
+                    product.lotStock = Math.max(product.lotStock - newQty, 0);
+
+                    if (product.lotStock === 0) {
+                        product.stock = "Out of Stock";
+                    }
+
+                    await product.save();
+                }
+            }
+        }
+
+        // --- 3️⃣ HANDLE POINTS LOGIC ---
+        const totalAmount = updateData.total || existingOrder.total;
+        const userId = existingOrder.customer.userId;
+
+        let userPoints = await RewardPoints.findOne({ userId });
+
+        // Remove previously earned points
+        if (existingOrder.pointsEarned > 0) {
+            userPoints.points -= existingOrder.pointsEarned;
+            userPoints.history.push({
+                type: "reversal",
+                amount: existingOrder.pointsEarned,
+                description: `Reversed points for Order ${existingOrder.orderNumber}`
+            });
+        }
+
+        // Add new points (4% up to 5000)
+        let newPoints = Math.floor((totalAmount * 4) / 100);
+        newPoints = newPoints > 5000 ? 5000 : newPoints;
+
+        userPoints.points += newPoints;
+        userPoints.history.push({
+            type: "earned",
+            amount: newPoints,
+            description: `Updated points for Order ${existingOrder.orderNumber}`
+        });
+
+        await userPoints.save();
+
+        updateData.pointsEarned = newPoints;
+        updateData.pointsEarnedValue = newPoints / 2;
+
+        // --- 4️⃣ APPLY UPDATE ---
+        const updatedOrder = await AdminOrder.findByIdAndUpdate(orderId, updateData, {
+            new: true,
+            runValidators: true,
+        });
+
+        res.status(200).json({ success: true, message: "Order Updated Successfully", data: updatedOrder })
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
 
 
 

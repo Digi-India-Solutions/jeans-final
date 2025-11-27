@@ -1,13 +1,13 @@
 
-export default function OrdersChart() {
-  const orderData = [
-    { status: 'Delivered', count: 245, color: 'bg-green-500', percentage: 65 },
-    { status: 'Shipped', count: 89, color: 'bg-blue-500', percentage: 23 },
-    { status: 'Pending', count: 32, color: 'bg-yellow-500', percentage: 8 },
-    { status: 'Canceled', count: 15, color: 'bg-red-500', percentage: 4 }
-  ];
+export default function OrdersChart({orderSales}) {
+  // const orderData = [
+  //   { status: 'Delivered', count: 245, color: 'bg-green-500', percentage: 65 },
+  //   { status: 'Shipped', count: 89, color: 'bg-blue-500', percentage: 23 },
+  //   { status: 'Pending', count: 32, color: 'bg-yellow-500', percentage: 8 },
+  //   { status: 'Canceled', count: 15, color: 'bg-red-500', percentage: 4 }
+  // ];
 
-  const total = orderData.reduce((sum, item) => sum + item.count, 0);
+  const total = orderSales.reduce((sum, item) => sum + item.count, 0);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
@@ -16,8 +16,8 @@ export default function OrdersChart() {
       <div className="flex items-center justify-center mb-6">
         <div className="relative w-48 h-48">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            {orderData.map((item, index) => {
-              const previousPercentages = orderData.slice(0, index).reduce((sum, prev) => sum + prev.percentage, 0);
+            {orderSales.map((item, index) => {
+              const previousPercentages = orderSales.slice(0, index).reduce((sum, prev) => sum + prev.percentage, 0);
               const strokeDasharray = `${item.percentage} ${100 - item.percentage}`;
               const strokeDashoffset = -previousPercentages;
               
@@ -45,7 +45,7 @@ export default function OrdersChart() {
       </div>
       
       <div className="space-y-3">
-        {orderData.map((item, index) => (
+        {orderSales.map((item, index) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className={`w-3 h-3 rounded-full ${item.color}`}></div>

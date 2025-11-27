@@ -12,6 +12,10 @@ export default function Dashboard() {
   const [dateRange, setDateRange] = useState('This Month');
   const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   const [data, setData] = useState([]);
+  const [categoryComparisons, setCategoryComparison] = useState([]);
+  const [salesData, setSalesData] = useState([]);
+  const [orderSales, setOrderSales] = useState([]);
+  const [recentSales, setRecentSales] = useState([]);
   // Updated stats with piece counts
   const stats = [
     { title: 'Total Sales', value: '₹4.34L | 2,230 Pcs', change: '+12.5%', changeType: 'positive', icon: 'ri-money-dollar-circle-line', color: 'blue' },
@@ -22,13 +26,13 @@ export default function Dashboard() {
     { title: 'Cart Items', value: '485 | 485 Pcs', change: '+22.1%', changeType: 'positive', icon: 'ri-shopping-bag-line', color: 'pink' }
   ];
 
-  const recentSales = [
-    { id: 1, customer: 'Rajesh Kumar', amount: '₹2,850 | 1 Pc', product: 'Premium Skinny Jeans', status: 'Completed', time: '2 hours ago' },
-    { id: 2, customer: 'Priya Sharma', amount: '₹1,250 | 1 Pc', product: 'Formal Cotton Shirt', status: 'Processing', time: '3 hours ago' },
-    { id: 3, customer: 'Amit Singh', amount: '₹3,200 | 2 Pcs', product: 'Regular Fit Jeans Set', status: 'Shipped', time: '5 hours ago' },
-    { id: 4, customer: 'Neha Gupta', amount: '₹980 | 1 Pc', product: 'Casual Denim Shirt', status: 'Completed', time: '1 day ago' },
-    { id: 5, customer: 'Vikram Patel', amount: '₹4,500 | 3 Pcs', product: 'Jeans Combo Pack', status: 'Processing', time: '1 day ago' }
-  ];
+  // const recentSales = [
+  //   { id: 1, customer: 'Rajesh Kumar', amount: '₹2,850 | 1 Pc', product: 'Premium Skinny Jeans', status: 'Completed', time: '2 hours ago' },
+  //   { id: 2, customer: 'Priya Sharma', amount: '₹1,250 | 1 Pc', product: 'Formal Cotton Shirt', status: 'Processing', time: '3 hours ago' },
+  //   { id: 3, customer: 'Amit Singh', amount: '₹3,200 | 2 Pcs', product: 'Regular Fit Jeans Set', status: 'Shipped', time: '5 hours ago' },
+  //   { id: 4, customer: 'Neha Gupta', amount: '₹980 | 1 Pc', product: 'Casual Denim Shirt', status: 'Completed', time: '1 day ago' },
+  //   { id: 5, customer: 'Vikram Patel', amount: '₹4,500 | 3 Pcs', product: 'Jeans Combo Pack', status: 'Processing', time: '1 day ago' }
+  // ];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -43,43 +47,95 @@ export default function Dashboard() {
     }
   };
 
-  // Jeans vs Shirts comparison data
-  const categoryComparison = {
-    jeans: {
-      todaySales: 45000, todayPcs: 18, weeklySales: 315000, weeklyPcs: 126,
-      monthlySales: 2450000, monthlyPcs: 980, ytdSales: 12250000, ytdPcs: 4900, growth: 15.2
-    },
-    shirts: {
-      todaySales: 32000, todayPcs: 21, weeklySales: 224000, weeklyPcs: 147,
-      monthlySales: 1890000, monthlyPcs: 1250, ytdSales: 9450000, ytdPcs: 6250, growth: 8.3
-    }
-  };
+  // // Jeans vs Shirts comparison data
+  // const categoryComparison = {
+  //   jeans: {
+  //     todaySales: 45000, todayPcs: 18, weeklySales: 315000, weeklyPcs: 126,
+  //     monthlySales: 2450000, monthlyPcs: 980, ytdSales: 12250000, ytdPcs: 4900, growth: 15.2
+  //   },
+  //   shirts: {
+  //     todaySales: 32000, todayPcs: 21, weeklySales: 224000, weeklyPcs: 147,
+  //     monthlySales: 1890000, monthlyPcs: 1250, ytdSales: 9450000, ytdPcs: 6250, growth: 8.3
+  //   }
+  // };
 
   const fetchRoles = async () => {
     try {
       const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
-      console.log("response.data:==>response.data:==>", response)
+      // console.log("response.data:==>response.data:==>", response)
     } catch (error) {
       console.log(error)
     }
   }
   const fetchDashboardData = async () => {
     const response = await getData('api/dashboard/get-dashboard-data');
-    console.log("response:==>", response)
+    // console.log("response:==>", response)
     if (response?.success === true) {
       setData(response?.stats)
     }
   }
+  const fetchCategoryComparisons = async () => {
+    const response = await getData('api/dashboard/get-category-comparisons');
+    // console.log("response:==>SSS=>", response.categoryComparison)
+    if (response?.success === true) {
+      setCategoryComparison(response?.categoryComparison)
+    }
+  }
+
+  const fetchSalesChart = async () => {
+    const response = await getData('api/dashboard/get-sales-chart-data');
+    // console.log("response:==>SSS=>", response.salesChart)
+    if (response?.success === true) {
+      setSalesData(response?.salesData)
+    }
+  }
+
+  const fetchOrderSales = async () => {
+    const response = await getData('api/dashboard/get-order-sales-chart-data');
+    // console.log("response:==>SSS=>", response.orderData)
+    if (response?.success === true) {
+      setOrderSales(response?.orderData)
+    }
+  }
+
+  const fetchRecentSales = async () => {
+    const response = await getData('api/dashboard/get-recent-sales-data');
+    console.log("response:==>SSS=>", response.recentSales)
+    if (response?.success === true) {
+      setRecentSales(response?.recentSales)
+    }
+  }
+
+
 
   useEffect(() => {
     fetchDashboardData()
+    fetchCategoryComparisons()
+    fetchSalesChart()
+    fetchOrderSales()
+    fetchRecentSales()
   }, [])
 
   useEffect(() => {
     fetchRoles()
   }, [user?.role])
 
-console.log("data:==>", data , stats)
+  const formatLakh = (num = 0) => {
+    if (num >= 100000) {
+      // 1 lakh or more
+      return (num / 100000)?.toFixed(num % 100000 === 0 ? 0 : 1) + 'L';
+    } else if (num >= 1000) {
+      // 1 thousand or more
+      return (num / 1000)?.toFixed(num % 1000 === 0 ? 0 : 1) + 'K';
+    } else if (num >= 10000000) {
+      return (num / 10000000)?.toFixed(num % 10000000 === 0 ? 0 : 1) + 'M';
+    } else {
+      // below 1 thousand
+      return num
+    }
+  }
+
+  // console.log("data:==>", data, stats)
   return (
     <AdminLayout>
       <div className="p-6">
@@ -88,7 +144,7 @@ console.log("data:==>", data , stats)
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your store today.</p>
           </div>
-          <div className="flex items-center space-x-4">
+          {/* <div className="flex items-center space-x-4">
             <div className="relative">
               <select
                 value={dateRange}
@@ -106,7 +162,7 @@ console.log("data:==>", data , stats)
               <i className="ri-download-line mr-2"></i>
               Export
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Grid */}
@@ -127,20 +183,20 @@ console.log("data:==>", data , stats)
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">Jeans Sales Analytics</h3>
               </div>
-              <div className="text-sm text-green-600 font-medium">+{categoryComparison.jeans.growth}%</div>
+              <div className="text-sm text-green-600 font-medium">+{categoryComparisons?.jeans?.growth}%</div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Today</p>
-                <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.jeans.todaySales / 1000).toFixed(0)}k | {categoryComparison.jeans.todayPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.jeans?.todaySales)} | {categoryComparisons?.jeans?.todayPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-blue-500 h-2 rounded-full" style={{ width: '75%' }}></div>
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Weekly</p>
-                <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.jeans.weeklySales / 1000).toFixed(0)}k | {categoryComparison.jeans.weeklyPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.jeans?.weeklySales)} | {categoryComparisons?.jeans?.weeklyPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }}></div>
                 </div>
@@ -150,11 +206,11 @@ console.log("data:==>", data , stats)
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <p className="text-xs text-gray-600">Monthly</p>
-                <p className="text-sm font-bold text-blue-600">₹{(categoryComparison.jeans.monthlySales / 100000).toFixed(1)}L | {categoryComparison.jeans.monthlyPcs} Pcs</p>
+                <p className="text-sm font-bold text-blue-600">₹{formatLakh(categoryComparisons?.jeans?.monthlySales)} | {categoryComparisons?.jeans?.monthlyPcs} Pcs</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-600">YTD</p>
-                <p className="text-sm font-bold text-blue-600">₹{(categoryComparison.jeans.ytdSales / 1000000).toFixed(1)}M | {categoryComparison.jeans.ytdPcs} Pcs</p>
+                <p className="text-sm font-bold text-blue-600">₹{formatLakh(categoryComparisons?.jeans?.ytdSales)} | {categoryComparisons?.jeans?.ytdPcs} Pcs</p>
               </div>
             </div>
           </Card>
@@ -168,20 +224,20 @@ console.log("data:==>", data , stats)
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">Shirts Sales Analytics</h3>
               </div>
-              <div className="text-sm text-green-600 font-medium">+{categoryComparison.shirts.growth}%</div>
+              <div className="text-sm text-green-600 font-medium">+{categoryComparisons?.shirts?.growth}%</div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Today</p>
-                <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.shirts.todaySales / 1000).toFixed(0)}k | {categoryComparison.shirts.todayPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.shirts?.todaySales)} | {categoryComparisons?.shirts?.todayPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Weekly</p>
-                <p className="text-lg font-bold text-gray-900">₹{(categoryComparison.shirts.weeklySales / 1000).toFixed(0)}k | {categoryComparison.shirts.weeklyPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.shirts?.weeklySales)} | {categoryComparisons?.shirts?.weeklyPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-green-500 h-2 rounded-full" style={{ width: '70%' }}></div>
                 </div>
@@ -191,11 +247,11 @@ console.log("data:==>", data , stats)
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <p className="text-xs text-gray-600">Monthly</p>
-                <p className="text-sm font-bold text-green-600">₹{(categoryComparison.shirts.monthlySales / 100000).toFixed(1)}L | {categoryComparison.shirts.monthlyPcs} Pcs</p>
+                <p className="text-sm font-bold text-green-600">₹{formatLakh(categoryComparisons?.shirts?.monthlySales)} | {categoryComparisons?.shirts?.monthlyPcs} Pcs</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-600">YTD</p>
-                <p className="text-sm font-bold text-green-600">₹{(categoryComparison.shirts.ytdSales / 1000000).toFixed(1)}M | {categoryComparison.shirts.ytdPcs} Pcs</p>
+                <p className="text-sm font-bold text-green-600">₹{formatLakh(categoryComparisons?.shirts?.ytdSales)} | {categoryComparisons?.shirts?.ytdPcs} Pcs</p>
               </div>
             </div>
           </Card>
@@ -203,8 +259,8 @@ console.log("data:==>", data , stats)
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <SalesChart />
-          <OrdersChart />
+          <SalesChart salesData={salesData} />
+          <OrdersChart orderSales={orderSales} />
         </div>
 
         {/* Recent Orders */}
@@ -212,9 +268,9 @@ console.log("data:==>", data , stats)
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Recent Sales</h3>
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 View All
-              </Button>
+              </Button> */}
             </div>
           </div>
           <div className="overflow-x-auto">

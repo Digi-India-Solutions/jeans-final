@@ -43,6 +43,7 @@ const sendWhatsAppMessage = async ({ sendTo, templateName = "", data, language =
 
 const sendOrderNotificationByAdminOnWhatsapp = async ({ name, mobile, email }) => {
   const data = { name, mobile, email, };
+  console.log("data===>", data);
   await sendWhatsAppMessage({ sendTo: mobile, templateName: "customare_order_notification_copy_1", data, });
 };
 
