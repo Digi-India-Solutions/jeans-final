@@ -332,7 +332,7 @@ const adminOrderSchema = new Schema({
     },
 
     items: [{
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "SubProduct", required: true },
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
         singlePicPrice: { type: Number, required: true },
@@ -380,7 +380,7 @@ const adminOrderSchema = new Schema({
     pointsEarned: { type: Number, default: 0 },
     pointsEarnedValue: { type: Number, default: 0 },
     recycleBin: { type: Boolean, default: false },
-
+   
     statusHistory: [{
         status: { type: String, required: true },
         date: { type: String, required: true }, // format: YYYY-MM-DD
