@@ -4,7 +4,7 @@ import Card from '../../../components/base/Card';
 import Button from '../../../components/base/Button';
 import UploadCatlogueModal from './UploadCatlogueModal';
 import ViewCatlogueModal from './ViewCatlogueModal';
-import { getData } from '../../../services/FetchNodeServices';
+import { getData, serverURL } from '../../../services/FetchNodeServices';
 
 export default function CatalogueUpload() {
   const [catalogues, setCatalogues] = useState([]);
@@ -20,10 +20,13 @@ export default function CatalogueUpload() {
   const [totalSize, setTotalSize] = useState(0)
   const [totalToday, setTotalToday] = useState(0)
 
-  const deleteCatalogue = (id) => {
+  const deleteCatalogue = async (id) => {
     if (confirm('Are you sure you want to delete this catalogue?')) {
-      setCatalogues(catalogues.filter(cat => cat.id !== id));
-      alert('Catalogue deleted successfully!');
+      const response = await getData(`api/catalogues/delete-catalogue/${id}`);
+      if (response.success === true) {
+        setCatalogues(catalogues.filter(cat => cat._id !== id));
+        alert('Catalogue deleted successfully!');
+      }
     }
   };
 
@@ -40,18 +43,30 @@ export default function CatalogueUpload() {
   };
 
   const downloadCatalogue = (catalogue) => {
-    // Create a temporary link to download the file
-    const link = document.createElement('a');
-    link.href = catalogue.fileUrl;
-    link.download = catalogue.originalName;
-    link.click();
+    if (!catalogue.fileUrl) {
+      alert("File URL not found");
+      return;
+    }
 
-    // Increment download count
-    setCatalogues(catalogues.map(cat =>
-      cat.id === catalogue.id
-        ? { ...cat, downloadCount: cat.downloadCount + 1 }
-        : cat
-    ));
+    // Ensure URL is correct (convert to absolute path)
+    const fileUrl = `${serverURL}/${catalogue.fileUrl}`;
+
+    // Create link for download
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = catalogue.originalName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // Update download count on UI
+    setCatalogues(prev =>
+      prev.map(cat =>
+        cat._id === catalogue._id
+          ? { ...cat, downloadCount: cat.downloadCount + 1 }
+          : cat
+      )
+    );
   };
 
   const getFilteredCatalogues = () => {
@@ -271,7 +286,7 @@ export default function CatalogueUpload() {
                           Download
                         </Button> */}
                         <Button
-                          onClick={() => deleteCatalogue(catalogue.id)}
+                          onClick={() => deleteCatalogue(catalogue._id)}
                           className="bg-red-50 text-red-600 hover:bg-red-100 text-xs px-2 py-1"
                         >
                           <i className="ri-delete-bin-line mr-1"></i>

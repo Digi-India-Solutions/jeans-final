@@ -1,7 +1,8 @@
 import React from 'react'
 import Button from '../../../components/base/Button';
+import { serverURL } from '../../../services/FetchNodeServices';
 
-function ViewCatlogueModal({ setShowViewModal, selectedCatalogue, setSelectedCatalogue, downloadCatalogue ,currentPage , setCurrentPage, totalPages}) {
+function ViewCatlogueModal({ setShowViewModal, selectedCatalogue, setSelectedCatalogue, downloadCatalogue, currentPage, setCurrentPage, totalPages }) {
 
 
     return (
@@ -54,19 +55,20 @@ function ViewCatlogueModal({ setShowViewModal, selectedCatalogue, setSelectedCat
                             PDF preview functionality would be available here in the full implementation
                         </p>
                         <div className="flex justify-center space-x-3">
-                            <Button
+                            {/* <Button
                                 onClick={() => downloadCatalogue(selectedCatalogue)}
                                 className="bg-blue-600 text-white hover:bg-blue-700"
                             >
                                 <i className="ri-download-line mr-2"></i>
                                 Download PDF
-                            </Button>
+                            </Button> */}
                             <Button
-                                onClick={() => window.open(selectedCatalogue.fileUrl, '_blank')}
+                                onClick={() => { open(`${serverURL}/${selectedCatalogue?.fileUrl}`) }}
                                 className="bg-green-600 text-white hover:bg-green-700"
                             >
                                 <i className="ri-external-link-line mr-2"></i>
-                                Open in New Tab
+                                Download PDF
+                                {/* Open in New Tab */}
                             </Button>
                         </div>
                     </div>
@@ -84,8 +86,8 @@ function ViewCatlogueModal({ setShowViewModal, selectedCatalogue, setSelectedCat
                     </div>
                 </div>
                 {/* Pagination Controls */}
-             
-               
+
+
             </div>
         </div>
     )
