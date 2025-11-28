@@ -521,7 +521,7 @@ export default function OrdersManagement() {
         </head>
         <body>
           <div class="header">
-            <div class="company-name">Your Company Name</div>
+            <div class="company-name">Anibhavi Creation</div>
             <div>Fashion & Apparel Store</div>
             <div class="invoice-title">ORDER INVOICE</div>
           </div>
@@ -790,6 +790,34 @@ export default function OrdersManagement() {
     fetchRoles()
   }, [user?.role])
 
+
+
+  const handleUpdateOrder = (order) => {
+    console.log("XXXXXXX::=>", order);
+    setNewOrderForm({
+      ...order,
+      customerId: order?.customer?.userId?._id,
+      customerName: order?.customer?.userId?.name,
+      customerEmail: order?.customer?.userId?.email,
+      customerPhone: order?.customer?.userId?.phone,
+      deliveryAddress: order?.customer?.deliveryAddress,
+      redeemPoints: order?.pointsRedeemed,
+      orderNote: order?.orderNote,
+      items: order?.items.map((item) => ({
+        productId: item?.productId?._id,
+        name: item?.name,
+        quantity: item?.quantity,
+        singlePicPrice: item?.singlePicPrice,
+        pcsInSet: item?.pcsInSet,
+        availableSizes: item?.availableSizes
+      }))
+
+    });
+
+    setShowEditOrderModal(true)
+    setShowOrderModal(false);
+
+  }
 
   return (
     <AdminLayout>
@@ -1147,6 +1175,17 @@ export default function OrdersManagement() {
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold">Order Details - {selectedOrder.orderNumber}</h2>
                   <div className="flex space-x-2">
+                    {permiton.update && <div className="flex space-x-1">
+                      <Button
+                        onClick={() => {
+                          handleUpdateOrder(selectedOrder);
+                        }}
+                        className="bg-emerald-500 text-white hover:bg-emerald-600 text-xs px-2 py-1 rounded"
+                      >
+                        Edit Order
+                      </Button>
+                    </div>}
+
                     <Button
                       onClick={() => {
                         setOrderToPrint(selectedOrder);

@@ -445,33 +445,33 @@ function OrderTable({
                                                 </div>
                                             )}
 
-                                            {canUpdateStatus(order?.status) && (
+                                            {/* {canUpdateStatus(order?.status) && (
                                                 <Button
                                                     onClick={() => openStatusUpdate(order)}
                                                     className="bg-green-500 text-green-600 hover:bg-green-100 text-xs px-1 py-1"
                                                 >
                                                     Status
                                                 </Button>
-                                            )}
+                                            )} */}
                                         </div>
                                         {permiton.update && <div className="flex space-x-1">
-                                            <Button
+                                            {/* <Button
                                                 onClick={() => {
                                                     handleUpdateOrder(order);
                                                 }}
                                                 className="bg-emerald-500 text-white hover:bg-emerald-600 text-xs px-2 py-1 rounded"
                                             >
                                                 Edit Order
-                                            </Button>
-                                            {order.balanceAmount > 0 && (
+                                            </Button> */}
+                                            {/* {order.balanceAmount > 0 && (
                                                 <Button
                                                     onClick={() => openPaymentUpdate(order)}
                                                     className="bg-yellow-500 text-white-600 hover:bg-yellow-100 text-xs px-2 py-1"
                                                 >
                                                     Payment
                                                 </Button>
-                                            )}
-                                            {order.status !== "Cancelled" &&
+                                            )} */}
+                                            {/* {order.status !== "Cancelled" &&
                                                 order?.status !== "Delivered" && (
                                                     <Button
                                                         onClick={() => {
@@ -487,7 +487,7 @@ function OrderTable({
                                                     >
                                                         Cancel
                                                     </Button>
-                                                )}
+                                                )} */}
                                         </div>}
 
                                     </div>
