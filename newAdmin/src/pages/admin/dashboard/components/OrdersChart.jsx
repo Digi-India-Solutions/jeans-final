@@ -8,7 +8,7 @@ export default function OrdersChart({orderSales}) {
   // ];
 
   const total = orderSales.reduce((sum, item) => sum + item.count, 0);
-
+console.log("orderSales::=>>XX", orderSales);
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-6">Order Status Distribution</h3>

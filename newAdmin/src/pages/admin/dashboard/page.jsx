@@ -9,7 +9,7 @@ import RecentOrders from './components/RecentOrders';
 import { getData, postData } from '../../../services/FetchNodeServices';
 
 export default function Dashboard() {
-  const [dateRange, setDateRange] = useState('This Month');
+  const [dateRange, setDateRange] = useState('Monthly');
   const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   const [data, setData] = useState([]);
   const [categoryComparisons, setCategoryComparison] = useState([]);

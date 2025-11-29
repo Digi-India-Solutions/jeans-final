@@ -38,7 +38,7 @@ export default function SalesChart({ salesData, dateRange, setDateRange }) {
             {/* <span className="text-xs text-gray-500 mt-2">{data.month}</span> */}
             <span className="text-xs text-gray-500 mt-2">
               {dateRange === "Monthly" && data?.month}
-              {dateRange === "Weekly" && `${data?.year}`}
+              {dateRange === "Weekly" && `Week ${data?.week}`}
               {dateRange === "Daily" && data?.day}
             </span>
           </div>
