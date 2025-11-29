@@ -27,7 +27,7 @@ function JeansSalesTab({salesData}) {
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-600">Total Revenue & Pieces</p>
-                            <p className="text-lg font-bold text-gray-900">₹{formatLakh(salesData?.jeans?.total)} | {salesData?.jeans?.pieces} Pcs</p>
+                            <p className="text-lg font-bold text-gray-900">₹{salesData?.jeans?.total} | {salesData?.jeans?.pieces} Pcs</p>
                             <p className="text-sm text-green-600">+{salesData?.jeans?.growth}% growth</p>
                         </div>
                     </div>
@@ -67,7 +67,7 @@ function JeansSalesTab({salesData}) {
                         <div className="text-4xl text-blue-500 mb-2">📊</div>
                         <p className="text-gray-600">Detailed jeans sales analytics</p>
                         <p className="text-sm text-gray-500">Track performance by product variants</p>
-                        <p className="text-sm text-gray-500 mt-1">Total: ₹{formatLakh(salesData?.jeans?.total)} | {salesData?.jeans?.pieces} Pcs</p>
+                        <p className="text-sm text-gray-500 mt-1">Total: ₹{salesData?.jeans?.total} | {salesData?.jeans?.pieces} Pcs</p>
                     </div>
                 </div>
             </Card>

@@ -431,6 +431,7 @@ export default function SalesReports() {
     }
   }
 
+  console.log("XXXXXXX:==>", salesDatas)
   return (
     <AdminLayout>
       <div className="p-6">

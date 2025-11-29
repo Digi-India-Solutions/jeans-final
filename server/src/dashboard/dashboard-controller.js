@@ -45,14 +45,17 @@ exports.getDashboardData = catchAsyncErrors(async (req, res) => {
                 const price = parseInt(item?.productId?.filnalLotPrice || 0);
                 const qty = parseInt(item?.quantity || 0);
 
+
                 if (!price || !qty) return;
 
                 if (category.includes("JEANS")) {
+                    const pcs = parseInt(item.pcsInSet || qty);
+
                     if (isCurrent) {
                         buckets.jeans.current.total += price * qty;
-                        buckets.jeans.current.pieces += qty;
+                        buckets.jeans.current.pieces += pcs;
                         buckets.global.totalSales += price * qty;
-                        buckets.global.pcs += qty;
+                        buckets.global.pcs += parseInt(item.pcsInSet || qty);
                     }
                     if (isLast) buckets.jeans.last.total += price * qty;
                     hasJeans = true;
@@ -103,7 +106,7 @@ exports.getDashboardData = catchAsyncErrors(async (req, res) => {
         const stats = [
             {
                 title: "Total Sales",
-                value: `₹${formatLakh(buckets.global.totalSales)} | ${buckets.global.pcs} Pcs`,
+                value: `₹${buckets.global.totalSales} | ${buckets.global.pcs} Pcs`,
                 change: getGrowth(buckets.global.totalSales, buckets.jeans.last.total + buckets.shirts.last.total),
                 changeType: "positive",
                 icon: "ri-money-dollar-circle-line",
@@ -111,7 +114,7 @@ exports.getDashboardData = catchAsyncErrors(async (req, res) => {
             },
             {
                 title: "Jeans Sales",
-                value: `₹${formatLakh(buckets.jeans.current.total)} | ${buckets.jeans.current.pieces} Pcs`,
+                value: `₹${buckets.jeans.current.total} | ${buckets.jeans.current.pieces} Pcs`,
                 change: getGrowth(buckets.jeans.current.total, buckets.jeans.last.total),
                 changeType: "positive",
                 icon: "ri-shirt-line",
@@ -119,7 +122,7 @@ exports.getDashboardData = catchAsyncErrors(async (req, res) => {
             },
             {
                 title: "Shirts Sales",
-                value: `₹${formatLakh(buckets.shirts.current.total)} | ${buckets.shirts.current.pieces} Pcs`,
+                value: `₹${buckets.shirts.current.total} | ${buckets.shirts.current.pieces} Pcs`,
                 change: getGrowth(buckets.shirts.current.total, buckets.shirts.last.total),
                 changeType: "positive",
                 icon: "ri-t-shirt-line",
@@ -269,8 +272,57 @@ exports.getCategoryComparisons = catchAsyncErrors(async (req, res) => {
     }
 });
 
+// exports.getSalesChartData = catchAsyncErrors(async (req, res) => {
+//     try {
+//         const dateRange = req.query.dateRange || "Monthly";
+
+//         const orders = await AdminOrder.find({ recycleBin: { $ne: true } })
+//             .populate({
+//                 path: "items.productId",
+//                 populate: {
+//                     path: "productId",
+//                     model: "Product",
+//                     populate: { path: "mainCategoryId", model: "MainCategory" }
+//                 }
+//             });
+
+//         // --- Prepare 12 months with 0 sales ---
+//         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+//             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+//         const monthlyTotals = months.map(m => ({ month: m, sales: 0 }));
+
+//         // --- Process each order ---
+//         orders.forEach(order => {
+//             const monthIndex = new Date(order.createdAt).getMonth();
+
+//             order.items.forEach(item => {
+//                 const price = parseInt(item.singlePicPrice || item.productId?.filnalLotPrice || 0);
+//                 const pcs = parseInt(item.pcsInSet || item.quantity || 0);
+
+//                 if (!price || !pcs) return;
+
+//                 const total = price * pcs;
+
+//                 monthlyTotals[monthIndex].sales += total;
+//             });
+//         });
+
+//         return res.status(200).json({
+//             success: true,
+//             salesData: monthlyTotals
+//         });
+
+//     } catch (error) {
+//         console.log(error);
+//         return res.status(500).json({ success: false, message: error.message });
+//     }
+// });
+
 exports.getSalesChartData = catchAsyncErrors(async (req, res) => {
     try {
+        const dateRange = req.query.dateRange || "Monthly";
+
         const orders = await AdminOrder.find({ recycleBin: { $ne: true } })
             .populate({
                 path: "items.productId",
@@ -281,31 +333,64 @@ exports.getSalesChartData = catchAsyncErrors(async (req, res) => {
                 }
             });
 
-        // --- Prepare 12 months with 0 sales ---
+        // ----------- Monthly Data -----------
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        const monthlyTotals = months.map(m => ({ month: m, sales: 0 }));
+        const monthlyData = months.map(m => ({ month: m, sales: 0 }));
 
-        // --- Process each order ---
+        // ----------- Weekly Data (1-4 weeks per month) ----------
+        const weeklyData = Array.from({ length: 4 }, (_, i) => ({
+            week: i + 1,
+            sales: 0
+        }));
+
+        // ----------- Daily Data (1–31) ----------
+        const dailyData = Array.from({ length: 31 }, (_, i) => ({
+            day: i + 1,
+            sales: 0
+        }));
+
+        // ----------- Process Orders -----------
         orders.forEach(order => {
-            const monthIndex = new Date(order.createdAt).getMonth();
+            const date = new Date(order.createdAt);
+
+            const monthIndex = date.getMonth();
+            const weekIndex = Math.floor(date.getDate() / 8); // approx 4 weeks
+            const dayIndex = date.getDate() - 1;
 
             order.items.forEach(item => {
-                const price = parseInt(item.singlePicPrice || item.productId?.filnalLotPrice || 0);
+                const price = parseInt(item.singlePicPrice || item.productId?.finalLotPrice || 0);
                 const pcs = parseInt(item.pcsInSet || item.quantity || 0);
 
                 if (!price || !pcs) return;
 
                 const total = price * pcs;
 
-                monthlyTotals[monthIndex].sales += total;
+                // Add to monthly
+                monthlyData[monthIndex].sales += total;
+
+                // Add to weekly
+                if (weekIndex >= 0 && weekIndex < 4) {
+                    weeklyData[weekIndex].sales += total;
+                }
+
+                // Add to daily
+                if (dayIndex >= 0 && dayIndex < 31) {
+                    dailyData[dayIndex].sales += total;
+                }
             });
         });
 
+        // Select response based on range
+        let salesData =
+            dateRange === "Weekly" ? weeklyData :
+                dateRange === "Daily" ? dailyData :
+                    monthlyData;
+
         return res.status(200).json({
             success: true,
-            salesData: monthlyTotals
+            salesData
         });
 
     } catch (error) {

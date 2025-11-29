@@ -1,36 +1,33 @@
-export default function SalesChart({salesData}) {
-  // const salesData = [
-  //   { month: 'Jan', sales: 45000 },
-  //   { month: 'Feb', sales: 52000 },
-  //   { month: 'Mar', sales: 48000 },
-  //   { month: 'Apr', sales: 61000 },
-  //   { month: 'May', sales: 55000 },
-  //   { month: 'Jun', sales: 67000 },
-  //   { month: 'Jul', sales: 73000 },
-  //   { month: 'Aug', sales: 69000 },
-  //   { month: 'Sep', sales: 76000 },
-  //   { month: 'Oct', sales: 82000 },
-  //   { month: 'Nov', sales: 89000 },
-  //   { month: 'Dec', sales: 95000 }
-  // ];
+export default function SalesChart({ salesData, dateRange, setDateRange }) {
+
 
   const maxSales = Math.max(...salesData.map(d => d.sales));
-
+  console.log("salesData==>", salesData)
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800">Sales Overview</h3>
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg">Monthly</button>
-          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-700 hover:text-white rounded-lg">Weekly</button>
-          <button className="px-3 py-1 text-sm text-gray-500 hover:bg-gray-700 hover:text-white rounded-lg">Daily</button>
+          {["Monthly", "Weekly", "Daily"].map((range) => (
+            <button
+              key={range}
+              onClick={() => setDateRange(range)}
+              className={`px-3 py-1 text-sm rounded-lg transition 
+                ${dateRange === range
+                  ? "bg-gray-700 text-white shadow"
+                  : "bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-700"
+                }`}
+            >
+              {range}
+            </button>
+          ))}
         </div>
       </div>
-      
+
       <div className="h-80 flex items-end justify-between space-x-2 overflow-hidden">
         {salesData.map((data, index) => (
           <div key={index} className="flex-1 flex flex-col items-center">
-            <div 
+            <div
               className="w-full bg-blue-500 rounded-t-sm hover:bg-blue-600 transition-colors relative group"
               style={{ height: `${(data.sales / maxSales) * 250}px` }}
             >
@@ -38,11 +35,16 @@ export default function SalesChart({salesData}) {
                 ₹{data.sales.toLocaleString()}
               </div>
             </div>
-            <span className="text-xs text-gray-500 mt-2">{data.month}</span>
+            {/* <span className="text-xs text-gray-500 mt-2">{data.month}</span> */}
+            <span className="text-xs text-gray-500 mt-2">
+              {dateRange === "Monthly" && data?.month}
+              {dateRange === "Weekly" && `${data?.year}`}
+              {dateRange === "Daily" && data?.day}
+            </span>
           </div>
         ))}
       </div>
-      
+
       <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
         <span>Total Sales: ₹7,82,000</span>
         <span className="text-green-600 font-medium">↑ 12.5% from last year</span>

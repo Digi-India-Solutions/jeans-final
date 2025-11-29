@@ -61,7 +61,7 @@ function OverviewTab({ dateRange, setDateRange }) {
                     <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Jeans Sales</p>
                         <p className="text-lg font-bold text-gray-900">
-                            ₹{formatLakh(salesDatas?.jeans?.total)} | {salesDatas?.jeans?.pieces || 0} Pcs
+                            ₹{salesDatas?.jeans?.total} | {salesDatas?.jeans?.pieces || 0} Pcs
                         </p>
                         <p className={`text-sm ${growthClass(salesDatas?.jeans?.growth)}`}>
                             {salesDatas?.jeans?.growth}% from {dateRange === 'thisMonth' ? "last month" : dateRange === 'thisWeek' ? 'last Week' : dateRange === 'thisYear' ? "last Year" : dateRange === ' today' ? ' today' : 'Custom'}
@@ -79,7 +79,7 @@ function OverviewTab({ dateRange, setDateRange }) {
                     <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Shirts Sales</p>
                         <p className="text-lg font-bold text-gray-900">
-                            ₹{formatLakh(salesDatas?.shirts?.total)} | {salesDatas?.shirts?.pieces || 0} Pcs
+                            ₹{salesDatas?.shirts?.total} | {salesDatas?.shirts?.pieces || 0} Pcs
                         </p>
                         <p className={`text-sm ${growthClass(salesDatas?.shirts?.growth)}`}>
                             {salesDatas?.shirts?.growth === "NaN" ? -100 : salesDatas?.shirts?.growth}% from {dateRange === 'thisMonth' ? "last month" : dateRange === 'thisWeek' ? 'last Week' : dateRange === 'thisYear' ? "last Year" : dateRange === ' today' ? ' today' : 'Custom'}
@@ -115,7 +115,7 @@ function OverviewTab({ dateRange, setDateRange }) {
                     <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                         <p className="text-lg font-bold text-gray-900">
-                            ₹{formatLakh(totalRevenue)} | {totalPieces} Pcs
+                            ₹{totalRevenue} | {totalPieces} Pcs
                         </p>
                         <p className={`text-sm ${growthClass(
                             (parseInt(salesDatas?.jeans?.growth || 0) + parseInt(salesDatas?.shirts?.growth || 0)) / 2

@@ -79,15 +79,15 @@ exports.getJeansShirtRevenueAndOrder = catchAsyncErrors(async (req, res, next) =
                 if (category.includes("JEANS")) {
                     if (isCurrent) {
                         buckets.jeans.current.total += parseInt(item.productId?.filnalLotPrice) * parseInt(item?.quantity)
-                        buckets.jeans.current.pieces += parseInt(item?.quantity);
+                        buckets.jeans.current.pieces += parseInt(item.pcsInSet) || parseInt(item?.quantity);
                     }
                     if (isLast) buckets.jeans.last.total += parseInt(item?.productId?.filnalLotPrice) * parseInt(item?.quantity);
                     hasJeans = true;
                 } else if (category.includes("SHIRTS")) {
-                    console.log("DDDD:==>GGGGG", item.singlePicPrice, item.pcsInSet, item?.quantity);
+                    console.log("DDDD:==>GGGGG=>", item.singlePicPrice, item.pcsInSet, item?.quantity);
                     if (isCurrent) {
                         buckets.shirts.current.total += parseInt(item.singlePicPrice * item.pcsInSet) * parseInt(item?.quantity);
-                        buckets.shirts.current.pieces += item.quantity;
+                        buckets.shirts.current.pieces += parseInt(item.pcsInSet) || item.quantity;
                     }
                     if (isLast) buckets.shirts.last.total += parseInt(item.productId?.filnalLotPrice) * parseInt(item?.quantity);
                     hasShirts = true;
