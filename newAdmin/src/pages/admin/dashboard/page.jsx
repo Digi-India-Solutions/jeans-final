@@ -83,7 +83,7 @@ export default function Dashboard() {
   }
 
   const fetchSalesChart = async () => {
-    const response = await getData('api/dashboard/get-sales-chart-data');
+    const response = await getData(`api/dashboard/get-sales-chart-data?dateRange=${dateRange}`);
     // console.log("response:==>SSS=>", response.salesChart)
     if (response?.success === true) {
       setSalesData(response?.salesData)
@@ -114,7 +114,7 @@ export default function Dashboard() {
     fetchSalesChart()
     fetchOrderSales()
     fetchRecentSales()
-  }, [])
+  }, [dateRange])
 
   useEffect(() => {
     fetchRoles()
@@ -135,7 +135,8 @@ export default function Dashboard() {
     }
   }
 
-  // console.log("data:==>", data, stats)
+  console.log("data:==>AAAAA", categoryComparisons)
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -189,14 +190,14 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Today</p>
-                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.jeans?.todaySales)} | {categoryComparisons?.jeans?.todayPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{categoryComparisons?.jeans?.todaySales} | {categoryComparisons?.jeans?.todayPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-blue-500 h-2 rounded-full" style={{ width: '75%' }}></div>
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Weekly</p>
-                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.jeans?.weeklySales)} | {categoryComparisons?.jeans?.weeklyPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{categoryComparisons?.jeans?.weeklySales} | {categoryComparisons?.jeans?.weeklyPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }}></div>
                 </div>
@@ -206,11 +207,11 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <p className="text-xs text-gray-600">Monthly</p>
-                <p className="text-sm font-bold text-blue-600">₹{formatLakh(categoryComparisons?.jeans?.monthlySales)} | {categoryComparisons?.jeans?.monthlyPcs} Pcs</p>
+                <p className="text-sm font-bold text-blue-600">₹{categoryComparisons?.jeans?.monthlySales} | {categoryComparisons?.jeans?.monthlyPcs} Pcs</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-600">YTD</p>
-                <p className="text-sm font-bold text-blue-600">₹{formatLakh(categoryComparisons?.jeans?.ytdSales)} | {categoryComparisons?.jeans?.ytdPcs} Pcs</p>
+                <p className="text-sm font-bold text-blue-600">₹{categoryComparisons?.jeans?.ytdSales} | {categoryComparisons?.jeans?.ytdPcs} Pcs</p>
               </div>
             </div>
           </Card>
@@ -230,14 +231,14 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Today</p>
-                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.shirts?.todaySales)} | {categoryComparisons?.shirts?.todayPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{categoryComparisons?.shirts?.todaySales} | {categoryComparisons?.shirts?.todayPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
                 </div>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <p className="text-xs text-gray-600">Weekly</p>
-                <p className="text-lg font-bold text-gray-900">₹{formatLakh(categoryComparisons?.shirts?.weeklySales)} | {categoryComparisons?.shirts?.weeklyPcs} Pcs</p>
+                <p className="text-lg font-bold text-gray-900">₹{categoryComparisons?.shirts?.weeklySales} | {categoryComparisons?.shirts?.weeklyPcs} Pcs</p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div className="bg-green-500 h-2 rounded-full" style={{ width: '70%' }}></div>
                 </div>
@@ -247,11 +248,11 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <p className="text-xs text-gray-600">Monthly</p>
-                <p className="text-sm font-bold text-green-600">₹{formatLakh(categoryComparisons?.shirts?.monthlySales)} | {categoryComparisons?.shirts?.monthlyPcs} Pcs</p>
+                <p className="text-sm font-bold text-green-600">₹{categoryComparisons?.shirts?.monthlySales} | {categoryComparisons?.shirts?.monthlyPcs} Pcs</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-600">YTD</p>
-                <p className="text-sm font-bold text-green-600">₹{formatLakh(categoryComparisons?.shirts?.ytdSales)} | {categoryComparisons?.shirts?.ytdPcs} Pcs</p>
+                <p className="text-sm font-bold text-green-600">₹{categoryComparisons?.shirts?.ytdSales} | {categoryComparisons?.shirts?.ytdPcs} Pcs</p>
               </div>
             </div>
           </Card>
@@ -259,7 +260,7 @@ export default function Dashboard() {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <SalesChart salesData={salesData} />
+          <SalesChart salesData={salesData} dateRange={dateRange} setDateRange={setDateRange} />
           <OrdersChart orderSales={orderSales} />
         </div>
 
