@@ -402,17 +402,18 @@ exports.getSalesChartData = catchAsyncErrors(async (req, res) => {
 exports.getOrderStatusChartData = catchAsyncErrors(async (req, res) => {
     try {
         const orders = await AdminOrder.find({ recycleBin: { $ne: true } });
-
+        console.log("orders::=>>", orders);
         // Count orders per status
         const statusCounts = {
             Delivered: 0,
             Shipped: 0,
             Pending: 0,
-            Canceled: 0
+            Cancelled: 0,
+            Packed: 0
         };
 
         orders.forEach(order => {
-            const status = order.status || 'Pending';
+            const status = order?.status || 'Pending';
             if (statusCounts[status] !== undefined) {
                 statusCounts[status]++;
             }
@@ -425,7 +426,8 @@ exports.getOrderStatusChartData = catchAsyncErrors(async (req, res) => {
             Delivered: 'bg-green-500',
             Shipped: 'bg-blue-500',
             Pending: 'bg-yellow-500',
-            Canceled: 'bg-red-500'
+            Cancelled: 'bg-red-500',
+            Packed: 'bg-indigo-500'
         };
 
         // Format response exactly like your frontend needs
@@ -436,11 +438,7 @@ exports.getOrderStatusChartData = catchAsyncErrors(async (req, res) => {
             percentage: total === 0 ? 0 : Math.round((statusCounts[key] / total) * 100)
         }));
 
-        return res.status(200).json({
-            success: true,
-            orderData,
-            totalOrders: total
-        });
+        return res.status(200).json({ success: true, orderData, totalOrders: total });
 
     } catch (error) {
         console.log(error);
