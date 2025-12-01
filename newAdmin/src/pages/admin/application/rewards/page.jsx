@@ -242,7 +242,7 @@ export default function RewardsManagement() {
               setSelectedCustomer={setSelectedCustomer}
               filteredCustomers={filteredCustomers}
               setShowCustomerModal={setShowCustomerModal}
-              
+
             />
 
             {filteredCustomers.length === 0 && (
@@ -265,7 +265,7 @@ export default function RewardsManagement() {
             selectedCustomer={selectedCustomer}
             setPointsForm={setPointsForm}
             pointsForm={pointsForm}
-fetchRewards={fetchRewards}
+            fetchRewards={fetchRewards}
           />
         )}
 
