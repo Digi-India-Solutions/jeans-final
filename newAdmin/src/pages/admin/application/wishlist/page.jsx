@@ -148,6 +148,7 @@ export default function WishlistManagement() {
       console.error("Error fetching wishlists:", error);
     }
   }
+
   useEffect(() => {
     fetchCustomers();
     fetchProductsWithPagination()
@@ -351,21 +352,21 @@ export default function WishlistManagement() {
             <p className="text-gray-600 mt-1">View and manage customer wishlists</p>
           </div>
           <div className="flex space-x-3">
-            <Button
+            {/* <Button
               onClick={handleCreateWishlist}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <i className="ri-add-line mr-2"></i>
               Create Wishlist
-            </Button>
-            <Button variant="outline" size="md">
+            </Button> */}
+            {/* <Button variant="outline" size="md">
               <i className="ri-mail-line mr-2"></i>
               Send Bulk Reminders
             </Button>
             <Button variant="primary" size="md">
               <i className="ri-download-line mr-2"></i>
               Export Data
-            </Button>
+            </Button> */}
           </div>
         </div>
 

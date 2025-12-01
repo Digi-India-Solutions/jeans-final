@@ -8,6 +8,8 @@ const SubProduct = require("./subProducts-model.js");
 const Category = require("../categorys/categorys-model.js")
 const Color = require("../colors/colors-model.js");
 const Size = require("../sizes/sizes-model.js");
+const Wishlist = require("../wishLists/wishList-model.js");
+const Cart = require("../addToCard/card-model.js");
 const { deleteImage, uploadImage } = require("../../middleware/Uploads.js");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder.js");
 
@@ -260,28 +262,111 @@ exports.updateSubProductByID = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+// exports.deleteSubProductByID = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const productID = req.params.id;
+
+//         const productData = await SubProduct.findById(productID);
+//         if (!productData) {
+//             return next(new ErrorHandler("Product not found", 400));
+//         }
+
+//         if (productData?.subProductImages) {
+//             for (let oldImage of productData.subProductImages) {
+//                 await deleteImage(oldImage);
+//             }
+
+//         }
+//         const wishlists = await Wishlist.find({ productId: productID });
+
+//         if (wishlists.length > 0) {
+//             for (let wishlist of wishlists) {
+//                 await Wishlist.deleteOne({ _id: wishlist._id });
+//             }
+//         }
+
+//         const carts = await Cart.find({ "items.productId": productID });
+
+//         if (carts.length > 0) {
+//             for (let cart of carts) {
+
+//                 // Remove only the matching item
+//                 cart.items = cart.items.filter(
+//                     (item) => item.productId.toString() !== productID.toString()
+//                 );
+
+//                 // If items become empty → delete the cart
+//                 if (cart.items.length === 0) {
+//                     await Cart.deleteOne({ _id: cart._id });
+//                 } else {
+//                     // Otherwise update the cart
+//                     await cart.save();
+//                 }
+//             }
+//         }
+
+//         const product = await SubProduct.deleteOne({ _id: productID });
+
+
+//         res.status(200).json({ message: "Product deleted successfully", success: true, data: product });
+
+//     } catch (error) {
+//         return next(new ErrorHandler(error.message, 500));
+//     }
+// })
+
 exports.deleteSubProductByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const productID = req.params.id;
 
+        // 1. Check product existence
         const productData = await SubProduct.findById(productID);
         if (!productData) {
-            return next(new ErrorHandler("Product not found", 400));
+            return next(new ErrorHandler("Product not found", 404));
         }
 
-        if (productData?.subProductImages) {
-            for (let oldImage of productData.subProductImages) {
-                await deleteImage(oldImage);
+        // 2. Delete all product images
+        if (productData.subProductImages && productData.subProductImages.length > 0) {
+            for (const img of productData.subProductImages) {
+                await deleteImage(img);
             }
-
         }
-        const product = await SubProduct.deleteOne({ _id: productID });
-        res.status(200).json({ message: "Product deleted successfully", success: true, data: product });
+
+        // 3. Remove product from all wishlists
+        await Wishlist.deleteMany({ productId: productID });
+
+        // 4. Remove only matching items from all carts
+        const carts = await Cart.find({ ["items.subProduct"]: productID });
+        console.log("carts:==>", carts);
+
+        for (const cart of carts) {
+
+            // Remove only the matching subProduct
+            cart.items = cart.items.filter(
+                (item) => item.subProduct.toString() !== productID.toString()
+            );
+
+            // Recalculate total
+            cart.totalAmount = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // If empty → delete the cart
+            if (cart.items.length === 0) {
+                await Cart.deleteOne({ _id: cart._id });
+            } else {
+                // Save updated cart
+                await cart.save();
+            }
+        }
+
+        // 5. Delete the sub-product
+        await SubProduct.deleteOne({ _id: productID });
+
+        res.status(200).json({ success: true, message: "Product deleted successfully" });
 
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
-})
+});
 
 exports.getAllSubProductsByType = catchAsyncErrors(async (req, res, next) => {
     const { term } = req.params;

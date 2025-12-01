@@ -2,7 +2,7 @@ import React from 'react'
 import Button from '../../../../components/base/Button';
 import { postData } from '../../../../services/FetchNodeServices';
 
-function ManagementRewordPoint({ setShowCustomerModal, setCustomers, customers, setSelectedCustomer, selectedCustomer, setPointsForm, pointsForm }) {
+function ManagementRewordPoint({ fetchRewards, setShowCustomerModal, setCustomers, customers, setSelectedCustomer, selectedCustomer, setPointsForm, pointsForm }) {
 
     const handlePointsUpdate = async () => {
         if (!selectedCustomer || !pointsForm.points) return;
@@ -31,7 +31,7 @@ function ManagementRewordPoint({ setShowCustomerModal, setCustomers, customers, 
         } catch (err) {
             console.log(err)
         }
-
+        fetchRewards()
         setPointsForm({ points: '', reason: '', type: 'earned' });
         setShowCustomerModal(false);
         setSelectedCustomer(null);
