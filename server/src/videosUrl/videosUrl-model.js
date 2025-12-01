@@ -12,6 +12,11 @@ const videoSchema = new Schema({
         trim: true,
         default: ""
     },
+    type: {
+        type: String,
+        trim: true,
+        default: ""
+    },
     status: {
         type: Boolean,
         default: true,

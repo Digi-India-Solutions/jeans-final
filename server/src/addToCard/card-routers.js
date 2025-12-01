@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const upload = require('../../middleware/multer')
 
-const { AddToCard, getCardById, updateCard, deleteFromCart, deleteCard, getAllCard, applyCoupon, getCardBySubProductId, getAllCardWithPagination } = require("./card-conroller")
+const { AddToCard, getCardById, updateCard, deleteFromCart, deleteCard, getAllCard, applyCoupon, getCardBySubProductId, getAllCardWithPagination, updateAllQuantityCard } = require("./card-conroller")
 
 router.post("/add-to-cart", AddToCard)
 
@@ -21,5 +21,7 @@ router.get("/get-all-card-with-pagination", getAllCardWithPagination)
 router.post("/apply-coupon/:id", applyCoupon)
 
 router.post("/get-card-by-subProduct-id", getCardBySubProductId)
+
+router.post("/updat-all-quantity-card", updateAllQuantityCard)
 
 module.exports = router;

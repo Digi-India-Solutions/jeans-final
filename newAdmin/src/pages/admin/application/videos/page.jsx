@@ -14,12 +14,13 @@ export default function VideosManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     videoUrl: '',
-    status: true
+    status: true,
+    type: 'Both'
   });
   const [filters, setFilters] = useState({
-    type: '',    
-    status: '',    
-    search: ''  
+    type: '',
+    status: '',
+    search: ''
   });
 
   const handleAdd = () => {
@@ -34,8 +35,10 @@ export default function VideosManagement() {
   const handleEdit = (video) => {
     setEditingVideo(video);
     setFormData({
-      videoUrl: video.videoUrl || '',
-      status: video.status || true
+      videoUrl: video?.videoUrl || '',
+      status: video?.status || true,
+      type: video?.type || 'Both'
+
     });
     setShowModal(true);
   };
@@ -49,6 +52,11 @@ export default function VideosManagement() {
       setIsLoading(false);
       return;
     }
+    if (!formData.type) {
+      toast.error("Please select a video type");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       let response;
@@ -59,7 +67,7 @@ export default function VideosManagement() {
         // Create new video
         response = await postData("api/video/add", formData);
       }
-      
+
       if (response?.success) {
         toast.success(response?.message || (editingVideo ? "Video updated successfully" : "Video added successfully"));
         setShowModal(false);
@@ -124,13 +132,13 @@ export default function VideosManagement() {
   const toggleStatus = async (id) => {
     const video = videos.find(v => v._id === id);
     if (!video) return;
-    
+
     const updatedStatus = !video.status;
-    
+
     try {
-      const response = await postData('api/video/change-status', { 
-        videoId: id, 
-        status: updatedStatus 
+      const response = await postData('api/video/change-status', {
+        videoId: id,
+        status: updatedStatus
       });
 
       if (response.success) {
@@ -150,8 +158,8 @@ export default function VideosManagement() {
   };
 
   const getStatusColor = (status) => {
-    return status 
-      ? 'bg-green-100 text-white' 
+    return status
+      ? 'bg-green-100 text-white'
       : 'bg-yellow-100 text-white';
   };
 
@@ -250,7 +258,7 @@ export default function VideosManagement() {
               {filteredVideos.map(video => {
                 const thumbnailUrl = getYouTubeThumbnail(video.videoUrl);
                 const videoTitle = getYouTubeTitleFromUrl(video.videoUrl);
-                
+
                 return (
                   <Card key={video._id} className="overflow-hidden">
                     <div className="relative">
@@ -275,7 +283,7 @@ export default function VideosManagement() {
 
                     <div className="p-4">
                       <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{videoTitle}</h3>
-                      
+
                       <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
                         <span>{formatDate(video.createdAt)}</span>
                       </div>
@@ -341,6 +349,18 @@ export default function VideosManagement() {
 
                 <form onSubmit={handleSave}>
                   <div className="space-y-4">
+                    <div>
+                      <select
+                        value={formData?.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="Both">Both</option>
+                        <option value="Customer">Customer</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Video URL *</label>
                       <input

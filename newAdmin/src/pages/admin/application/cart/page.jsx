@@ -104,13 +104,6 @@ export default function CartManagement() {
         setShowEditModal(true);
     };
 
-    // const addProductToForm = (form, setForm) => {
-    //     setForm({
-    //         ...form,
-    //         selectedProducts: [...form?.selectedProducts, { productId: '', quantity: 1 }]
-    //     });
-    // };
-
     const addProductToForm = (form, setForm) => {
         setForm({
             ...form,
@@ -199,7 +192,7 @@ export default function CartManagement() {
             console.error("Error creating cart: ", error);
         }
     };
-    // console.log("editttt:=>", editForm)
+
     const updateCart = async () => {
         if (!editForm?.customerId || editForm?.selectedProducts?.length === 0) return;
 

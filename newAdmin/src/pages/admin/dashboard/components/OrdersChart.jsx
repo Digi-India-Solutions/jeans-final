@@ -48,7 +48,7 @@ console.log("orderSales::=>>XX", orderSales);
         {orderSales.map((item, index) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
+              <div className={`w-3 h-3 rounded-full ${item?.color}`}></div>
               <span className="text-sm font-medium text-gray-700">{item.status}</span>
             </div>
             <div className="flex items-center space-x-2">

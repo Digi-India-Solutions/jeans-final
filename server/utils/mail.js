@@ -39,95 +39,93 @@ const sendMail = ({ to, subject, html, from = process.env.MAIL_EMAIL_ID }) => {
 
 exports.sendResetPasswordSuperAdmin = async (data) => {
     const { email, token, user } = data;
-    const resetLink =
-        process.env.BASE_URL + `/${user}/reset-password/${token}`;
+
+    const resetLink = `${process.env.BASE_URL}/${user}/reset-password/${token}`;
 
     const body = `
     <!DOCTYPE html>
     <html lang="en">
-    
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Verify your recovery email</title>
-        <style>
-            body {
-                margin: 0 auto;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-            }
-    
-            .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #fff;
-                border: 1px solid gainsboro;
-                padding: 20px;
-                border-radius: 8px;
-                text-align: center;
-            }
-    
-            .logo {
-                margin-bottom: 20px;
-            }
-    
-            .title {
-                font-size: 24px;
-                color: black;
-                font-weight: 500;
-                margin-top: 5%;
-                margin-bottom: 5%;
-            }
-    
-            .message {
-                font-size: 16px;
-                color: #272727;
-                margin-bottom: 20px;
-                line-height: 1.5;
-                text-align: left;
-            }
-    
-            .note {
-                font-size: 14px;
-                color: #272727;
-                text-align: left;
-                margin-top: 20px;
-                margin-bottom: 5%;
-                line-height: 1.5;
-            }
-    
-            .footer{
-                color: #4a4a4a;
-                font-size: 12px;
-                max-width: 600px;
-                text-align: center;
-            }
-        </style>
+        <title>Reset Password</title>
     </head>
-    
-    <body>
-        <div style="margin: 0 auto">
-            <div class="container">
-                // <div class="logo">
-                //   <img src="https://api.sddipl.com/images/anibhavi-logo.png" style="width: 180px;">
-                // </div>
-                <div class="title">Reset Password</div>
-                <hr style="opacity: 30%; margin-top: 3%; margin-bottom: 3%;" />
-                <div class="message">
-                    Anibhavi Creation received a request to <strong>Change Password</strong>.
-                    <br><br>
-                    Use this link to safely reset your password: <a href="${resetLink}">${resetLink}</a>
-                </div>
-               <p class="footer">All rights reserved © 2024 | Anibhavi Creation | 9/7308, Guru Govind Singh Gali, Kailash Nagar, Gandhinagar, Delhi, 110031</p>
-            </div>
-        </div>
+
+    <body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5; padding:20px 0;">
+            <tr>
+                <td align="center">
+
+                    <!-- Main Container -->
+                    <table width="600" cellpadding="0" cellspacing="0" 
+                        style="background:#ffffff; border-radius:8px; border:1px solid gainsboro; padding:20px;">
+
+                        <!-- Logo -->
+                        <tr>
+                            <td align="center" style="padding-bottom:20px;">
+                                <img src="https://api.sddipl.com/uploads/logo/logowithText.png" 
+                                     alt="Logo" width="180" 
+                                     style="display:block; margin:0 auto;" />
+                            </td>
+                        </tr>
+
+                        <!-- Title -->
+                        <tr>
+                            <td align="center" 
+                                style="font-size:24px; font-weight:600; color:#000; padding:10px 0;">
+                                Reset Password
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <hr style="opacity:0.2; border:0; height:1px; background:#000;">
+                            </td>
+                        </tr>
+
+                        <!-- Message -->
+                        <tr>
+                            <td 
+                                style="font-size:16px; color:#272727; line-height:1.6; text-align:left; padding:20px;">
+                                
+                                Anibhavi Creation received a request to 
+                                <strong>Change Password</strong>.
+                                <br><br>
+
+                                Click the link below to reset your password safely:
+                                <br><br>
+
+                                <a href="${resetLink}" 
+                                   style="color:#0066cc; font-weight:600; word-break:break-all;">
+                                   ${resetLink}
+                                </a>
+
+                                <br><br>
+                                If you did not request this, please ignore this email.
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td align="center" 
+                                style="font-size:12px; color:#4a4a4a; padding:20px 10px;">
+                                
+                                All rights reserved © 2024 | Anibhavi Creation  
+                                <br>
+                                9/7308, Guru Govind Singh Gali, Kailash Nagar, Gandhinagar, Delhi, 110031
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+        </table>
+
     </body>
-    
     </html>
-    `
+    `;
 
     const subject = "Reset your Password";
     return await sendMail({ to: email, subject, html: body });
@@ -215,7 +213,7 @@ exports.sendOtpForUserSignup = async (data) => {
     <div style="margin: 0 auto">
         <div class="container">
             <div class="logo">
-                <img src="https://localhost:3000/images/logo.avif" style="width: 180px;"
+                <img src="https://api.sddipl.com/uploads/logo/logowithText.png"  style="width: 180px;"
                     alt="Anibhavi Creation">
             </div>
             <div class="title">Verify your Email</div>

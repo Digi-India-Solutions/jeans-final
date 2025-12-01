@@ -3,7 +3,7 @@ const Video = require('./videosUrl-model');
 const ShortUniqueId = require("short-unique-id");
 
 exports.addUrl = catchAsyncErrors(async (req, res) => {
-    const { videoUrl, } = req.body;
+    const { videoUrl, type } = req.body;
 
     if (!videoUrl) {
         return res.status(400).json({ success: false, message: "Video URL is required" });
@@ -12,7 +12,7 @@ exports.addUrl = catchAsyncErrors(async (req, res) => {
     const uniqueNumId = new ShortUniqueId({ length: 6, dictionary: "number" });
     const currentUniqueId = uniqueNumId.rnd();
 
-    const newVideo = new Video({ videoUrl, uniqueVideoUrlId: currentUniqueId });
+    const newVideo = new Video({ videoUrl, type, uniqueVideoUrlId: currentUniqueId });
     await newVideo.save();
 
     res.status(201).json({ success: true, message: "Video added successfully", data: newVideo });
@@ -55,9 +55,9 @@ exports.getVideoById = catchAsyncErrors(async (req, res) => {
 
 
 exports.updateVideo = catchAsyncErrors(async (req, res) => {
-    const { videoUrl } = req.body;
+    const { videoUrl, type } = req.body;
 
-    const updated = await Video.findByIdAndUpdate(req.params.id, { videoUrl, updatedAt: Date.now(), }, { new: true });
+    const updated = await Video.findByIdAndUpdate(req.params.id, { videoUrl, type, updatedAt: Date.now(), }, { new: true });
 
     if (!updated) {
         return res.status(404).json({ success: false, message: "Video not found" });
@@ -74,4 +74,19 @@ exports.deleteVideo = catchAsyncErrors(async (req, res) => {
     }
 
     res.status(200).json({ success: true, message: "Video deleted successfully" });
+});
+
+exports.getAdminUrlVideos = catchAsyncErrors(async (req, res) => {
+    const videos = await Video.find({ type: { $in: ["Admin", "Both"] } })
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, data: videos });
+});
+
+
+exports.getCustomUrlVideos = catchAsyncErrors(async (req, res) => {
+    const videos = await Video.find({ type: { $in: ["Customer", "Both"] } })
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, data: videos });
 });

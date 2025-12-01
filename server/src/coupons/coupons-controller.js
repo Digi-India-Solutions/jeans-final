@@ -23,7 +23,7 @@ exports.createCoupon = catchAsyncErrors(async (req, res, next) => {
 
 exports.getAllCoupons = catchAsyncErrors(async (req, res, next) => {
     try {
-        const coupons = await Coupon.find();
+        const coupons = await Coupon.find().sort({ createdAt: -1 });
         console.log(coupons)
         res.status(200).json({ success: true, coupons });
     } catch (error) {
@@ -113,12 +113,12 @@ exports.updateCoupon = catchAsyncErrors(async (req, res, next) => {
 
 exports.getCouponByCode = catchAsyncErrors(async (req, res, next) => {
     try {
-        const { couponCode,totalAmount} = req.body;
+        const { couponCode, totalAmount } = req.body;
 
         if (!couponCode) {
             return res.status(400).json({ success: false, message: "Coupon code is required." });
         }
-        if(!totalAmount){
+        if (!totalAmount) {
             return res.status(400).json({ success: false, message: "Total amount is required." });
         }
 
@@ -148,7 +148,7 @@ exports.getCouponByCode = catchAsyncErrors(async (req, res, next) => {
 exports.getCouponByStatus = catchAsyncErrors(async (req, res, next) => {
     try {
         const { status } = req.body
-        const coupons = await Coupon.find({ status: status });
+        const coupons = await Coupon.find({ status: status }).sort({ createdAt: -1 });
         if (!coupons) {
             return res.status(404).json({ message: "Coupon not found." });
         }
