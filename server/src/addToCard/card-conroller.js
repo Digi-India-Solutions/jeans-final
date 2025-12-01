@@ -267,6 +267,7 @@ exports.updateCard = catchAsyncErrors(async (req, res) => {
     }
 });
 
+
 exports.updateAllQuantityCard = catchAsyncErrors(async (req, res) => {
     try {
         const { userId, itemId, quantity } = req.body;
@@ -386,29 +387,71 @@ exports.getAllCard = catchAsyncErrors(async (req, res) => {
     }
 });
 
+// exports.getAllCardWithPagination = catchAsyncErrors(async (req, res) => {
+//     try {
+//         // Pagination params
+//         let page = parseInt(req.query.page) || 1;
+//         let limit = parseInt(req.query.limit) || 10;
+
+//         let skip = (page - 1) * limit;
+
+//         // Total documents
+//         const totalCards = await Card.countDocuments();
+
+//         // Fetch paginated cards
+//         const cards = await Card.find()
+//             .skip(skip)
+//             .limit(limit)
+//             .populate({
+//                 path: 'items.subProduct',
+//                 populate: { path: 'productId', select: 'productName' }
+//             })
+//             .populate({
+//                 path: 'user',
+//                 select: 'name email phone'
+//             });
+
+//         res.status(200).json({
+//             success: true,
+//             count: cards.length,
+//             totalCards,
+//             totalPages: Math.ceil(totalCards / limit),
+//             currentPage: page,
+//             cards,
+//         });
+//     } catch (error) {
+//         console.error('Get all cards error:', error);
+//         res.status(500).json({ success: false, message: 'Failed to fetch cards', error: error.message });
+//     }
+// })
+
 exports.getAllCardWithPagination = catchAsyncErrors(async (req, res) => {
     try {
-        // Pagination params
         let page = parseInt(req.query.page) || 1;
         let limit = parseInt(req.query.limit) || 10;
 
         let skip = (page - 1) * limit;
 
-        // Total documents
-        const totalCards = await Card.countDocuments();
+        // Count ONLY cards that have items
+        const totalCards = await Card.countDocuments({
+            items: { $exists: true, $not: { $size: 0 } }
+        });
 
-        // Fetch paginated cards
-        const cards = await Card.find()
+        // Fetch paginated cards with items
+        const cards = await Card.find({
+            items: { $exists: true, $not: { $size: 0 } }
+        })
             .skip(skip)
             .limit(limit)
             .populate({
-                path: 'items.subProduct',
-                populate: { path: 'productId', select: 'productName' }
+                path: "items.subProduct",
+                populate: { path: "productId", select: "productName" }
             })
             .populate({
-                path: 'user',
-                select: 'name email phone'
-            });
+                path: "user",
+                select: "name email phone"
+            })
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
@@ -418,11 +461,17 @@ exports.getAllCardWithPagination = catchAsyncErrors(async (req, res) => {
             currentPage: page,
             cards,
         });
+
     } catch (error) {
-        console.error('Get all cards error:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch cards', error: error.message });
+        console.error("Get all cards error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch cards",
+            error: error.message
+        });
     }
-})
+});
+
 
 exports.applyCoupon = catchAsyncErrors(async (req, res) => {
     try {

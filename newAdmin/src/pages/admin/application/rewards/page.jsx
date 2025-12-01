@@ -116,10 +116,10 @@ export default function RewardsManagement() {
 
           {/* Right Section */}
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="md" className="flex items-center gap-2">
+            {/* <Button variant="outline" size="md" className="flex items-center gap-2">
               <i className="ri-download-line"></i>
               Export Report
-            </Button>
+            </Button> */}
 
             <Button
               variant="secondary"
@@ -135,7 +135,7 @@ export default function RewardsManagement() {
 
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6 w-fit">
+        {/* <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6 w-fit">
           <button
             onClick={() => setActiveTab("customers")}
             className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === "customers"
@@ -145,7 +145,7 @@ export default function RewardsManagement() {
           >
             Customer Points
           </button>
-        </div>
+        </div> */}
 
         {/* Customers Tab */}
         {activeTab === "customers" && (
@@ -242,6 +242,7 @@ export default function RewardsManagement() {
               setSelectedCustomer={setSelectedCustomer}
               filteredCustomers={filteredCustomers}
               setShowCustomerModal={setShowCustomerModal}
+              
             />
 
             {filteredCustomers.length === 0 && (
@@ -264,7 +265,7 @@ export default function RewardsManagement() {
             selectedCustomer={selectedCustomer}
             setPointsForm={setPointsForm}
             pointsForm={pointsForm}
-
+fetchRewards={fetchRewards}
           />
         )}
 

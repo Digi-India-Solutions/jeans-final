@@ -235,6 +235,12 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
+
+        const rewardPoint = await RewardPoints.findOne({ userId: user._id });
+        if (rewardPoint) {
+            await RewardPoints.deleteOne();
+        }
+
         await user.deleteOne();
 
         res.status(200).json({ success: true, message: 'User deleted successfully' });

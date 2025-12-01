@@ -213,7 +213,7 @@ exports.verifyPayment = async (req, res) => {
 
         // 4️⃣ Update order payment fields
         const previousPaid = order.paidAmount || 0;
-        const newPaidAmount = previousPaid + order.balanceAmount;
+        const newPaidAmount = previousPaid ;
 
         order.paidAmount = newPaidAmount;
         order.balanceAmount = Math.max(order.total - newPaidAmount, 0);
