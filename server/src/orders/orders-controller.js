@@ -181,6 +181,7 @@ exports.verifyPayment = async (req, res) => {
 
         // 1️⃣ Validate order
         const order = await AdminOrder.findById(order_id).populate("customer.userId");
+
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
@@ -201,8 +202,7 @@ exports.verifyPayment = async (req, res) => {
             .update(signBody)
             .digest("hex");
 
-        const signatureMatch =
-            expectedSignature === razorpay_signature;
+        const signatureMatch = expectedSignature === razorpay_signature;
 
         if (!signatureMatch) {
             return res.status(400).json({
@@ -212,11 +212,11 @@ exports.verifyPayment = async (req, res) => {
         }
 
         // 4️⃣ Update order payment fields
-        const previousPaid = order.paidAmount || 0;
-        const newPaidAmount = previousPaid ;
-
-        order.paidAmount = newPaidAmount;
-        order.balanceAmount = Math.max(order.total - newPaidAmount, 0);
+        // const previousPaid = order.paidAmount || 0;
+        // // const newPaidAmount = previousPaid;
+        // console.log("SSSS::=>", previousPaid)
+        // order.paidAmount = previousPaid;
+        // order.balanceAmount = order.balanceAmount
 
         order.paymentType = order.balanceAmount === 0 ? "Complete Payment" : "Partial Payment";
 
@@ -228,10 +228,10 @@ exports.verifyPayment = async (req, res) => {
         };
 
         // Add payment log
-        order.payments.push({
-            method: "Online",
-            amount: order.total,
-        });
+        // order.payments.push({
+        //     method: "Online",
+        //     amount: order.total,
+        // });
 
         // 5️⃣ Reward Points
         // let userPoints = await RewardPoints.findOne({ userId });
