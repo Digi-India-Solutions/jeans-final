@@ -4,8 +4,9 @@ const router = express.Router();
 const {
     createOrder, createOrderByAdmin, createOrderByclient, getAllOrdersByAdminWithPagination, getAllRecycledOrdersByAdminWithPagination, updateOrderNoteByAdmin,
     getAllOrders, getOrderByID, changeStatus, changeStatusByAdmin, getAllOrdersByUser, verifyPayment, deleteOrderByID,
-    updateOrderPaymentByAdmin, FilterOrdersByAdmin, getAllAdminOrders, 
-    moveToRecycleBin, updateOrderByAdmin, moveToOrder
+    updateOrderPaymentByAdmin, FilterOrdersByAdmin, getAllAdminOrders,
+    moveToRecycleBin, updateOrderByAdmin, moveToOrder,
+    getOrderByNewAdminID
 } = require("./orders-controller");
 
 
@@ -28,6 +29,8 @@ router.get("/get-all-orders-by-admin-with-pagination", getAllOrdersByAdminWithPa
 router.get("/get-all-recycled-orders-by-admin-with-pagination", getAllRecycledOrdersByAdminWithPagination);
 
 router.get("/get-order-by-id/:id", getOrderByID);
+
+router.get("/get-order-by-new-admin-id/:id", getOrderByNewAdminID)
 
 router.post("/change-status/:id", changeStatus)
 
