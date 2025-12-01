@@ -1141,8 +1141,6 @@ exports.getOrderByNewAdminID = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-
-
 // exports.searchOrders = catchAsyncErrors(async (req, res, next) => {
 //     try {
 //         const { pageNumber = 1 } = req.query;

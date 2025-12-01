@@ -211,21 +211,6 @@ export default function RewardsManagement() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     />
                   </div>
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Customer Type</label>
-                    <div className="relative">
-                      <select
-                        value={filters.type}
-                        onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
-                      >
-                        <option value="">All Types</option>
-                        <option value="B2B">B2B</option>
-                        <option value="Retail">Retail</option>
-                      </select>
-                      <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    </div>
-                  </div> */}
                 </div>
               </div>
             </Card>
@@ -242,7 +227,6 @@ export default function RewardsManagement() {
               setSelectedCustomer={setSelectedCustomer}
               filteredCustomers={filteredCustomers}
               setShowCustomerModal={setShowCustomerModal}
-
             />
 
             {filteredCustomers.length === 0 && (
