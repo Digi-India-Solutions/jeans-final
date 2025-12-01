@@ -1111,6 +1111,37 @@ exports.FilterOrdersByAdmin = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+exports.getOrderByNewAdminID = catchAsyncErrors(async (req, res, next) => {
+    try {
+        const orderID = req.params.id;
+
+        const order = await AdminOrder.findById(orderID)
+            .populate({
+                path: "items.productId",  // if items contain subProduct use items.subProduct
+                populate: {
+                    path: "productId",     // populate main product
+                }
+            })
+            .populate({
+                path: "customer.userId",
+            });
+
+        if (!order) {
+            return next(new ErrorHandler("Order not found", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order fetched successfully",
+            data: order
+        });
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+});
+
+
 
 // exports.searchOrders = catchAsyncErrors(async (req, res, next) => {
 //     try {
