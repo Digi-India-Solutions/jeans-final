@@ -8,23 +8,6 @@ function ManagementRewordPoint({ fetchRewards, setShowCustomerModal, setCustomer
         if (!selectedCustomer || !pointsForm.points) return;
 
         const pointsChange = parseInt(pointsForm.points);
-
-        // setCustomers(prev => prev.map(customer =>
-        //     customer.id === selectedCustomer.id
-        //         ? {
-        //             ...customer,
-        //             points: pointsForm.type === 'earned'
-        //                 ? customer.points + pointsChange
-        //                 : Math.max(0, customer.points - pointsChange),
-        //             totalEarned: pointsForm.type === 'earned'
-        //                 ? customer.totalEarned + pointsChange
-        //                 : customer.totalEarned,
-        //             totalRedeemed: pointsForm.type === 'redeemed'
-        //                 ? customer.totalRedeemed + pointsChange
-        //                 : customer.totalRedeemed
-        //         }
-        //         : customer
-        // ));
         try {
             const response = await postData(`api/reward/change-points-by-admin/${selectedCustomer?._id}`, pointsForm)
             // change-points-by-admin
