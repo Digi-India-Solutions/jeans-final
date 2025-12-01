@@ -427,7 +427,7 @@ exports.getOrderStatusChartData = catchAsyncErrors(async (req, res) => {
             Shipped: 'bg-blue-500',
             Pending: 'bg-yellow-500',
             Cancelled: 'bg-red-500',
-            Packed: 'bg-indigo-500'
+            Packed: 'bg-purple-500'
         };
 
         // Format response exactly like your frontend needs

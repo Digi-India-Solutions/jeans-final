@@ -119,17 +119,16 @@ export default function BannersManagement() {
         confirmButtonText: 'Yes, delete it!'
       });
 
-      // if (result?.isConfirmed) {
-      //   const data = await getData(`api/banner/delete/${id}`);
-      //   console.log("REASPONSE ALL BANNER", data)
-      //   if (data?.success === true) {
-      //     setBanners(banners.filter(banner => banner?._id !== id));
-      //     toast.success("Banner deleted successfully");
-      //   } else {
-      //     toast.error("Banner deleted Failed");
-      //   }
+      if (result?.isConfirmed) {
+        const data = await getData(`api/banner/delete/${id}`);
+        if (data?.success === true) {
+          setBanners(banners.filter(banner => banner?._id !== id));
+          toast.success("Banner deleted successfully");
+        } else {
+          toast.error("Banner deleted Failed");
+        }
 
-      // }
+      }
     } catch (error) {
       toast.error("Failed to delete the banner");
     }
@@ -248,10 +247,11 @@ export default function BannersManagement() {
                       <span>Shop URL:</span>
                       <span className="font-medium">{banner.url || "None"}</span>
                     </div>
-                    <div className="flex justify-between">
+
+                    {banner?.Clicks && <div className="flex justify-between">
                       <span>Clicks:</span>
                       <span className="font-medium">{banner?.Clicks || 0}</span>
-                    </div>
+                    </div>}
 
                     <div className="flex justify-between">
                       <span>Start Date:</span>

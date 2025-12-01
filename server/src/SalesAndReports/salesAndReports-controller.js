@@ -209,20 +209,20 @@ exports.getSalesData = catchAsyncErrors(async (req, res, next) => {
 
                 if (isCurrent) {
                     buckets[key].current.total += lineTotal;
-                    buckets[key].current.pieces += item?.quantity || 0;
+                    buckets[key].current.pieces += parseInt(item.pcsInSet) || item.quantity || 0;
 
                     // Daily data
                     const dateKey = getDateKey(order.createdAt);
                     const daily = buckets[key].current.dailyData.find(d => d.date === dateKey);
                     if (daily) {
                         daily.sales += lineTotal;
-                        daily.pieces += item?.quantity || 0;
+                        daily.pieces += parseInt(item.pcsInSet) || item.quantity || 0;
                     } else {
                         buckets[key].current.dailyData.push({
                             date: dateKey,
                             sales: lineTotal,
                             orders: 0, // filled later
-                            pieces: item?.quantity || 0,
+                            pieces: parseInt(item.pcsInSet) || item.quantity || 0,
                         });
                     }
                 }

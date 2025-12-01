@@ -267,6 +267,65 @@ exports.updateCard = catchAsyncErrors(async (req, res) => {
     }
 });
 
+exports.updateAllQuantityCard = catchAsyncErrors(async (req, res) => {
+    try {
+        const { userId, itemId, quantity } = req.body;
+
+        // Validate ObjectIds
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+            return res.status(200).json({ success: false, message: 'Invalid userId or itemId' });
+        }
+
+        // Fetch user's cart
+        const cart = await Card.findOne({ user: userId, items: { $elemMatch: { _id: itemId } } });
+
+        if (!cart) {
+            return res.status(204).json({ success: false, message: 'Cart not found' });
+        }
+
+        // Find item index
+        const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
+
+        if (itemIndex === -1) {
+            return res.status(204).json({ success: false, message: 'Item not found in cart' });
+        }
+
+        const item = cart.items[itemIndex];
+
+        // Fetch product to check stock
+        const product = await SubProduct.findById(item.subProduct);
+
+        if (!product) {
+            return res.status(204).json({ success: false, message: 'Product not found' });
+        }
+
+        // Update quantity based on action
+        if (quantity > 0) {
+            if (quantity > product.stock) {
+                return res.status(200).json({ success: false, message: `Cannot exceed stock. Available: ${product.stock}` });
+            }
+            item.quantity = quantity;
+        }
+        item.status = "pending";
+
+        // Recalculate total amount
+        cart.totalAmount = cart.items.reduce(
+            (total, item) => total + item.quantity * item.price,
+            0
+        );
+
+        await cart.save();
+        await cart.populate({ path: 'items.subProduct', select: 'name images price finalPrice stock variant' });
+
+        return res.status(200).json({ success: true, message: 'Cart updated', cart });
+
+    } catch (error) {
+        console.error('Update cart error:', error);
+        return res.status(500).json({ success: false, message: 'Failed to update cart', error: error.message });
+    }
+});
+
+
 exports.deleteFromCart = catchAsyncErrors(async (req, res) => {
     try {
         const { userId, itemId } = req.body;
