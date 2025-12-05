@@ -172,9 +172,10 @@ export default function VideosManagement() {
 
   const getYouTubeThumbnail = (url) => {
     const videoId = extractYouTubeVideoId(url);
+    console.log('DD>->',videoId)
     return videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
   };
-
+// console.log('DD>->',)
   const getYouTubeTitleFromUrl = (url) => {
     if (!url) return 'Untitled Video';
     const videoId = extractYouTubeVideoId(url);
@@ -356,8 +357,8 @@ export default function VideosManagement() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="Both">Both</option>
-                        <option value="Customer">Customer</option>
-                        <option value="Admin">Admin</option>
+                        <option value="Customer">COUSTUMER REVIEW</option>
+                        <option value="Admin">FEATURED VIDEOS</option>
                       </select>
                     </div>
 

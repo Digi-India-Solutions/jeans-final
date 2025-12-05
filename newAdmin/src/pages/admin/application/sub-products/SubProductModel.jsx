@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Button from '../../../../components/base/Button';
 import { toast } from 'react-toastify';
 import { postData } from '../../../../services/FetchNodeServices';
+import Select from "react-select";
 
 function SubProductModel({
   formData,
@@ -204,7 +205,7 @@ function SubProductModel({
                 )}
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Parent Product <span className="text-red-500">*</span>
                 </label>
@@ -225,6 +226,50 @@ function SubProductModel({
                   </select>
                   <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
+                {formErrors.productId && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.productId}</p>
+                )}
+              </div> */}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Parent Product <span className="text-red-500">*</span>
+                </label>
+
+                <Select
+                  options={productList?.map((product) => ({
+                    value: product._id,
+                    label: `${product.productName} (${product?.mainCategoryId?.mainCategoryName})`,
+                  }))}
+
+                  value={
+                    formData.productId
+                      ? {
+                        value: formData.productId,
+                        label:
+                          productList?.find((p) => p._id === formData.productId)?.productName +
+                          " (" +
+                          productList?.find((p) => p._id === formData.productId)?.mainCategoryId
+                            ?.mainCategoryName +
+                          ")",
+                      }
+                      : null
+                  }
+
+                  onChange={(e) => handleParentProductChange(e.value)}
+
+                  placeholder="Select Parent Product"
+                  className="text-sm"
+                  styles={{
+                    control: (base, state) => ({
+                      ...base,
+                      borderColor: formErrors.productId ? "red" : "#d1d5db",
+                      boxShadow: state.isFocused ? "0 0 0 1px #3b82f6" : "none",
+                      "&:hover": { borderColor: "#3b82f6" },
+                    }),
+                  }}
+                />
+
                 {formErrors.productId && (
                   <p className="text-red-500 text-xs mt-1">{formErrors.productId}</p>
                 )}

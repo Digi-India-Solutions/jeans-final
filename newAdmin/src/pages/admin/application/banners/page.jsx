@@ -321,21 +321,44 @@ export default function BannersManagement() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Title */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Banner Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Banner Title
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Shop Banner (Page)
+                      </label>
+                      <select
+                        value={formData.url}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            url: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">None</option>
+                        {selectUrl.map((url) => (
+                          <option key={url} value={url}>
+                            {url}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-
                   {/* Image Upload + Preview */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -363,7 +386,7 @@ export default function BannersManagement() {
                   </div>
 
                   {/* Position & Shop URL */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Position
@@ -404,7 +427,7 @@ export default function BannersManagement() {
                         ))}
                       </select>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Dates */}
                   <div className="grid grid-cols-2 gap-4">

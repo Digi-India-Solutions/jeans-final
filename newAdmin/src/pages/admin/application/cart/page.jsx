@@ -371,7 +371,7 @@ export default function CartManagement() {
                     {filteredCarts.map((cart) => {
                         const firstItem = cart.items?.[0];
                         const firstImage = firstItem?.subProduct?.subProductImages?.[0];
-
+                        console.log("DDDDDDDD::=>", cart)
                         return (
                             <Card key={cart?._id} className="p-6">
                                 {/* USER DETAILS */}
@@ -397,7 +397,7 @@ export default function CartManagement() {
                                             />
                                             <div className="flex-1">
                                                 <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {item?.subProduct?.name}
+                                                    {item?.subProduct?.name} / {item?.subProduct?.productId?.productName}
                                                 </p>
                                                 <p className="text-xs text-gray-500">
                                                     ₹{item?.price} x {item?.quantity}
@@ -800,7 +800,7 @@ export default function CartManagement() {
 
                                                 <div className="flex-1">
                                                     <h4 className="font-medium text-gray-900">
-                                                        {p?.productId?.productName}
+                                                        {p?.name} / {p?.productId?.productName}
                                                     </h4>
 
                                                     <p className="text-sm text-gray-600">Lot: {p?.lotNumber}</p>

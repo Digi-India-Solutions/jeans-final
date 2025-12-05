@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Button from '../../../components/base/Button';
 import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
+import Select from "react-select";
 
 function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowEditOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
@@ -69,8 +70,7 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
     };
 
     const getTotalValue = () => {
-        console.log("XXXX::=>", newOrderForm?.items)
-        return newOrderForm?.items?.reduce((sum, item) => sum + (getTotalPcs(item) * item?.singlePicPrice), 0);
+        return newOrderForm?.items?.reduce((sum, item) => sum + (item?.quantity * (item?.singlePicPrice * item?.pcsInSet)), 0);
     };
 
     const getTotalPcs = () => {
@@ -84,6 +84,7 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
     };
     // console.log("ZZZZZZZZZZZZZ:==>", newOrderForm?.items?.reduce((sum, item) => sum + item?.quantity, 0));
     const handleCustomerSelect = (customerId) => {
+
         const customer = customers?.find(c => c?._id === customerId);
         console.log("customercustomercustomer:==>", customer, customerId);
         if (customer) {
@@ -198,7 +199,7 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
 
         // console.log("💰 Payment Debug:", "Total Entered:", totalPaymentEntered, "Allowed:", finalTotal);
 
-        if (totalPaymentEntered <= finalTotal) {
+        if (totalPaymentEntered <= subtotal || totalPaymentEntered <= finalTotal) {
             setNewOrderForm({ ...newOrderForm, payments: updatedPayments });
         } else {
             alert("⚠️ Total payment cannot exceed the order total amount.");
@@ -263,7 +264,7 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
 
         const newOrder = {
             id: Date.now(),
-            orderNumber: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
+            orderNumber: newOrderForm.orderNumber,
             customer: {
                 userId: newOrderForm.customerId,
                 name: newOrderForm.customerName,
@@ -431,21 +432,75 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
                                             <div className="relative">
-                                                <select
-                                                    value={newOrderForm?.customerId}
-                                                    onChange={(e) => handleCustomerSelect(e.target.value)}
-                                                    className="w-full px-3 py-2 pr-8 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
-                                                    required
-                                                >
-                                                    <option value="">Select Customer</option>
-                                                    {customers?.map(customer => (
-                                                        <option key={customer?._id} value={customer._id}>
-                                                            {customer?.name}
-                                                            {/* ({customer.type}) */}
-                                                        </option>
-                                                    ))}
-                                                    <option value="new">+ Add New Customer</option>
-                                                </select>
+                                                {/* <Select
+                                                    options={customers?.map((product) => ({
+                                                        value: product._id,
+                                                        label: `${product.productName} (${product?.mainCategoryId?.mainCategoryName})`,
+                                                    }))}
+
+                                                    value={
+                                                        formData.productId
+                                                            ? {
+                                                                value: formData.productId,
+                                                                label:
+                                                                    productList?.find((p) => p._id === formData.productId)?.productName +
+                                                                    " (" +
+                                                                    productList?.find((p) => p._id === formData.productId)?.mainCategoryId
+                                                                        ?.mainCategoryName +
+                                                                    ")",
+                                                            }
+                                                            : null
+                                                    }
+
+                                                    onChange={(e) => handleParentProductChange(e.value)}
+
+                                                    placeholder="Select Parent Product"
+                                                    className="text-sm"
+                                                    styles={{
+                                                        control: (base, state) => ({
+                                                            ...base,
+                                                            borderColor: formErrors.productId ? "red" : "#d1d5db",
+                                                            boxShadow: state.isFocused ? "0 0 0 1px #3b82f6" : "none",
+                                                            "&:hover": { borderColor: "#3b82f6" },
+                                                        }),
+                                                    }}
+                                                /> */}
+
+                                                <Select
+                                                    options={[
+                                                        ...(customers ? customers.map((customer) => ({
+                                                            value: customer?._id,
+                                                            label: customer?.name,
+                                                        })) : []),
+                                                        { value: "new", label: "+ Add New Customer" },
+                                                    ]}
+
+                                                    value={
+                                                        newOrderForm?.customerId
+                                                            ? {
+                                                                value: newOrderForm?.customerId,
+                                                                label:
+                                                                    customers?.find((c) => c._id === newOrderForm?.customerId)?.name ||
+                                                                    "+ Add New Customer",
+                                                            }
+                                                            : null
+                                                    }
+
+                                                    onChange={(selected) => handleCustomerSelect(selected?.value)}
+
+                                                    placeholder="Select Customer"
+                                                    className="text-sm"
+                                                    isSearchable={true}
+                                                    styles={{
+                                                        control: (base) => ({
+                                                            ...base,
+                                                            borderColor: "#374151",
+                                                            boxShadow: "none",
+                                                            "&:hover": { borderColor: "#3b82f6" },
+                                                        }),
+                                                    }}
+                                                />
+
                                                 <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                             </div>
                                             <Button
