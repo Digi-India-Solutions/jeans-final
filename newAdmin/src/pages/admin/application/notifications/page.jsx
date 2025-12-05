@@ -2,78 +2,14 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../../../components/feature/AdminLayout';
 import Card from '../../../../components/base/Card';
 import Button from '../../../../components/base/Button';
+import { getData, postData } from '../../../../services/FetchNodeServices';
+import Swal from "sweetalert2";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function NotificationsManagement() {
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'New Collection Launch',
-      message: 'Check out our latest premium jeans collection with exclusive designs!',
-      type: 'Promotional',
-      targetAudience: 'All Users',
-      status: 'Sent',
-      scheduledDate: '2024-01-15',
-      sentDate: '2024-01-15',
-      recipients: 2847,
-      openRate: 68.5,
-      clickRate: 12.3
-    },
-    {
-      id: 2,
-      title: 'Order Shipped',
-      message: 'Your order #ORD-2024-001 has been shipped and is on its way!',
-      type: 'Transactional',
-      targetAudience: 'Specific Users',
-      status: 'Sent',
-      scheduledDate: '2024-01-14',
-      sentDate: '2024-01-14',
-      recipients: 1,
-      openRate: 100,
-      clickRate: 45.2
-    },
-    {
-      id: 3,
-      title: 'Flash Sale Alert',
-      message: 'Limited time offer! Get 30% off on all formal shirts. Hurry up!',
-      type: 'Promotional',
-      targetAudience: 'Active Users',
-      status: 'Scheduled',
-      scheduledDate: '2024-01-20',
-      sentDate: null,
-      recipients: 1523,
-      openRate: 0,
-      clickRate: 0
-    }
-  ]);
-
-  const [templates, setTemplates] = useState([
-    {
-      id: 1,
-      name: 'Order Confirmation',
-      type: 'Transactional',
-      subject: 'Order Confirmed - {{orderNumber}}',
-      content: 'Hi {{customerName}}, your order has been confirmed and will be processed soon.',
-      isActive: true
-    },
-    {
-      id: 2,
-      name: 'Promotional Sale',
-      type: 'Promotional',
-      subject: 'Special Offer Just for You!',
-      content: 'Don\'t miss our exclusive sale with up to {{discount}}% off on selected items!',
-      isActive: true
-    },
-    {
-      id: 3,
-      name: 'Abandoned Cart Reminder',
-      type: 'Marketing',
-      subject: 'Complete Your Purchase',
-      content: 'You left some great items in your cart. Complete your purchase now!',
-      isActive: true
-    }
-  ]);
-
-  // Firebase Configuration State
+  const [notifications, setNotifications] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [firebaseSettings, setFirebaseSettings] = useState({
     apiKey: '',
     projectId: '',
@@ -84,24 +20,25 @@ export default function NotificationsManagement() {
 
   const [isEditingFirebase, setIsEditingFirebase] = useState(false);
   const [firebaseSaved, setFirebaseSaved] = useState(false);
-
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
   const [editingNotification, setEditingNotification] = useState(null);
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState('notifications');
-
+  const [isLoading, setIsLoading] = useState(false)
+  const [isResend, setIsResend] = useState(false)
+  const [isDelete, setIsDelete] = useState(false)
   const [notificationForm, setNotificationForm] = useState({
     title: '',
     message: '',
-    type: 'Promotional',
-    targetAudience: 'All Users',
-    scheduledDate: '',
-    scheduledTime: '',
+    // type: 'Promotional',
+    // targetAudience: 'All Users',
+    // scheduledDate: '',
+    // scheduledTime: '',
     image: ''
   });
-
+  const [preview, setPreview] = useState('');
   const [templateForm, setTemplateForm] = useState({
     name: '',
     type: 'Promotional',
@@ -123,7 +60,7 @@ export default function NotificationsManagement() {
     localStorage.setItem('firebaseSettings', JSON.stringify(firebaseSettings));
     setIsEditingFirebase(false);
     setFirebaseSaved(true);
-    
+
     // Show success message temporarily
     setTimeout(() => {
       setFirebaseSaved(false);
@@ -139,40 +76,44 @@ export default function NotificationsManagement() {
     alert('Testing Firebase connection...\n\nConnection Status: Success ✓\nProject ID: ' + firebaseSettings.projectId + '\nMessaging: Enabled');
   };
 
-  const handleSendNotification = () => {
+  const handleSendNotification = async () => {
+
+    if (!notificationForm.title || !notificationForm.message) return alert('Please fill out all fields.');
+    setIsLoading(true)
+    let response = null;
     if (editingNotification) {
-      setNotifications(prev => prev.map(notif =>
-        notif.id === editingNotification.id
-          ? { 
-              ...notif, 
-              ...notificationForm,
-              status: notificationForm.scheduledDate > new Date().toISOString().split('T')[0] ? 'Scheduled' : 'Sent',
-              sentDate: notificationForm.scheduledDate <= new Date().toISOString().split('T')[0] ? new Date().toISOString().split('T')[0] : null,
-              recipients: getRecipientCount(notificationForm.targetAudience),
-              openRate: 0,
-              clickRate: 0
-            }
-          : notif
-      ));
+      const form = new FormData();
+      form.append("title", notificationForm.title);
+      form.append("body", notificationForm.message);
+      if (notificationForm.image) {
+        form.append("image", notificationForm.image);
+      }
+      response = await postData(`api/notification/update-notification/${editingNotification._id}`, form);
+
     } else {
-      setNotifications(prev => [...prev, {
-        ...notificationForm,
-        id: Date.now(),
-        status: notificationForm.scheduledDate > new Date().toISOString().split('T')[0] ? 'Scheduled' : 'Sent',
-        sentDate: notificationForm.scheduledDate <= new Date().toISOString().split('T')[0] ? new Date().toISOString().split('T')[0] : null,
-        recipients: getRecipientCount(notificationForm.targetAudience),
-        openRate: 0,
-        clickRate: 0
-      }]);
+
+      if (notificationForm?.image) {
+        const data = new FormData();
+        data.append('title', notificationForm.title);
+        data.append('body', notificationForm.message);
+        data.append('image', notificationForm.image);
+
+        response = await postData("api/notification/create-notification", data, true);
+      } else {
+        response = await postData("api/notification/create-notification-without-image", {
+          title: notificationForm.title,
+          body: notificationForm.message,
+        });
+      }
+
+      setIsLoading(true)
+      console.log("data:==>", response);
+
     }
-    
+    fetchNotifications()
     setNotificationForm({
       title: '',
       message: '',
-      type: 'Promotional',
-      targetAudience: 'All Users',
-      scheduledDate: '',
-      scheduledTime: '',
       image: ''
     });
     setEditingNotification(null);
@@ -192,7 +133,7 @@ export default function NotificationsManagement() {
         id: Date.now()
       }]);
     }
-    
+
     setTemplateForm({
       name: '',
       type: 'Promotional',
@@ -236,14 +177,16 @@ export default function NotificationsManagement() {
 
   const handleEditNotification = (notification) => {
     setEditingNotification(notification);
+    setPreview(notification.image);
     setNotificationForm({
       title: notification.title,
-      message: notification.message,
-      type: notification.type,
-      targetAudience: notification.targetAudience,
-      scheduledDate: notification.scheduledDate,
-      scheduledTime: '10:00',
-      image: notification.image || ''
+      message: notification.body,
+      // type: notification.type,
+      // targetAudience: notification.targetAudience,
+      // scheduledDate: notification.scheduledDate,
+      // scheduledTime: '10:00',
+      image: '',
+      preview: notification.image || ''
     });
     setShowNotificationModal(true);
   };
@@ -254,11 +197,6 @@ export default function NotificationsManagement() {
     setShowTemplateModal(true);
   };
 
-  const deleteNotification = (id) => {
-    if (confirm('Are you sure you want to delete this notification?')) {
-      setNotifications(prev => prev.filter(notif => notif.id !== id));
-    }
-  };
 
   const deleteTemplate = (id) => {
     if (confirm('Are you sure you want to delete this template?')) {
@@ -266,8 +204,95 @@ export default function NotificationsManagement() {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Only image files are allowed");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size should be less than 2MB");
+        return;
+      }
+      setNotificationForm((prev) => ({ ...prev, image: file }));
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await getData("api/notification/get-all-notification");
+      console.log("SSSSSSXXXXXXXSSSSSSS:-->", response);
+      if (response?.success) {
+        setNotifications(response?.data || []);
+      }
+    } catch (error) {
+      // toast.error("Error fetching notifications");
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const handleResend = async (id) => {
+    try {
+
+      setIsResend(true)
+      const response = await getData(`api/notification/resend-notification/${id}`);
+      if (response?.success) {
+        setIsResend(false)
+        toast.success(response?.message || "Notification resent successfully");
+      } else {
+        setIsResend(false)
+        toast.error(response?.message || "Failed to resend notification");
+      }
+      setIsResend(false)
+    } catch (error) {
+      toast.error("Error resending notification");
+      setIsResend(false)
+      console.error("Error resending notification:", error);
+    }
+  };
+  const handleDelete = async (id) => {
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "This notification will be permanently deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        setIsDelete(true)
+        const response = await getData(`api/notification/delete-notification/${id}`);
+        if (response?.success) {
+          setIsDelete(false)
+          setNotifications((prev) => prev.filter((n) => n?._id !== id));
+          Swal.fire("Deleted!", "Notification has been deleted.", "success");
+        }
+      } catch (error) {
+        setIsDelete(false)
+        Swal.fire("Error!", "There was an error deleting the notification.", "error");
+        console.error("Error deleting notification:", error);
+      } finally {
+        // setDeleteActionLoading(null);
+      }
+      setIsDelete(false)
+    }
+  };
+
+  console.log("DDDDDD:==>", notificationForm)
   return (
     <AdminLayout>
+      <ToastContainer />
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -275,14 +300,14 @@ export default function NotificationsManagement() {
             <p className="text-gray-600 mt-1">Manage Firebase push notifications and templates</p>
           </div>
           <div className="flex space-x-3">
-            <Button 
+            {/* <Button
               onClick={() => setShowFirebaseModal(true)}
-              variant="outline" 
+              variant="outline"
               size="md"
             >
               <i className="ri-settings-line mr-2"></i>
               Firebase Config
-            </Button>
+            </Button> */}
             {activeTab === 'notifications' ? (
               <Button onClick={() => setShowNotificationModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
                 <i className="ri-notification-line mr-2"></i>
@@ -301,30 +326,28 @@ export default function NotificationsManagement() {
         <div className="flex space-x-1 bg-gray-900 p-1 rounded-lg mb-6 w-fit">
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'notifications'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-white '
-            }`}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'notifications'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-white '
+              }`}
           >
             Push Notifications
           </button>
-          <button
+          {/* <button
             onClick={() => setActiveTab('templates')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'templates'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-white hover:text-white'
-            }`}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'templates'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-white hover:text-white'
+              }`}
           >
             Message Templates
-          </button>
+          </button> */}
         </div>
 
         {activeTab === 'notifications' && (
           <>
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <Card className="p-6">
                 <div className="flex items-center">
                   <div className="p-3 rounded-full bg-blue-100">
@@ -377,7 +400,7 @@ export default function NotificationsManagement() {
                   </div>
                 </div>
               </Card>
-            </div>
+            </div> */}
 
             {/* Notifications Table */}
             <Card className="overflow-hidden">
@@ -386,17 +409,17 @@ export default function NotificationsManagement() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Notification Details
+                        Title
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type & Audience
+                        Body
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Performance
+                        image
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
-                      </th>
+                      </th> */}
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
@@ -404,39 +427,46 @@ export default function NotificationsManagement() {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {notifications.map(notification => (
-                      <tr key={notification.id} className="hover:bg-gray-50">
+                      <tr key={notification._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div>
                             <div className="text-sm font-medium text-gray-900">{notification.title}</div>
-                            <div className="text-sm text-gray-500 max-w-xs truncate">{notification.message}</div>
-                            <div className="text-xs text-gray-400 mt-1">
+                            {/* <div className="text-sm text-gray-500 max-w-xs truncate">{notification.message}</div> */}
+                            {/* <div className="text-xs text-gray-400 mt-1">
                               Scheduled: {notification.scheduledDate}
                               {notification.sentDate && ` • Sent: ${notification.sentDate}`}
-                            </div>
+                            </div> */}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(notification.type)}`}>
+                            {/* <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(notification.type)}`}>
                               {notification.type}
                             </span>
-                            <div className="text-sm text-gray-600 mt-1">{notification.targetAudience}</div>
-                            <div className="text-xs text-gray-500">{notification.recipients} recipients</div>
+                            <div className="text-sm text-gray-600 mt-1">{notification.targetAudience}</div> */}
+                            <div className="text-xs text-gray-500">{notification.body}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm text-gray-900">Open: {notification.openRate}%</div>
-                            <div className="text-sm text-gray-600">Click: {notification.clickRate}%</div>
+                            <div className="text-sm text-gray-900"><img src={notification?.image} alt="" style={{ width: 20, height: 20 }} /></div>
+                            {/* <div className="text-sm text-gray-900">Open: {notification.openRate}%</div> */}
+                            {/* <div className="text-sm text-gray-600">Click: {notification.clickRate}%</div> */}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        {/* <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(notification.status)}`}>
                             {notification.status}
                           </span>
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
+                            <Button
+                              onClick={() => handleResend(notification?._id)}
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
+                            >
+                              {isResend ? 'Resending...' : 'Resend'}
+                            </Button>
                             <Button
                               onClick={() => handleEditNotification(notification)}
                               className="bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs px-2 py-1"
@@ -444,7 +474,7 @@ export default function NotificationsManagement() {
                               Edit
                             </Button>
                             <Button
-                              onClick={() => deleteNotification(notification.id)}
+                              onClick={() => handleDelete(notification._id)}
                               className="bg-red-500 text-red-600 hover:bg-red-900 text-xs px-2 py-1"
                             >
                               Delete
@@ -473,9 +503,8 @@ export default function NotificationsManagement() {
                         {template.type}
                       </span>
                     </div>
-                    <div className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      template.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <div className={`px-2 py-1 text-xs font-semibold rounded-full ${template.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {template.isActive ? 'Active' : 'Inactive'}
                     </div>
                   </div>
@@ -513,7 +542,7 @@ export default function NotificationsManagement() {
         )}
 
         {/* Firebase Configuration Modal */}
-        {showFirebaseModal && (
+        {/* {showFirebaseModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
@@ -544,7 +573,7 @@ export default function NotificationsManagement() {
                     <input
                       type={isEditingFirebase ? 'text' : 'password'}
                       value={firebaseSettings.apiKey}
-                      onChange={(e) => setFirebaseSettings({...firebaseSettings, apiKey: e.target.value})}
+                      onChange={(e) => setFirebaseSettings({ ...firebaseSettings, apiKey: e.target.value })}
                       onFocus={() => setIsEditingFirebase(true)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="AIzaSyBOti4mM-6x9WDnZIj..."
@@ -558,7 +587,7 @@ export default function NotificationsManagement() {
                     <input
                       type="text"
                       value={firebaseSettings.projectId}
-                      onChange={(e) => setFirebaseSettings({...firebaseSettings, projectId: e.target.value})}
+                      onChange={(e) => setFirebaseSettings({ ...firebaseSettings, projectId: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="my-garments-app"
                     />
@@ -571,7 +600,7 @@ export default function NotificationsManagement() {
                     <input
                       type="text"
                       value={firebaseSettings.messagingSenderId}
-                      onChange={(e) => setFirebaseSettings({...firebaseSettings, messagingSenderId: e.target.value})}
+                      onChange={(e) => setFirebaseSettings({ ...firebaseSettings, messagingSenderId: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="123456789012"
                     />
@@ -584,7 +613,7 @@ export default function NotificationsManagement() {
                     <input
                       type="text"
                       value={firebaseSettings.appId}
-                      onChange={(e) => setFirebaseSettings({...firebaseSettings, appId: e.target.value})}
+                      onChange={(e) => setFirebaseSettings({ ...firebaseSettings, appId: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="1:123456789012:web:abcdef..."
                     />
@@ -597,7 +626,7 @@ export default function NotificationsManagement() {
                     <input
                       type={isEditingFirebase ? 'text' : 'password'}
                       value={firebaseSettings.serverKey}
-                      onChange={(e) => setFirebaseSettings({...firebaseSettings, serverKey: e.target.value})}
+                      onChange={(e) => setFirebaseSettings({ ...firebaseSettings, serverKey: e.target.value })}
                       onFocus={() => setIsEditingFirebase(true)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="AAAABBBBcccc:APA91bE..."
@@ -631,7 +660,7 @@ export default function NotificationsManagement() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Notification Modal */}
         {showNotificationModal && (
@@ -668,7 +697,7 @@ export default function NotificationsManagement() {
                     <input
                       type="text"
                       value={notificationForm.title}
-                      onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Notification title..."
                       maxLength="50"
@@ -679,7 +708,7 @@ export default function NotificationsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
                     <textarea
                       value={notificationForm.message}
-                      onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, message: e.target.value })}
                       rows="3"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder="Your notification message..."
@@ -689,8 +718,20 @@ export default function NotificationsManagement() {
                       {notificationForm.message.length}/200 characters
                     </p>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Image (optional)
+                    </label>
 
-                  <div className="grid grid-cols-2 gap-4">
+                    <input type="file" accept="image/*" onChange={handleFileChange} className="block w-full text-sm border border-gray-300 rounded-lg cursor-pointer p-2" />
+
+                    {preview && (
+                      <div className="mt-3">
+                        <img src={preview} alt="Preview" className="w-28 h-28 rounded-lg object-cover border border-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                  {/* {activeTab === 'notifications'}    <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                       <div className="relative">
@@ -722,9 +763,9 @@ export default function NotificationsManagement() {
                         <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Date</label>
                       <input
@@ -744,9 +785,9 @@ export default function NotificationsManagement() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
-                  </div>
+                  </div> */}
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Image URL (Optional)</label>
                     <input
                       type="url"
@@ -755,7 +796,7 @@ export default function NotificationsManagement() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="https://example.com/image.jpg"
                     />
-                  </div>
+                  </div> */}
 
                   <div className="flex space-x-3 pt-4">
                     <Button
@@ -781,7 +822,7 @@ export default function NotificationsManagement() {
                       className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                     >
                       <i className="ri-send-plane-line mr-2"></i>
-                      {editingNotification ? 'Update Notification' : 'Send Notification'}
+                      {editingNotification ? isLoading ? 'Updating...' : 'Update Notification' : isLoading ? 'Sending...' : 'Send Notification'}
                     </Button>
                   </div>
                 </div>
@@ -823,7 +864,7 @@ export default function NotificationsManagement() {
                     <input
                       type="text"
                       value={templateForm.name}
-                      onChange={(e) => setTemplateForm({...templateForm, name: e.target.value})}
+                      onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -833,7 +874,7 @@ export default function NotificationsManagement() {
                     <div className="relative">
                       <select
                         value={templateForm.type}
-                        onChange={(e) => setTemplateForm({...templateForm, type: e.target.value})}
+                        onChange={(e) => setTemplateForm({ ...templateForm, type: e.target.value })}
                         className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                       >
                         <option value="Promotional">Promotional</option>
@@ -849,7 +890,7 @@ export default function NotificationsManagement() {
                     <input
                       type="text"
                       value={templateForm.subject}
-                      onChange={(e) => setTemplateForm({...templateForm, subject: e.target.value})}
+                      onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Use {{variable}} for dynamic content"
                     />
@@ -859,7 +900,7 @@ export default function NotificationsManagement() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
                     <textarea
                       value={templateForm.content}
-                      onChange={(e) => setTemplateForm({...templateForm, content: e.target.value})}
+                      onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
                       rows="4"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder="Use {{variable}} for dynamic content"
@@ -871,7 +912,7 @@ export default function NotificationsManagement() {
                       type="checkbox"
                       id="isActive"
                       checked={templateForm.isActive}
-                      onChange={(e) => setTemplateForm({...templateForm, isActive: e.target.checked})}
+                      onChange={(e) => setTemplateForm({ ...templateForm, isActive: e.target.checked })}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
