@@ -319,7 +319,7 @@ exports.verifyPayment = async (req, res) => {
 
 const generateOrderNumber = async () => {
     const totalOrders = await AdminOrder.findOne().sort({ createdAt: -1 })
-    console.log('totalOrders==>', totalOrders)
+    // console.log('totalOrders==>', totalOrders)
     const dateObj = new Date();
     const year = dateObj.getFullYear();
     // console.log('totalOrders==>', totalOrders?.orderNumber)
@@ -369,18 +369,18 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
         if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
             return next(new ErrorHandler("Customer info and at least 1 item are required.", 200));
         }
-        console.log("FFFFFFFF:==>hjh", req.body)
+        // console.log("FFFFFFFF:==>hjh", req.body)
         // ✅ Generate unique order number
         const orderNumber = await generateOrderNumber();
-
         // ✅ Create status history
         const statusHistory = [
             { status, date: orderDate, updatedBy: "System" },
         ];
-        console.log("FFFFFFFF:==>hjh", req.body, orderNumber)
+        // console.log("FFFFFFFF:==>hjh", (req.body?.customer?.userId))
 
         // /////////////ADD POINTS//////////////////////////////
-        let userPoints = await RewardPoints.findOne({ userId: customer?.userId });
+        let userPoints = await RewardPoints.findOne({ userId: req.body?.customer?.userId });
+        // console.log("FFFFFFFF:==>", userPoints)
         if (pointsRedeemed > 0) {
             if (!userPoints || userPoints?.points < pointsRedeemed) {
                 return res.status(200).json({ success: false, message: "Insufficient reward points." });

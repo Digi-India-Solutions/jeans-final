@@ -77,7 +77,7 @@ exports.changePointsByAdmin = catchAsyncErrors(async (req, res, next) => {
 
 exports.getAllRewards = catchAsyncErrors(async (req, res, next) => {
     try {
-        const rewards = await RewardPoints.find().populate("userId")
+        const rewards = await RewardPoints.find().populate("userId").sort({ updatedAt: -1 });
 
         if (!rewards || rewards.length === 0) {
             return res.status(404).json({ success: false, message: "No rewards found." });
@@ -96,7 +96,7 @@ exports.getAllRewardsWithPagination = catchAsyncErrors(async (req, res, next) =>
         const limit = parseInt(req.query.limit, 10) || 10;
         const skip = (page - 1) * limit;
 
-        const rewards = await RewardPoints.find().populate("userId").sort({ createdAt: -1 }).skip(skip).limit(limit)
+        const rewards = await RewardPoints.find().populate("userId").sort({ updatedAt: -1 }).skip(skip).limit(limit)
 
         const totalRecords = await RewardPoints.countDocuments(rewards);
 
@@ -189,7 +189,7 @@ exports.addFistTimeSignupReward = catchAsyncErrors(async (req, res, next) => {
 
 exports.getFistTimeSignupReward = catchAsyncErrors(async (req, res, next) => {
     try {
-        const rewards = await UserSignupPoint.find().sort({ createdAt: -1 });
+        const rewards = await UserSignupPoint.find().sort({ updatedAt: -1 });
         res.json({ success: true, data: rewards });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

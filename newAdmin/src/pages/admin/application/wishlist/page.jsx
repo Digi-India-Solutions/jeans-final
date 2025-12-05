@@ -352,13 +352,13 @@ export default function WishlistManagement() {
             <p className="text-gray-600 mt-1">View and manage customer wishlists</p>
           </div>
           <div className="flex space-x-3">
-            {/* <Button
+            <Button
               onClick={handleCreateWishlist}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <i className="ri-add-line mr-2"></i>
               Create Wishlist
-            </Button> */}
+            </Button>
             {/* <Button variant="outline" size="md">
               <i className="ri-mail-line mr-2"></i>
               Send Bulk Reminders
@@ -406,11 +406,11 @@ export default function WishlistManagement() {
         {/* Wishlist Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredWishlists.map(wishlist => {
-
+            console.log("FFFFFFFFFFFFF:=>", wishlist)
             const images = wishlist?.productId?.subProductImages?.[0]
               ? wishlist?.productId?.subProductImages[0].split(",")
               : [];
-            // console.log("FFFFFFFFFFFFF:=>", images[0])
+            console.log("FFFFFFFFFFFFF:=>", wishlist)
             return (
               <Card key={wishlist?._id} className="p-6">
                 <div className="flex justify-between items-start mb-4">
@@ -426,22 +426,25 @@ export default function WishlistManagement() {
                   </div>
                   <div className="text-right">
                     {/* <div className="text-lg font-bold text-green-600">₹{wishlist.totalValue.toLocaleString()}</div> */}
-                    <div className="text-sm text-gray-500">{wishlist?.productId?.length} items</div>
+                    <div className="text-sm text-gray-500">{wishlist?.items?.length} items</div>
                   </div>
                 </div>
 
                 <div className="space-y-2 mb-4">
-                  <div key={wishlist?.productId?._id} className="flex items-center space-x-3">
-                    <img
-                      src={images[0] || wishlist?.productId?.subProductImages[0]}
-                      alt={wishlist?.productId?.name}
-                      className="w-10 h-10 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">{wishlist?.productId?.name}</p>
-                      <p className="text-xs text-gray-500">₹{wishlist?.productId?.singlePicPrice}</p>
+                  {wishlist.items.map((item, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <img
+                        src={item?.productId?.subProductImages[0]}
+                        alt={item?.productId?.name}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">{item?.productId?.name}</p>
+                        <p className="text-xs text-gray-500">₹{item?.productId?.singlePicPrice}</p>
+                      </div>
                     </div>
-                  </div>
+                  ))}
+
                   {/* {wishlist.items.slice(0, 2).map(item => (
                   <div key={item.id} className="flex items-center space-x-3">
                     <img
@@ -457,7 +460,7 @@ export default function WishlistManagement() {
                 ))} */}
                   {wishlist?.productId?.length > 2 && (
                     <div className="text-xs text-gray-500 text-center py-2">
-                      +{wishlist?.productId?.length - 2} more items
+                      +{wishlist?.items?.length - 2} more items
                     </div>
                   )}
                 </div>
@@ -474,7 +477,7 @@ export default function WishlistManagement() {
                     <i className="ri-eye-line mr-1"></i>
                     View
                   </Button>
-                  <Button
+                  {/* <Button
                     onClick={() => handleEditWishlist(wishlist)}
                     className="bg-green-500 text-green-600 hover:bg-green-800 px-3"
                   >
@@ -485,7 +488,7 @@ export default function WishlistManagement() {
                     className="bg-purple-500 text-purple-600 hover:bg-purple-800 px-3"
                   >
                     <i className="ri-mail-line"></i>
-                  </Button>
+                  </Button> */}
                   <Button
                     onClick={() => deleteWishlist(wishlist?._id)}
                     className="bg-red-500 text-red-600 hover:bg-red-800 px-3"
@@ -782,12 +785,16 @@ export default function WishlistManagement() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
-                {/* Header */}
+
+                {/* ---------- HEADER ---------- */}
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h2 className="text-xl font-semibold">{selectedWishlist?.userId?.name}'s Wishlist</h2>
+                    <h2 className="text-xl font-semibold">
+                      {selectedWishlist?.userId?.name}'s Wishlist
+                    </h2>
                     <p className="text-gray-600">{selectedWishlist?.userId?.email}</p>
                   </div>
+
                   <button
                     onClick={() => {
                       setShowDetailsModal(false);
@@ -799,84 +806,85 @@ export default function WishlistManagement() {
                   </button>
                 </div>
 
-                {/* Summary */}
+                {/* ---------- SUMMARY SECTION ---------- */}
                 <div className="mb-6">
                   <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+
                     <div>
                       <span className="text-sm text-gray-600">Total Value:</span>
+
                       <span className="text-xl font-bold text-green-600 ml-2">
                         ₹
-                        {(
-                          (Number(selectedWishlist?.quantity) || 0) *
-                          (Number(
-                            Array.isArray(selectedWishlist?.productId)
-                              ? selectedWishlist?.productId[0]?.filnalLotPrice
-                              : selectedWishlist?.productId?.filnalLotPrice
-                          ) || 0)
-                        ).toLocaleString()}
+                        {selectedWishlist?.items
+                          ?.reduce((acc, item) => acc + item?.quantity * item.productId?.singlePicPrice, 0)
+                          .toLocaleString()}
                       </span>
+
                       <p className="text-xs text-gray-500 mt-1">
-                        ({selectedWishlist?.quantity} × ₹
-                        {Number(
-                          Array.isArray(selectedWishlist?.productId)
-                            ? selectedWishlist?.productId[0]?.filnalLotPrice
-                            : selectedWishlist?.productId?.filnalLotPrice
-                        ).toLocaleString()})
+                        {selectedWishlist?.items?.length} total items
                       </p>
                     </div>
+
                     <div>
-                      <span className="text-sm text-gray-600">Items:</span>
+                      <span className="text-sm text-gray-600">Products:</span>
                       <span className="font-semibold ml-2">
-                        {Array.isArray(selectedWishlist?.productId)
-                          ? selectedWishlist?.productId.length
-                          : 1}
+                        {selectedWishlist?.items?.length}
                       </span>
                     </div>
+
                   </div>
                 </div>
 
-                {/* Product Details */}
+                {/* ---------- PRODUCT LIST ---------- */}
                 <div className="space-y-4">
-                  {(Array.isArray(selectedWishlist?.productId)
-                    ? selectedWishlist?.productId
-                    : [selectedWishlist?.productId]
-                  ).map(item => (
+
+                  {selectedWishlist?.items?.map((item) => (
                     <div
-                      key={item?._id}
+                      key={item._id}
                       className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
                     >
+                      {/* PRODUCT IMAGE */}
                       <img
-                        src={item?.subProductImages?.[0] || "/placeholder.png"}
-                        alt={item?.name}
+                        src={item?.productId?.subProductImages?.[0] || "/placeholder.png"}
+                        alt={item?.productId?.name}
                         className="w-20 h-20 object-cover rounded-lg"
                       />
+
+                      {/* PRODUCT DETAILS */}
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{item?.name}</h4>
-                        <p className="text-sm text-gray-600">Lot: {item?.lotNumber}</p>
-                        <p className="text-sm text-gray-600">Color: {item?.color}</p>
+                        <h4 className="font-medium text-gray-900">
+                          {item?.productId?.productName}
+                        </h4>
+
+                        <p className="text-sm text-gray-600">Lot: {item?.productId?.lotNumber}</p>
+                        <p className="text-sm text-gray-600">Color: {item?.productId?.color}</p>
+
                         <p className="text-sm text-gray-600">
-                          Sizes: {item?.sizes ? JSON.parse(item?.sizes).join(", ") : "N/A"}
+                          Sizes: {item?.productId?.sizes ? JSON.parse(item?.productId?.sizes).join(", ") : "N/A"}
                         </p>
-                        <p className="text-sm text-gray-600">Quantity: {selectedWishlist?.quantity}</p>
+
+                        <p className="text-sm text-gray-600">Quantity: {item?.quantity}</p>
+
                         <p className="text-lg font-semibold text-green-600">
-                          ₹
-                          {(
-                            (Number(selectedWishlist?.quantity) || 0) *
-                            (Number(item?.filnalLotPrice) || 0)
-                          ).toLocaleString()}
+                          ₹{(item?.quantity * item?.productId?.singlePicPrice).toLocaleString()}
                         </p>
                       </div>
-                      {/* <button
-                        onClick={() => removeFromWishlist(selectedWishlist?._id, item?._id)}
-                        className="text-red-500 hover:text-red-700 p-2"
-                      >
-                        <i className="ri-delete-bin-line"></i>
-                      </button> */}
+
+                      {/* DELETE BUTTON */}
+                      {/* 
+              <button
+                onClick={() => removeFromWishlist(selectedWishlist?._id, item?.productId?._id)}
+                className="text-red-500 hover:text-red-700 p-2"
+              >
+                <i className="ri-delete-bin-line"></i>
+              </button>
+              */}
                     </div>
                   ))}
+
                 </div>
 
-                {/* Footer buttons */}
+                {/* ---------- FOOTER ---------- */}
                 <div className="flex space-x-3 mt-6">
                   <Button
                     onClick={() => sendWishlistReminder(selectedWishlist)}
@@ -885,6 +893,7 @@ export default function WishlistManagement() {
                     <i className="ri-mail-line mr-2"></i>
                     Send Reminder
                   </Button>
+
                   <Button
                     onClick={() => {
                       setShowDetailsModal(false);
@@ -895,10 +904,12 @@ export default function WishlistManagement() {
                     Close
                   </Button>
                 </div>
+
               </div>
             </div>
           </div>
         )}
+
 
       </div>
     </AdminLayout>

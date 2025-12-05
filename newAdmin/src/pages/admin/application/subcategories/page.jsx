@@ -269,11 +269,11 @@ export default function SubCategoriesManagement() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-4">
+                  {/* <p className="text-sm text-gray-600 mb-4">
                     {subCategory?.description?.length > 180
                       ? subCategory?.description?.slice(0, 180) + "..."
                       : subCategory?.description}
-                  </p>
+                  </p> */}
 
                   <div className="flex space-x-2">
                     {permiton.update && <Button
@@ -389,7 +389,7 @@ export default function SubCategoriesManagement() {
                   </div> */}
 
                   {/* Description */}
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Description
                     </label>
@@ -402,7 +402,7 @@ export default function SubCategoriesManagement() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       maxLength="500"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Sub-Category Image */}
                   <div>

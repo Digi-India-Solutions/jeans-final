@@ -2,7 +2,6 @@ import axios from "axios";
 // const serverURL = "http://localhost:8000";
 const serverURL ="https://api.sddipl.com";
 
-
 const postData = async (url, body) => {
   try {
     console.log(JSON.stringify(body));

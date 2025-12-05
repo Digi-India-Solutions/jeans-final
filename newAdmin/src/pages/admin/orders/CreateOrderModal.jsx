@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Button from '../../../components/base/Button';
 import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
-
+import Select from "react-select";
 function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
@@ -68,11 +68,12 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
     };
 
     const getTotalValue = () => {
-        console.log("XXXX::=>", newOrderForm?.items)
-        return newOrderForm?.items?.reduce((sum, item) => sum + (getTotalPcs(item) * item?.singlePicPrice), 0);
+        // console.log("XXXX::=>SSSSSSSS", newOrderForm?.items?.reduce((sum, item) => sum + (item?.quantity * (item?.singlePicPrice * item?.pcsInSet)), 0));
+        return newOrderForm?.items?.reduce((sum, item) => sum + (item?.quantity * (item?.singlePicPrice * item?.pcsInSet)), 0);
     };
 
     const getTotalPcs = () => {
+        // console.log("XXXX::=>SSSSSSSSWW", newOrderForm?.items?.reduce((sum, item) => sum + (Number(item?.quantity) * Number(item?.pcsInSet || 0)), 0));
         return newOrderForm?.items?.reduce((sum, item) => {
             return sum + (Number(item?.quantity) * Number(item?.pcsInSet || 0));
         }, 0);
@@ -190,7 +191,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
     //         setNewOrderForm({ ...newOrderForm, payments: updatedPayments });
     //     }
     // };
-    console.log("updatedPayments==>", newOrderForm)
+    console.log("pointsRedemptionValue==>", newOrderForm);
     const updatePaymentMethod = (index, field, value) => {
         // Create a new array with the updated payment
         const updatedPayments = newOrderForm.payments.map((payment, i) =>
@@ -199,9 +200,9 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
 
         // Calculate totals
         const subtotal = getTotalValue();
-        // console.log("💰 Payment Debug:", "subtotal:=>", subtotal);// e.g., base price total
+        console.log("subtotal:=>", subtotal);// e.g., base price total
         const pointsRedemptionValue = calculatePointsValue(newOrderForm.redeemPoints || newOrderForm?.customerAvailablePoints);
-        // console.log("pointsRedemptionValue==>", pointsRedemptionValue, newOrderForm);
+        console.log("pointsRedemptionValue==>", pointsRedemptionValue, newOrderForm);
         const finalTotal = parseFloat((subtotal - pointsRedemptionValue).toFixed(2));
 
         // Compute current total payment entered by user
@@ -212,7 +213,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
 
         // console.log("💰 Payment Debug:", "Total Entered:", totalPaymentEntered, "Allowed:", finalTotal);
 
-        if (totalPaymentEntered <= finalTotal) {
+        if (totalPaymentEntered <= subtotal || totalPaymentEntered <= finalTotal) {
             setNewOrderForm({ ...newOrderForm, payments: updatedPayments });
         } else {
             alert("⚠️ Total payment cannot exceed the order total amount.");
@@ -279,7 +280,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
 
         const newOrder = {
             id: Date.now(),
-            orderNumber: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
+            // orderNumber: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
             customer: {
                 userId: newOrderForm.customerId,
                 name: newOrderForm.customerName,
@@ -318,6 +319,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         };
         // alert(JSON.stringify(newOrder))
         const response = await postData('api/order/create-order-by-admin', newOrder);
+        console.log('Response:==>', response);
         if (!response.success) {
             console.log('Error:', response.message);
             return;
@@ -444,7 +446,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
                                             <div className="relative">
-                                                <select
+                                                {/* <select
                                                     value={newOrderForm?.customerId}
                                                     onChange={(e) => handleCustomerSelect(e.target.value)}
                                                     className="w-full px-3 py-2 pr-8 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none"
@@ -454,11 +456,46 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                     {customers?.map(customer => (
                                                         <option key={customer?._id} value={customer._id}>
                                                             {customer?.name}
-                                                            {/* ({customer.type}) */}
                                                         </option>
                                                     ))}
                                                     <option value="new">+ Add New Customer</option>
-                                                </select>
+                                                </select> */}
+                                                <Select
+                                                    options={[
+                                                        ...(customers ? customers.map((customer) => ({
+                                                            value: customer?._id,
+                                                            label: customer?.name,
+                                                        })) : []),
+                                                        { value: "new", label: "+ Add New Customer" },
+                                                    ]}
+
+                                                    value={
+                                                        newOrderForm?.customerId
+                                                            ? {
+                                                                value: newOrderForm?.customerId,
+                                                                label:
+                                                                    customers?.find((c) => c._id === newOrderForm?.customerId)?.name ||
+                                                                    "+ Add New Customer",
+                                                            }
+                                                            : null
+                                                    }
+
+                                                    onChange={(selected) => handleCustomerSelect(selected?.value)}
+
+                                                    placeholder="Select Customer"
+                                                    className="text-sm"
+                                                    isSearchable={true}
+                                                    styles={{
+                                                        control: (base) => ({
+                                                            ...base,
+                                                            borderColor: "#374151",
+                                                            boxShadow: "none",
+                                                            "&:hover": { borderColor: "#3b82f6" },
+                                                        }),
+                                                    }}
+                                                />
+
+
                                                 <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                             </div>
                                             <Button
@@ -766,7 +803,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                         </button>
                                                         <input
                                                             type="number"
-                                                            value={newOrderForm?.redeemPoints||0}
+                                                            value={newOrderForm?.redeemPoints || 0}
                                                             onChange={(e) => handleRedeemPointsChange(parseInt(e.target.value) || 0)}
                                                             placeholder="Enter points"
                                                             className="flex-1 px-3 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
@@ -786,7 +823,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <div className="text-right">
                                                     <div className="text-sm text-gray-600">Discount Value</div>
                                                     <div className="font-bold text-green-600 text-lg">
-                                                        ₹{calculatePointsValue(newOrderForm?.redeemPoints||0).toFixed(2)}
+                                                        ₹{calculatePointsValue(newOrderForm?.redeemPoints || 0).toFixed(2)}
                                                     </div>
                                                 </div>
                                             </div>
@@ -817,15 +854,15 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <div className="text-xs text-orange-700 bg-orange-200 p-3 rounded">
                                                     <div className="flex justify-between mb-1">
                                                         <span>Redeeming:</span>
-                                                        <span className="font-medium">{newOrderForm?.redeemPoints?.toLocaleString()||0} points</span>
+                                                        <span className="font-medium">{newOrderForm?.redeemPoints?.toLocaleString() || 0} points</span>
                                                     </div>
                                                     <div className="flex justify-between mb-1">
                                                         <span>Discount:</span>
-                                                        <span className="font-medium">₹{calculatePointsValue(newOrderForm?.redeemPoints||0)?.toFixed(2)}</span>
+                                                        <span className="font-medium">₹{calculatePointsValue(newOrderForm?.redeemPoints || 0)?.toFixed(2)}</span>
                                                     </div>
                                                     <div className="flex justify-between font-bold">
                                                         <span>Payable After Discount:</span>
-                                                        <span>₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints ||0))?.toLocaleString()}</span>
+                                                        <span>₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0))?.toLocaleString()}</span>
                                                     </div>
                                                 </div>
                                             )}
@@ -900,7 +937,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                             <div className="flex justify-between text-sm">
                                                 <span>Balance Due:</span>
                                                 {/* <span className="font-medium text-red-600">₹{getBalanceAmount()?.toLocaleString()}</span> */}
-                                                <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0)) - getTotalPaidAmount())?.toLocaleString()}</span>
+                                                <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0)) - getTotalPaidAmount())?.toLocaleString()}</span>
 
                                             </div>
                                         )}
@@ -953,7 +990,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                     {newOrderForm?.redeemPoints > 0 && (
                                         <div className="flex justify-between text-sm">
                                             <span>Points Discount:</span>
-                                            <span className="font-medium text-green-600">-₹{calculatePointsValue(newOrderForm?.redeemPoints||0).toFixed(2)}</span>
+                                            <span className="font-medium text-green-600">-₹{calculatePointsValue(newOrderForm?.redeemPoints || 0).toFixed(2)}</span>
                                         </div>
                                     )}
 
@@ -963,13 +1000,13 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span>Balance:</span>
-                                        <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0)) - getTotalPaidAmount())?.toLocaleString()}</span>
+                                        <span className="font-medium text-red-600">₹{Math.max(0, (getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0)) - getTotalPaidAmount())?.toLocaleString()}</span>
                                     </div>
 
                                     <div className="border-t pt-3">
                                         <div className="flex justify-between font-medium">
                                             <span>Final Amount:</span>
-                                            <span className="text-lg text-blue-600">₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0))?.toLocaleString()}</span>
+                                            <span className="text-lg text-blue-600">₹{(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0))?.toLocaleString()}</span>
                                         </div>
                                     </div>
 
@@ -977,7 +1014,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         <div className="mt-4 pt-3 border-t">
                                             <div className="flex justify-between font-medium">
                                                 <span>Points to Earn:</span>
-                                                <span className="text-orange-600">{calculatePointsToEarn(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints||0))} pts</span>
+                                                <span className="text-orange-600">{calculatePointsToEarn(getTotalValue() - calculatePointsValue(newOrderForm?.redeemPoints || 0))} pts</span>
                                             </div>
                                             <div className="text-xs text-gray-500 mt-1">
                                                 ₹100 = 1 point • Points expire in 90 days

@@ -214,7 +214,7 @@ export default function CategoriesManagement() {
               Manage product categories with images
             </p>
           </div>
-          {permiton?.write && <Button
+          {/* {permiton?.write && <Button
             onClick={() => {
               resetForm();
               setShowAddModal(true);
@@ -223,7 +223,7 @@ export default function CategoriesManagement() {
           >
             <i className="ri-add-line"></i>
             <span>Add Category</span>
-          </Button>}
+          </Button>} */}
         </div>
 
         {/* Category Grid */}
@@ -254,11 +254,11 @@ export default function CategoriesManagement() {
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-4">
+                {/* <p className="text-sm text-gray-600 mb-4">
                   {category?.description?.length > 180
                     ? category?.description?.slice(0, 180) + "..."
                     : category?.description}
-                </p>
+                </p> */}
 
                 {/* Actions */}
                 <div className="flex space-x-2">
@@ -333,7 +333,7 @@ export default function CategoriesManagement() {
                   </div>
 
                   {/* Slug */}
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Slug
                     </label>
@@ -344,10 +344,10 @@ export default function CategoriesManagement() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
-                  </div>
+                  </div> */}
 
                   {/* Description */}
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Description
                     </label>
@@ -358,7 +358,7 @@ export default function CategoriesManagement() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       maxLength="500"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Image */}
                   <div>

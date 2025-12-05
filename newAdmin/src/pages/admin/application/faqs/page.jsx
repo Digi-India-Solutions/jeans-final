@@ -281,8 +281,8 @@ export default function FAQsManagement() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(faq.status)}`}>
-                          {faq.status ? 'Active' : 'Inactive'}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(faq.isActive)}`}>
+                          {faq.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">{faq.question}</h3>
