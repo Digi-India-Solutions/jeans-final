@@ -521,7 +521,7 @@ export default function OrdersManagement() {
         </head>
         <body>
           <div class="header">
-            <div class="company-name">Anibhavi Creation</div>
+            <div class="company-name">Anibhavi Creation Pvt. Ltd.</div>
             <div>Fashion & Apparel Store</div>
             <div class="invoice-title">ORDER INVOICE</div>
           </div>
@@ -1230,7 +1230,7 @@ export default function OrdersManagement() {
                           <div><span className="text-gray-500">Date:</span> {selectedOrder?.orderDate}</div>
                           <div><span className="text-gray-500">Type:</span> {selectedOrder?.orderType}</div>
                           <div><span className="text-gray-500">Payment Method:</span> {selectedOrder?.paymentMethod}</div>
-                          <div><span className="text-gray-500">Final Total:</span> ₹{selectedOrder?.total.toLocaleString()}</div>
+                         <div><span className="text-gray-500">Total Amount:</span> ₹{selectedOrder?.total.toLocaleString()}</div>
                           {selectedOrder?.orderNote && (
                             <div><span className="text-gray-500">Note:</span> {selectedOrder?.orderNote}</div>
                           )}

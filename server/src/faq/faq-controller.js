@@ -14,7 +14,7 @@ exports.createFaq = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.getAllFaqs = catchAsyncErrors(async (req, res, next) => {
-    const faqs = await Faq.find().sort({ createdAt: -1 });
+    const faqs = await Faq.find();
 
     res.status(200).json({ success: true, faqs });
 });
