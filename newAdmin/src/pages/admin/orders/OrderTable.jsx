@@ -337,7 +337,7 @@ function OrderTable({
                                 <td className="px-4 py-4 whitespace-nowrap w-1/5">
                                     <div className="space-y-0.5">
                                         <div className="text-sm font-medium text-gray-900">
-                                            ₹{order?.total?.toLocaleString()}
+                                            ₹{(Number(order?.subtotal))?.toLocaleString()}
                                         </div>
                                         <div className="text-sm text-green-600">
                                             Paid: ₹{order?.paidAmount?.toLocaleString()}
