@@ -27,8 +27,8 @@ function SubProductModel({
   const validateForm = useCallback(() => {
     const errors = {};
 
-    if (!formData.name?.trim()) {
-      errors.name = 'Name is required';
+    if (!formData.color?.trim()) {
+      errors.color = 'Color is required';
     }
 
     if (!formData.productId) {
@@ -62,7 +62,7 @@ function SubProductModel({
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [formData, uploadedFiles.length]);
+  }, [formData, uploadedFiles?.length]);
 
   console.log("DDDDDD=>", uploadedFiles)
 
@@ -188,7 +188,7 @@ function SubProductModel({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Basic Info */}
             <div className="space-y-4">
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Name <span className="text-red-500">*</span>
                 </label>
@@ -202,6 +202,20 @@ function SubProductModel({
                 />
                 {formErrors.name && (
                   <p className="text-red-500 text-xs mt-1">{formErrors?.name}</p>
+                )}
+              </div> */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Color
+                </label>
+                <input
+                  type="text"
+                  value={formData.color || ''}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${formErrors.color ? 'border-red-500' : 'border-gray-300'
+                    }`} />
+                {formErrors.color && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors?.color}</p>
                 )}
               </div>
 
@@ -292,14 +306,21 @@ function SubProductModel({
                     Pcs in Set <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={formData.pcsInSet || ''}
-                    onChange={(e) => setFormData({ ...formData, pcsInSet: e.target.value })}
+                    onChange={(e) => {
+                      // Allow ONLY digits 0–9
+                      const cleaned = e.target.value.replace(/[^0-9]/g, '');
+
+                      setFormData({
+                        ...formData,
+                        pcsInSet: cleaned
+                      });
+                    }}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${formErrors.pcsInSet ? 'border-red-500' : 'border-gray-300'
                       }`}
                     placeholder="How many pieces per set"
                     required
-                    min="1"
                   />
                   {formErrors.pcsInSet && (
                     <p className="text-red-500 text-xs mt-1">{formErrors.pcsInSet}</p>
@@ -313,9 +334,13 @@ function SubProductModel({
                     Lot Stock (pcs) <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={formData.lotStock || ''}
-                    onChange={(e) => setFormData({ ...formData, lotStock: e.target.value })}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/[^0-9]/g, '');
+
+                      setFormData({ ...formData, lotStock: cleaned })
+                    }}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${formErrors.lotStock ? 'border-red-500' : 'border-gray-300'
                       }`}
                     placeholder="Total pieces in stock"
@@ -337,6 +362,7 @@ function SubProductModel({
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50 ${formErrors.singlePicPrice ? 'border-red-500' : 'border-gray-300'
                       }`}
                     required
+                    disabled
                     min="0"
                     step="0.01"
                   />
@@ -346,7 +372,7 @@ function SubProductModel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Color
@@ -369,7 +395,7 @@ function SubProductModel({
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
+              </div> */}
 
               {formData.singlePicPrice && formData.pcsInSet && (
                 <div className="p-3 bg-green-50 rounded-lg">
@@ -611,7 +637,7 @@ function SubProductModel({
             </Button>
             <Button
               type="button"
-              onClick={() => setShowModal(false)}
+              onClick={() => { setUploadedFiles([]), setShowModal(false) }}
               className="flex-1 bg-gray-900 hover:bg-gray-400 text-gray-700"
             >
               Cancel

@@ -56,7 +56,7 @@ function CreateReturnModal({
             orderNumber: returnForm?.orderNumber,
             orderId: returnForm?.orderId,
             items: itemsToReturn.map((item) => ({
-                name: item?.name,
+                color: item?.color,
                 availableSizes: item?.availableSizes,
                 returnPcs: item?.returnPcs,
                 reason: item?.reason,
@@ -130,7 +130,7 @@ function CreateReturnModal({
 
             const returnCount = previewOrder
                 ?.flatMap((ch) => ch.items)
-                ?.filter((i) => i?.name === item?.name)
+                ?.filter((i) => i?.color === item?.color)
                 ?.reduce((sum, i) => sum + (i?.returnPcs || 0), 0);
             const remaining = Math.max(item?.deliveredPcs - returnCount, 0);
             const singlePicPrice = item.singlePicPrice
@@ -149,6 +149,14 @@ function CreateReturnModal({
             (parseInt(item?.returnPcs || 0) * parseInt(item?.singlePicPrice || item?.price || 0)),
         0
     );
+
+    const handleSelectAll = () => {
+        const allItems = mergedItems.map((item) => ({
+            ...item,
+            dispatchQty: item.remainingQty,
+        }));
+        setReturnForm((prev) => ({ ...prev, items: allItems }));
+    }
     console.log("totalRefund==>", returnForm)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -209,12 +217,18 @@ function CreateReturnModal({
                             {/* Editable Return Items */}
                             <div>
                                 <div className="flex justify-between items-center mb-3">
-                                    <h3 className="font-medium">Return Items</h3>
+                                    <div className="flex  gap-3">
+                                        <h3 className="font-medium">Return Items</h3>
+
+                                    </div>
+                                    {/* <Button onClick={handleSelectAll} >
+                                        All Quantity
+                                    </Button> */}
                                     <button
                                         type="button"
                                         onClick={() => {
                                             const newItem = {
-                                                name: "", deliveredPcs: 0, alreadyReturned: 0,
+                                                color: "", deliveredPcs: 0, alreadyReturned: 0,
                                                 returnPcs: 0, reason: "", refundAmount: 0,
                                             };
                                             setReturnForm({ ...returnForm, items: [...(returnForm.items || []), newItem], });
@@ -223,6 +237,7 @@ function CreateReturnModal({
                                     >
                                         + Add Item
                                     </button>
+
                                 </div>
 
                                 {returnForm?.items?.length > 0 ? (
@@ -249,8 +264,8 @@ function CreateReturnModal({
                                                         </label>
                                                         <input
                                                             type="text"
-                                                            value={item.name || ""}
-                                                            onChange={(e) => updateReturnItem(index, "name", e.target.value)}
+                                                            value={item.color || ""}
+                                                            onChange={(e) => updateReturnItem(index, "color", e.target.value)}
                                                             placeholder="Enter item name"
                                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                                         />
@@ -436,7 +451,7 @@ function CreateReturnModal({
                                                 <div className="grid grid-cols-6 gap-4 items-center">
                                                     {/* Item name */}
                                                     <div className="col-span-2">
-                                                        <div className="font-medium">Name: {item?.name}</div>
+                                                        <div className="font-medium">Name: {item?.color}</div>
                                                         {/* {item.availableSizes?.length > 0 && (
                                                         <div className="text-sm text-gray-500">
                                                             Sizes: {item.availableSizes.join(", ")}

@@ -469,7 +469,7 @@ export default function SubProductsManagement() {
               <div className="relative">
                 <img
                   src={item?.subProductImages && item?.subProductImages?.length > 0 ? item?.subProductImages[0] : 'https://readdy.ai/api/search-image?query=product%20set%20pieces%20fashion%20clean%20background&width=300&height=200&seq=placeholder&orientation=landscape'}
-                  alt={item?.name}
+                  alt={item?.color}
                   className="w-full h-48 object-cover"
                 />
                 <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item?.stock)}`}>
@@ -483,7 +483,7 @@ export default function SubProductsManagement() {
 
               <div className="p-4">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-gray-900">{item?.name}</h3>
+                  <h3 className="font-semibold text-gray-900">{item?.color}</h3>
                   <span className="text-xs text-gray-500">{item?.lotNumber}</span>
                 </div>
 

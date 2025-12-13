@@ -333,7 +333,7 @@ const adminOrderSchema = new Schema({
 
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: "SubProduct", required: true },
-        name: { type: String, required: true },
+        color: { type: String, required: true },
         quantity: { type: Number, required: true },
         singlePicPrice: { type: Number, required: true },
         pcsInSet: { type: Number, required: true },

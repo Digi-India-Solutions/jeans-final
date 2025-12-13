@@ -4,7 +4,7 @@ import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
 import Select from "react-select";
 
-function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowEditOrderModal, setNewOrderForm, newOrderForm }) {
+function EditOrderModel({ subProducts,fetchAllOrder, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowEditOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
     const [showUserModal, setShowUserModal] = useState(false)
@@ -248,11 +248,12 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
 
     const updateOrder = async (e) => {
         e.preventDefault();
+
         if (newOrderForm.items.length === 0) {
             alert('Please add at least one item to the order');
             return;
         }
-
+        setLoding(false);
         const subtotal = getTotalValue();
         const pointsRedemptionValue = calculatePointsValue(newOrderForm.redeemPoints);
         const finalTotal = subtotal - pointsRedemptionValue;
@@ -309,6 +310,7 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
             console.log('Error:', response?.message);
             return;
         }
+        fetchAllOrder()
         setOrders([newOrder]);
         setFilteredOrders([newOrder]);
 
@@ -331,7 +333,7 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
             pointsToEarn: 0
         });
         setShowEditOrderModal(false);
-        setLoding(false)
+        setLoding(false);
     };
 
 
@@ -644,11 +646,11 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
                                                 <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                                                     <img
                                                         src={product?.subProductImages[0] || ''}
-                                                        alt={item.name}
+                                                        alt={item.color}
                                                         className="w-12 h-12 object-cover rounded-lg"
                                                     />
                                                     <div className="flex-1">
-                                                        <div className="font-medium">{item?.name}</div>
+                                                        <div className="font-medium">{item?.color}</div>
                                                         <div className="text-sm text-gray-500">₹{item?.singlePicPrice} per piece Price <input
                                                             type="text"
                                                             pattern="[0-9]*"
@@ -910,10 +912,13 @@ function EditOrderModel({ subProducts, orders, setOrders, setFilteredOrders, fil
                                                 </div>
                                                 <div className="flex-1">
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         value={payment.amount}
-                                                        onChange={(e) => updatePaymentMethod(index, 'amount', e.target.value)}
-                                                        placeholder="Amount (₹)"
+                                                        onChange={(e) => {
+                                                            const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                                                            updatePaymentMethod(index, 'amount', cleaned);
+                                                        }}
+                                                         placeholder="Amount (₹)"
                                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                                         min="0"
                                                         step="0.01"

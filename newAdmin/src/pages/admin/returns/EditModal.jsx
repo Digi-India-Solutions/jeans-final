@@ -74,7 +74,7 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <div className="relative">
                                 <select
-                                    value={editForm.status}
+                                    value={editForm?.status}
                                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                                     className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                                 >
@@ -88,11 +88,18 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                                             <option value="Approved">Approved</option>
                                             <option value="Pending">Pending</option>
                                             <option value="Completed">Completed</option>
+                                            <option value="Dispatched">Dispatched</option>
                                         </>
                                     )}
 
                                     {/* Common for all types */}
-                                    <option value="Dispatched">Dispatched</option>
+                                    {editingItem.type === "return" &&
+                                        <>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Completed">Completed</option>
+                                        </>
+                                    }
                                 </select>
 
                                 {/* Dropdown icon */}
@@ -106,7 +113,7 @@ function EditModal({ setChallans, fetchChallan, challans, editingItem, setReturn
                                 {editForm.items.map((item, index) => (
                                     <> <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                                         <div>
-                                            <div className="font-medium">{item?.name}</div>
+                                            <div className="font-medium">{item?.color}</div>
                                             <div className="text-sm text-gray-500">Size: {item?.availableSizes?.map((item, ind) => <>{item} {ind !== item?.availableSizes?.length - 1 && ", "}</>)}</div>
                                         </div>
                                         <div className="flex items-center space-x-2">

@@ -32,11 +32,11 @@ function ShowProductPrintModal({ selectedForPrint, setShowPrintModal, generateEA
                                         <div className="flex items-center space-x-3">
                                             <img
                                                 src={item?.subProductImages && item.subProductImages?.length > 0 ? item.subProductImages[0] || item?.productId?.images[0] : item?.productId?.images[0] || ''}
-                                                alt={item?.name}
+                                                alt={item?.color}
                                                 className="w-12 h-12 object-cover rounded"
                                             />
                                             <div>
-                                                <h4 className="font-medium">{item?.name}</h4>
+                                                <h4 className="font-medium">{item?.color}</h4>
                                                 <p className="text-sm text-gray-500">{item?.barcode}</p>
                                             </div>
                                         </div>

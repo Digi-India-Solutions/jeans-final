@@ -3,11 +3,11 @@ import Button from '../../../components/base/Button';
 import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
 import Select from "react-select";
-function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
+function CreateOrderModal({ subProducts, orders, fetchAllOrder,setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
     const [showUserModal, setShowUserModal] = useState(false)
-
+    const [loding, setLoding] = useState(false)
 
     const removeItemFromOrder = (index) => {
         setNewOrderForm({
@@ -108,7 +108,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                 setNewOrderForm({ ...newOrderForm, items: updatedItems });
             } else {
                 // Add new item
-                const newItem = { productId: foundProduct._id, name: foundProduct.name, quantity: 1, singlePicPrice: foundProduct.singlePicPrice, pcsInSet: foundProduct?.pcsInSet };
+                const newItem = { productId: foundProduct._id, name: foundProduct.color, quantity: 1, singlePicPrice: foundProduct.singlePicPrice, pcsInSet: foundProduct?.pcsInSet };
                 setNewOrderForm({
                     ...newOrderForm, items: [...newOrderForm?.items, newItem]
                 });
@@ -146,7 +146,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                         // Add new item
                         const newItem = {
                             productId: foundProduct._id,
-                            name: foundProduct.name,
+                            color: foundProduct.color,
                             quantity: 1,
                             singlePicPrice: foundProduct.singlePicPrice,
                             pcsInSet: foundProduct?.pcsInSet
@@ -261,14 +261,14 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         });
     };
 
-
+    console.log("XXXXXXX:==>newOrderForm", newOrderForm)
     const createOrder = async (e) => {
         e.preventDefault();
         if (newOrderForm.items.length === 0) {
             alert('Please add at least one item to the order');
             return;
         }
-
+        setLoding(true);
         const subtotal = getTotalValue();
         const pointsRedemptionValue = calculatePointsValue(newOrderForm.redeemPoints);
         const finalTotal = subtotal - pointsRedemptionValue;
@@ -321,9 +321,12 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
         const response = await postData('api/order/create-order-by-admin', newOrder);
         console.log('Response:==>', response);
         if (!response.success) {
+            setLoding(false);
             console.log('Error:', response.message);
             return;
         }
+        fetchAllOrder();
+        setLoding(false);
         setOrders([newOrder, ...orders]);
         setFilteredOrders([newOrder, ...filteredOrders]);
 
@@ -346,6 +349,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
             pointsToEarn: 0
         });
         setShowCreateOrderModal(false);
+        setLoding(false);
     };
 
 
@@ -639,11 +643,11 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                                                     <img
                                                         src={product?.subProductImages[0] || ''}
-                                                        alt={item.name}
+                                                        alt={item.color}
                                                         className="w-12 h-12 object-cover rounded-lg"
                                                     />
                                                     <div className="flex-1">
-                                                        <div className="font-medium">{item?.name}</div>
+                                                        <div className="font-medium">{item?.color}</div>
                                                         <div className="text-sm text-gray-500">₹{item?.singlePicPrice} per piece Price <input
                                                             type="text"
                                                             pattern="[0-9]*"
@@ -905,9 +909,12 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                                 </div>
                                                 <div className="flex-1">
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         value={payment.amount}
-                                                        onChange={(e) => updatePaymentMethod(index, 'amount', e.target.value)}
+                                                        onChange={(e) => {
+                                                            const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                                                            updatePaymentMethod(index, 'amount', cleaned);
+                                                        }}
                                                         placeholder="Amount (₹)"
                                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                                         min="0"
@@ -962,7 +969,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
                                         Cancel
                                     </Button>
                                     <Button type="submit" className="flex-1 bg-blue-900 text-white hover:bg-blue-700" disabled={newOrderForm?.items?.length === 0}  >
-                                        Create Order
+                                        {loding ? 'Creating...' : 'Create Order'}
                                     </Button>
                                 </div>
                             </form>
@@ -1034,7 +1041,7 @@ function CreateOrderModal({ subProducts, orders, setOrders, setFilteredOrders, f
 
                                                 return (
                                                     <div key={index} className="text-xs bg-white p-2 rounded border">
-                                                        <div className="font-medium truncate">{item.name}</div>
+                                                        <div className="font-medium truncate">{item.color}</div>
                                                         <div className="text-gray-600">
                                                             {item.quantity} sets × {item.pcsInSet} pcs = {totalPcs} pieces
                                                         </div>

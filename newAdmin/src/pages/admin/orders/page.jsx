@@ -11,8 +11,10 @@ import FilteredOrdersCom from './FilteredOrdersCom';
 import CreateNotesModel from './CreateNotesModel';
 import Swal from "sweetalert2";
 import EditOrderModel from './EditOrderModel';
+import { useNavigate } from 'react-router-dom';
 
 export default function OrdersManagement() {
+  const navigate = useNavigate();
   const [editOrderNoteForm, setEditOrderNoteForm] = useState({ orderId: '', orderNote: '' })
   const [showEditOrderNoteModal, setShowEditOrderNoteModal] = useState(false)
   const [subProducts, setSubProducts] = useState([])
@@ -20,66 +22,7 @@ export default function OrdersManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      orderNumber: 'ORD-2024-001',
-      customer: {
-        name: 'Rajesh Kumar',
-        email: 'rajesh@example.com',
-        phone: '+91 98765 43210',
-        type: 'B2B',
-        deliveryAddress: '123 Business Street, Mumbai, Maharashtra - 400001'
-      },
-      items: [
-        { productId: 1, name: 'Premium Skinny Jeans Set', quantity: 2, singlePicPrice: 450, pcsInSet: 5 },
-        { productId: 2, name: 'Formal Cotton Shirt Set', quantity: 1, singlePicPrice: 320, pcsInSet: 3 }
-      ],
-      total: 3570, // (2*5*450) + (1*3*320)
-      status: 'Pending',
-      paymentType: 'Partial Payment',
-      paidAmount: 2000,
-      balanceAmount: 1570,
-      paymentMethod: 'UPI',
-      orderType: 'Online',
-      orderDate: '2024-01-15',
-      trackingId: '',
-      deliveryVendor: '',
-      statusHistory: [
-        { status: 'Pending', date: '2024-01-15', updatedBy: 'System' }
-      ]
-    },
-    {
-      id: 2,
-      orderNumber: 'ORD-2024-002',
-      customer: {
-        name: 'Fashion Store Pvt Ltd',
-        email: 'orders@fashionstore.com',
-        phone: '+91 87654 32109',
-        type: 'B2B',
-        deliveryAddress: '45 Fashion Hub, Delhi, India - 110001'
-      },
-      items: [
-        { productId: 4, name: 'Regular Fit Jeans Set', quantity: 10, singlePicPrice: 367, pcsInSet: 6 },
-        { productId: 3, name: 'Casual Denim Shirt Set', quantity: 5, singlePicPrice: 400, pcsInSet: 4 }
-      ],
-      total: 30020, // (10*6*367) + (5*4*400)
-      status: 'Shipped',
-      paymentType: 'Complete Payment',
-      paidAmount: 30020,
-      balanceAmount: 0,
-      paymentMethod: 'Bank Transfer',
-      orderType: 'Online',
-      orderDate: '2024-01-14',
-      trackingId: 'TRK123456789',
-      deliveryVendor: 'BlueDart',
-      statusHistory: [
-        { status: 'Pending', date: '2024-01-14', updatedBy: 'System' },
-        { status: 'Packed', date: '2024-01-15', updatedBy: 'Admin' },
-        { status: 'Shipped', date: '2024-01-16', updatedBy: 'Admin' }
-      ]
-    }
-  ]);
+  const [orders, setOrders] = useState([]);
 
   const [filteredOrders, setFilteredOrders] = useState(orders);
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -695,8 +638,6 @@ export default function OrdersManagement() {
     };
   };
 
-
-
   const fetchProductsWithPagination = async () => {
     try {
       const response = await getData(`api/subProduct/get-all-sub-products-with-pagination?page=${currentPageSubProduct}&limit=12&search=${productSearchQuery}`);
@@ -805,7 +746,7 @@ export default function OrdersManagement() {
       orderNote: order?.orderNote,
       items: order?.items.map((item) => ({
         productId: item?.productId?._id,
-        name: item?.name,
+        color: item?.color,
         quantity: item?.quantity,
         singlePicPrice: item?.singlePicPrice,
         pcsInSet: item?.pcsInSet,
@@ -911,6 +852,7 @@ export default function OrdersManagement() {
             setFilteredOrders={setFilteredOrders}
             filteredOrders={filteredOrders}
             setOrderToPrint={setOrderToPrint}
+            fetchAllOrder={fetchAllOrder}
           />
         )}
 
@@ -931,6 +873,7 @@ export default function OrdersManagement() {
             setFilteredOrders={setFilteredOrders}
             filteredOrders={filteredOrders}
             setOrderToPrint={setOrderToPrint}
+            fetchAllOrder={fetchAllOrder}
           />
         )}
 
@@ -1184,8 +1127,16 @@ export default function OrdersManagement() {
                       >
                         Edit Order
                       </Button>
-                    </div>}
 
+                    </div>}
+                    <Button
+                      onClick={() => {
+                        navigate(`/admin/returns`, { state: { order: selectedOrder, model: true } });
+                      }}
+                      className="bg-emerald-500 text-white hover:bg-emerald-600 text-xs px-2 py-1 rounded"
+                    >
+                      Create Challan
+                    </Button>
                     <Button
                       onClick={() => {
                         setOrderToPrint(selectedOrder);
@@ -1230,7 +1181,7 @@ export default function OrdersManagement() {
                           <div><span className="text-gray-500">Date:</span> {selectedOrder?.orderDate}</div>
                           <div><span className="text-gray-500">Type:</span> {selectedOrder?.orderType}</div>
                           <div><span className="text-gray-500">Payment Method:</span> {selectedOrder?.paymentMethod}</div>
-                         <div><span className="text-gray-500">Total Amount:</span> ₹{selectedOrder?.total.toLocaleString()}</div>
+                          <div><span className="text-gray-500">Total Amount:</span> ₹{selectedOrder?.total.toLocaleString()}</div>
                           {selectedOrder?.orderNote && (
                             <div><span className="text-gray-500">Note:</span> {selectedOrder?.orderNote}</div>
                           )}
@@ -1333,7 +1284,7 @@ export default function OrdersManagement() {
                                 className="w-16 h-16 object-cover rounded-lg"
                               />
                               <div className="flex-1">
-                                <div className="font-medium">{item.name}</div>
+                                <div className="font-medium">{item.color}</div>
                                 <div className="text-sm text-gray-600">
                                   Quantity: {item.quantity} sets × {item.pcsInSet} pcs = {totalPcs} pieces
                                 </div>

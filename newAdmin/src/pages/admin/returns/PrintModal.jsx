@@ -2,7 +2,7 @@ import React from 'react'
 import Button from '../../../components/base/Button';
 
 function PrintModal({ setShowPrintModal, setPrintingItem, printingItem, printDocument }) {
-    console.log("item?.size::=>", printingItem?.items?.availableSizes)
+    console.log("item?.size::=>", printingItem)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -71,12 +71,12 @@ function PrintModal({ setShowPrintModal, setPrintingItem, printingItem, printDoc
                                 <tbody>
                                     {printingItem.items.map((item, index) => (
                                         <tr key={index}>
-                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.color}</td>
                                             <td className="border border-gray-300 px-4 py-2">{item?.availableSizes.map((size) => size).join(', ')}</td>
                                             <td className="border border-gray-300 px-4 py-2 text-right">
-                                                {printingItem.type === 'challan' ? item.dispatchedQty : item.returnQty}
+                                                {printingItem.type === 'challan' ? item.dispatchedQty : item?.returnQty || item?.returnPcs}
                                             </td>
-                                            <td className="border border-gray-300 px-4 py-2 text-right">₹{printingItem.type === 'challan' ? item?.price || 0 : item?.refundAmount || 0}</td>
+                                            <td className="border border-gray-300 px-4 py-2 text-right">₹{printingItem.type === 'challan' ? item?.price || 0 : item?.singlePicPrice  || 0}</td>
                                             <td className="border border-gray-300 px-4 py-2 text-right">
                                                 ₹{printingItem.type === 'challan'
                                                     ? (item.dispatchedQty * item.price).toLocaleString()

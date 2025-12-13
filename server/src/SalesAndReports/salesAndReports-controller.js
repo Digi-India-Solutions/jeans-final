@@ -47,6 +47,7 @@ exports.getJeansShirtRevenueAndOrder = catchAsyncErrors(async (req, res, next) =
 
         const orders = await AdminOrder.find({
             status: { $ne: "Cancelled" },
+            recycleBin: { $ne: true },
             createdAt: { $gte: lastStartAdjusted, $lte: end },
         })
             .populate({
@@ -165,6 +166,7 @@ exports.getSalesData = catchAsyncErrors(async (req, res, next) => {
         // Fetch orders (both periods together)
         const orders = await AdminOrder.find({
             status: { $ne: "Cancelled" },
+            recycleBin: { $ne: true },
             createdAt: { $gte: lastStart, $lte: end },
         })
             .populate({
@@ -289,6 +291,7 @@ exports.getTopProducts = async (req, res, next) => {
         const orders = await AdminOrder.find({
             createdAt: { $gte: lastStart, $lte: end },
             status: { $ne: "Cancelled" },
+            recycleBin: { $ne: true },
         }).populate("items.productId");
 
         const productMap = {};
@@ -300,7 +303,7 @@ exports.getTopProducts = async (req, res, next) => {
 
             order.items.forEach(item => {
                 console.log("XXXXXXX:==>", item)
-                const name = item?.name || item?.productId?.name || "Unknown Product";
+                const name = item?.color || item?.productId?.name || "Unknown Product";
                 const lineSales = (item.singlePicPrice || 0) * (item?.pcsInSet || 1) * (item?.quantity || 0);
                 const pieces = (item?.pcsInSet || 1) * (item?.quantity || 0);
 

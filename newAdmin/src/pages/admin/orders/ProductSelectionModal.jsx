@@ -43,7 +43,7 @@ function ProductSelectionModal({
 
             const newItem = {
                 productId: selectedProductForOrder?._id,
-                name: selectedProductForOrder?.name,
+                color: selectedProductForOrder?.color,
                 quantity: productQuantity,
                 price: selectedProductForOrder?.price,
             };
@@ -86,7 +86,7 @@ function ProductSelectionModal({
                 // ✅ Add new item
                 const newItem = {
                     productId: product?._id,
-                    name: product?.name,
+                    color: product?.color,
                     quantity: newQuantity,
                     singlePicPrice: product?.singlePicPrice,
                     pcsInSet: product?.pcsInSet,
@@ -187,7 +187,7 @@ function ProductSelectionModal({
                                     <div className="relative">
                                         <img
                                             src={product?.subProductImages?.[0]}
-                                            alt={product?.name}
+                                            alt={product?.color}
                                             className="w-full h-32 object-cover rounded-lg mb-3"
                                         />
                                         {isSelected && (
@@ -199,7 +199,7 @@ function ProductSelectionModal({
 
                                     {/* Details */}
                                     <h3 className="font-medium text-gray-900 mb-1">
-                                        {product?.name}
+                                        {product?.color}
                                     </h3>
                                     <p className="text-sm text-blue-600 mb-2">
                                         Parent: {product?.productId?.productName}

@@ -404,6 +404,7 @@ function CreateChallanModal({
   challans,
   setChallans,
   fetchChallan,
+  orders,
 }) {
   const [previewOrder, setPreviewOrder] = useState([]); // previous challans of same order
 
@@ -472,7 +473,7 @@ function CreateChallanModal({
       orderId: challanForm?.orderId,
       orderNumber: challanForm?.orderNumber,
       items: itemsToDispatch.map((item) => ({
-        name: item?.name,
+        color: item?.color,
         availableSizes: item?.availableSizes,
         dispatchedQty: item?.dispatchQty,
         price: item?.singlePicPrice,
@@ -561,7 +562,36 @@ function CreateChallanModal({
     });
   }, [challanForm?.items, previewOrder]);
 
-  console.log("mergedItems", challanForm)
+
+  useEffect(() => {
+    if (orders && customers) {
+      const matchedCustomer = customers.find((c) =>
+        c?.email?.trim().toLowerCase() === orders?.customer?.email?.trim().toLowerCase()
+      );
+
+      console.log("mergedItems==XXX>", challanForm, customers, matchedCustomer)
+      handleOrderChange(orders?._id, "challan")
+      setSelectedCustomerOrders([orders]);
+      setChallanForm((prev) => ({
+        ...prev,
+        customerId: matchedCustomer?._id || "",
+        orderId: orders?._id || "",
+        orderNumber: orders?.orderNumber || "",
+        deliveryVendor: orders?.transportName || "BlueDart",
+        notes: orders?.orderNote || "",
+
+      }));
+    }
+  }, [orders, customers]);
+
+  const handleSelectAll = () => {
+    const allItems = mergedItems.map((item) => ({
+      ...item,
+      dispatchQty: item.remainingQty,
+    }));
+    setChallanForm((prev) => ({ ...prev, items: allItems }));
+  }
+  // console.log("mergedItems==XXX>", challanForm, customers)
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
@@ -626,10 +656,14 @@ function CreateChallanModal({
           {/* Order Items */}
           {mergedItems.length > 0 && (
             <div className="space-y-3">
-              <h3 className="font-medium text-gray-700">
-                Dispatch Quantities per Item
-              </h3>
-
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium text-gray-700">
+                  Dispatch Quantities per Item
+                </h3>
+                <Button onClick={handleSelectAll} >
+                  All QUANTITY
+                </Button>
+              </div>
               {mergedItems.map((item, index) => (
                 <div
                   key={index}
@@ -637,7 +671,7 @@ function CreateChallanModal({
                 >
                   <div className="grid grid-cols-5 gap-4 items-center">
                     <div className="col-span-2">
-                      <div className="font-medium text-gray-800">{item.name}</div>
+                      <div className="font-medium text-gray-800">{item?.color}</div>
                       <div className="text-xs text-gray-500">
                         Sizes: {item.availableSizes.join(", ")}
                       </div>
@@ -645,7 +679,7 @@ function CreateChallanModal({
 
                     <div className="text-center text-sm">
                       <div className="text-gray-500">Ordered Qty</div>
-                      <div className="font-semibold">{item.quantity}</div>
+                      <div className="font-semibold">{item?.quantity}</div>
                     </div>
 
                     <div className="text-center text-sm">
