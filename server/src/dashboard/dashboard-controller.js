@@ -476,7 +476,7 @@ exports.getRecentSalesData = catchAsyncErrors(async (req, res) => {
         orders.forEach((order, index) => {
             order.items.forEach(item => {
                 // console.log('DDD==>', item.name);
-                const productName = item?.name || item?.productId?.productId?.productName || "Unknown Product";
+                const productName = `${item?.productId?.productId?.productName} / ${item?.color}` || item?.productId?.productId?.productName || "Unknown Product";
                 const customerName = order?.customer?.userId?.name || "Unknown Customer";
 
                 const price = parseInt(item?.productId?.filnalLotPrice || 0);

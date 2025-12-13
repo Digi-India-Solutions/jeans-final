@@ -41,7 +41,7 @@
 const mongoose = require('mongoose');
 
 const subProductSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    // name: { type: String, required: true },
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', unique: false, required: true },
     description: { type: String, required: true },
     lotNumber: { type: String, required: true },

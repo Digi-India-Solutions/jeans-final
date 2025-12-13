@@ -17,7 +17,7 @@ const returnSchema = new Schema(
         items: [
             {
                 productId: { type: Schema.Types.ObjectId, ref: 'subProduct', required: false, default: null },
-                name: String,
+                color: String,
                 availableSizes: [String],
                 returnPcs: Number,
                 reason: String,

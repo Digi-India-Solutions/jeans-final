@@ -64,12 +64,11 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
     ...(permissions?.sales?.read ? [{ title: 'Sales & Reports', icon: 'ri-bar-chart-line', path: '/admin/sales', }] : []),
     ...(permissions?.returns?.read ? [{ title: 'Return & Challan', icon: 'ri-exchange-line', path: '/admin/returns', }] : []),
     ...(permissions?.userManagement?.read ? [{ title: 'User Management', icon: 'ri-user-settings-line', path: '/admin/users', }] : []),
-    ...(permissions?.recycledOrder?.read || user?.role === 'Super Admin' ? [{ title: 'Recycled Order', icon: 'ri-recycle-line', path: '/admin/recycledOrder', }] : []),
     ...(permissions?.admins?.read || user?.role === 'Super Admin' ? [{ title: 'Admin & Staff Roles', icon: 'ri-shield-user-line', path: '/admin/user-roles', }] : []),
-
     // ...(permissions?.marketing?.read ? [{ title: 'Marketing', icon: 'ri-megaphone-line', path: '/admin/marketing', }] : []),
     ...(permissions?.enquiries?.read ? [{ title: 'Enquiries', icon: 'ri-question-answer-line', path: '/admin/enquiries', }] : []),
     ...(permissions?.catalogueUpload?.read ? [{ title: 'Catalogue Upload', icon: 'ri-file-pdf-line', path: '/admin/catalogue', }] : []),
+     ...(permissions?.recycledOrder?.read || user?.role === 'Super Admin' ? [{ title: 'Recycled Order', icon: 'ri-recycle-line', path: '/admin/recycledOrder', }] : []),
   ];
   console.log("GGGGGGGG:=>", permissions)
   return (

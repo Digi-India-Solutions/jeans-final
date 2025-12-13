@@ -30,7 +30,7 @@ exports.createReturn = catchAsyncErrors(async (req, res, next) => {
             req.body.data.items.forEach(bodyItem => {
                 // find the matching item in the order by name or productId
                 const orderItem = ExistOrder.items.find(
-                    i => i.name === bodyItem.name // or i.productId.equals(bodyItem.productId)
+                    i => i.color === bodyItem.color // or i.productId.equals(bodyItem.productId)
                 );
 
                 if (orderItem) {

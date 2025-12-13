@@ -18,7 +18,7 @@ const challanSchema = new Schema(
                 // Product reference (optional)
                 productId: { type: Schema.Types.ObjectId, ref: 'subProduct' },
 
-                name: String, // "black"
+                color: String, // "black"
                 availableSizes: [String], // for size array ["32","34","36"]
 
                 dispatchedQty: Number, // match JSON key

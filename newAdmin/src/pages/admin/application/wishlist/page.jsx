@@ -8,96 +8,44 @@ export default function WishlistManagement() {
   const [customers, setCustomers] = useState([]);
 
   const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: 'Premium Skinny Jeans',
-      price: 2499,
-      image: 'https://readdy.ai/api/search-image?query=premium%20skinny%20jeans%20blue%20denim%20modern%20fashion%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish1&orientation=squarish',
-      stock: 150
-    },
-    {
-      id: 2,
-      name: 'Formal Cotton Shirt',
-      price: 1899,
-      image: 'https://readdy.ai/api/search-image?query=formal%20cotton%20shirt%20white%20business%20professional%20clean%20background%20product%20photography%20folded%20shirt&width=300&height=300&seq=wish2&orientation=squarish',
-      stock: 200
-    },
-    {
-      id: 3,
-      name: 'Casual Denim Shirt',
-      price: 1599,
-      image: 'https://readdy.ai/api/search-image?query=casual%20denim%20shirt%20blue%20fashion%20modern%20clean%20background%20professional%20product%20photography%20hanging%20shirt&width=300&height=300&seq=wish3&orientation=squarish',
-      stock: 80
-    },
-    {
-      id: 4,
-      name: 'Regular Fit Jeans',
-      price: 2199,
-      image: 'https://readdy.ai/api/search-image?query=regular%20fit%20jeans%20dark%20blue%20denim%20classic%20fashion%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish4&orientation=squarish',
-      stock: 0
-    },
-    {
-      id: 5,
-      name: 'Premium Polo Shirt',
-      price: 1799,
-      image: 'https://readdy.ai/api/search-image?query=premium%20polo%20shirt%20navy%20blue%20fashion%20modern%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish5&orientation=squarish',
-      stock: 120
-    }
+    // {
+    //   id: 1,
+    //   name: 'Premium Skinny Jeans',
+    //   price: 2499,
+    //   image: 'https://readdy.ai/api/search-image?query=premium%20skinny%20jeans%20blue%20denim%20modern%20fashion%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish1&orientation=squarish',
+    //   stock: 150
+    // },
+    // {
+    //   id: 2,
+    //   name: 'Formal Cotton Shirt',
+    //   price: 1899,
+    //   image: 'https://readdy.ai/api/search-image?query=formal%20cotton%20shirt%20white%20business%20professional%20clean%20background%20product%20photography%20folded%20shirt&width=300&height=300&seq=wish2&orientation=squarish',
+    //   stock: 200
+    // },
+    // {
+    //   id: 3,
+    //   name: 'Casual Denim Shirt',
+    //   price: 1599,
+    //   image: 'https://readdy.ai/api/search-image?query=casual%20denim%20shirt%20blue%20fashion%20modern%20clean%20background%20professional%20product%20photography%20hanging%20shirt&width=300&height=300&seq=wish3&orientation=squarish',
+    //   stock: 80
+    // },
+    // {
+    //   id: 4,
+    //   name: 'Regular Fit Jeans',
+    //   price: 2199,
+    //   image: 'https://readdy.ai/api/search-image?query=regular%20fit%20jeans%20dark%20blue%20denim%20classic%20fashion%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish4&orientation=squarish',
+    //   stock: 0
+    // },
+    // {
+    //   id: 5,
+    //   name: 'Premium Polo Shirt',
+    //   price: 1799,
+    //   image: 'https://readdy.ai/api/search-image?query=premium%20polo%20shirt%20navy%20blue%20fashion%20modern%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish5&orientation=squarish',
+    //   stock: 120
+    // }
   ]);
 
-  const [wishlists, setWishlists] = useState([
-    {
-      id: 1,
-      customer: {
-        name: 'Rajesh Kumar',
-        email: 'rajesh@example.com',
-        type: 'B2B'
-      },
-      items: [
-        {
-          id: 101,
-          productId: 1,
-          name: 'Premium Skinny Jeans',
-          price: 2499,
-          image: 'https://readdy.ai/api/search-image?query=premium%20skinny%20jeans%20blue%20denim%20modern%20fashion%20clean%20background%20professional%20product%20photography&width=300&height=300&seq=wish1&orientation=squarish',
-          addedDate: '2024-01-15',
-          quantity: 2
-        },
-        {
-          id: 102,
-          productId: 2,
-          name: 'Formal Cotton Shirt',
-          price: 1899,
-          image: 'https://readdy.ai/api/search-image?query=formal%20cotton%20shirt%20white%20business%20professional%20clean%20background%20product%20photography%20folded%20shirt&width=300&height=300&seq=wish2&orientation=squarish',
-          addedDate: '2024-01-14',
-          quantity: 1
-        }
-      ],
-      totalValue: 6897,
-      lastUpdated: '2024-01-15'
-    },
-    {
-      id: 2,
-      customer: {
-        name: 'Priya Sharma',
-        email: 'priya.sharma@email.com',
-        type: 'Retail'
-      },
-      items: [
-        {
-          id: 103,
-          productId: 3,
-          name: 'Casual Denim Shirt',
-          price: 1599,
-          image: 'https://readdy.ai/api/search-image?query=casual%20denim%20shirt%20blue%20fashion%20modern%20clean%20background%20professional%20product%20photography%20hanging%20shirt&width=300&height=300&seq=wish3&orientation=squarish',
-          addedDate: '2024-01-13',
-          quantity: 1
-        }
-      ],
-      totalValue: 1599,
-      lastUpdated: '2024-01-13'
-    }
-  ]);
+  const [wishlists, setWishlists] = useState([]);
 
   const [selectedWishlist, setSelectedWishlist] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -342,7 +290,7 @@ export default function WishlistManagement() {
     );
   });
 
-  console.log("GGGGGGG:==>", selectedWishlist)
+  console.log("GGGGGGG:==>", products)
   return (
     <AdminLayout>
       <div className="p-6">
@@ -431,7 +379,7 @@ export default function WishlistManagement() {
                 </div>
 
                 <div className="space-y-2 mb-4">
-                  {wishlist.items.map((item, index) => (
+                  {wishlist?.items?.length > 0 && wishlist?.items?.map((item, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <img
                         src={item?.productId?.subProductImages[0]}
@@ -439,7 +387,7 @@ export default function WishlistManagement() {
                         className="w-10 h-10 object-cover rounded"
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item?.productId?.name}</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{`${item?.productId?.color} / ${item?.productId?.lotNumber}`}</p>
                         <p className="text-xs text-gray-500">₹{item?.productId?.singlePicPrice}</p>
                       </div>
                     </div>
@@ -574,7 +522,7 @@ export default function WishlistManagement() {
                                   <option value="">Select Product</option>
                                   {products.map(product => (
                                     <option key={product?._id} value={product?._id}>
-                                      {product?.name || product?.productId?.productName} - ₹{product?.singlePicPrice || product?.price} (Stock: {product?.stock})
+                                      {`${product?.color} / ${product?.productId?.productName}` || product?.productId?.productName} - ₹{product?.singlePicPrice || product?.price} (Stock: {product?.stock})
                                     </option>
                                   ))}
                                 </select>
@@ -853,7 +801,7 @@ export default function WishlistManagement() {
                       {/* PRODUCT DETAILS */}
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">
-                          {item?.productId?.productName}
+                          {`${item?.productId?.color} / ${item?.productId?.lotNumber}` || item?.productId?.productName}
                         </h4>
 
                         <p className="text-sm text-gray-600">Lot: {item?.productId?.lotNumber}</p>

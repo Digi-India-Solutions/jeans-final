@@ -20,7 +20,7 @@ export default function UsersManagement() {
   const [filters, setFilters] = useState({ status: '', verified: '', search: '' });
   const [filterDays, setFilterDays] = useState('');
   const [formErrors, setFormErrors] = useState({});
-
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', status: true, password: '', street: '', city: '', state: '', zipCode: '', country: '', shopname: '' });
 
   const [otpData, setOtpData] = useState({ email: '', otp: '', countdown: 0 });
@@ -132,7 +132,7 @@ export default function UsersManagement() {
 
   const sendOTP = async () => {
     if (!validateForm()) return;
-
+    setLoading(true);
     try {
       if (editingUser) {
         const updateData = {
@@ -157,9 +157,11 @@ export default function UsersManagement() {
 
         if (response?.status) {
           toast.success("User updated successfully");
+          setLoading(false);
           setShowModal(false);
           fetchUsers();
         } else {
+          setLoading(false);
           toast.error(response.message || "Failed to update user");
         }
       } else {
@@ -173,7 +175,7 @@ export default function UsersManagement() {
             otp: '',
             countdown: 60
           });
-
+          setLoading(false);
           // Start countdown
           const timer = setInterval(() => {
             setOtpData(prev => {
@@ -188,13 +190,16 @@ export default function UsersManagement() {
           setShowModal(false);
           setShowOTPModal(true);
           toast.success("OTP sent successfully");
+          setLoading(false);
         } else {
           toast.error(response.message || "Failed to send OTP");
+          setLoading(false);
         }
       }
-
+      setLoading(false);
     } catch (error) {
       toast.error("Error sending OTP");
+      setLoading(false);
       console.error("Send OTP error:", error);
     }
   };
@@ -681,7 +686,7 @@ export default function UsersManagement() {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
@@ -709,17 +714,38 @@ export default function UsersManagement() {
                   </div>
 
                   {!editingUser && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Password *
+                      </label>
+
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                         placeholder="Enter password for new user"
                       />
-                      {formErrors.password && <p className="text-red-500 text-xs mt-1">{formErrors.password}</p>}
+
+                      {/* Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-10 transform -translate-y-1/2 text-gray-500"
+                      >
+                        {showPassword ? (
+                          <i className="ri-eye-off-line text-xl"></i>
+                        ) : (
+                          <i className="ri-eye-line text-xl"></i>
+                        )}
+                      </button>
+
+                      {formErrors.password && (
+                        <p className="text-red-500 text-xs mt-1">{formErrors.password}</p>
+                      )}
                     </div>
                   )}
 
@@ -782,7 +808,7 @@ export default function UsersManagement() {
                     />
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                     <input
                       type="text"
@@ -790,7 +816,7 @@ export default function UsersManagement() {
                       onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="flex space-x-3 mt-6">
@@ -804,7 +830,7 @@ export default function UsersManagement() {
                     onClick={sendOTP}
                     className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                   >
-                    {editingUser ? 'Send OTP' : 'Create User'}
+                    {editingUser ? loading ? 'Updating...' : 'Update User' : loading ? 'Creating...' : 'Create User'}
                   </Button>
                 </div>
               </div>
@@ -879,7 +905,7 @@ export default function UsersManagement() {
                     className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                     disabled={otpData.otp.length !== 6}
                   >
-                    Verify & {editingUser ? 'Update' : 'Create'}
+                    Verify & {editingUser ? loading ? 'Updating...' : 'Update' : loading ? 'Creating...' : 'Create'}
                   </Button>
                 </div>
               </div>

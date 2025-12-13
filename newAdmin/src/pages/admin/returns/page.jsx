@@ -12,9 +12,13 @@ import PrintModal from './PrintModal';
 import EditModal from './EditModal';
 import AdvancedFilters from './AdvancedFilters';
 import { getData, postData } from '../../../services/FetchNodeServices';
+import { useLocation } from 'react-router-dom';
 
 export default function ReturnsAndChallan() {
   // Mock sub-products stock for returns processing
+  const location = useLocation();
+  console.log("location:==>", location?.state?.order)
+
   const [subProductsStock, setSubProductsStock] = useState([
     { id: 1, name: 'Premium Skinny Jeans Set', stock: 750 }, // in pcs
     { id: 2, name: 'Formal Cotton Shirt Set', stock: 600 }, // in pcs
@@ -30,59 +34,9 @@ export default function ReturnsAndChallan() {
     { id: 4, name: 'Amit Patel', email: 'amit.patel@email.com', type: 'Retail' }
   ]);
 
-  // const [customerOrderss] = useState({
-  //   1: [
-  //     {
-  //       id: 'ORD-2024-001',
-  //       items: [
-  //         { id: 1, name: 'Premium Skinny Jeans Set', size: '32', orderedQty: 5, dispatchedQty: 5, pendingQty: 0, price: 450, pcsInSet: 5 },
-  //         { id: 2, name: 'Formal Cotton Shirt Set', size: 'L', orderedQty: 3, dispatchedQty: 3, pendingQty: 0, price: 320, pcsInSet: 3 }
-  //       ],
-  //       total: 18570,
-  //       date: '2024-01-15'
-  //     }
-  //   ],
-  //   2: [
-  //     {
-  //       id: 'ORD-2024-002',
-  //       items: [
-  //         { id: 4, name: 'Regular Fit Jeans Set', size: '30', orderedQty: 50, dispatchedQty: 30, pendingQty: 20, price: 367, pcsInSet: 6 },
-  //         { id: 5, name: 'Formal Dress Shirt Set', size: 'L', orderedQty: 25, dispatchedQty: 20, pendingQty: 5, price: 383, pcsInSet: 6 }
-  //       ],
-  //       total: 154725,
-  //       date: '2024-01-12'
-  //     }
-  //   ]
-  // });
 
-  const [challans, setChallans] = useState([
-    {
-      id: 1,
-      challanNumber: 'CHN-2024-001',
-      customer: 'Fashion Store Pvt Ltd',
-      orderNumber: 'ORD-2024-002',
-      items: [
-        { name: 'Regular Fit Jeans Set', size: '30', dispatchedQty: 30, price: 367, pcsInSet: 6 }
-      ],
-      totalValue: 66060, // 30 sets * 6 pcs * 367 price
-      date: '2024-01-13',
-      status: 'Dispatched',
-      vendor: 'BlueDart'
-    },
-    {
-      id: 2,
-      challanNumber: 'CHN-2024-002',
-      customer: 'Rajesh Kumar',
-      orderNumber: 'ORD-2024-001',
-      items: [
-        { name: 'Premium Skinny Jeans Set', size: '32', dispatchedQty: 5, price: 450, pcsInSet: 5 }
-      ],
-      totalValue: 11250, // 5 sets * 5 pcs * 450 price
-      date: '2024-01-14',
-      status: 'Pending',
-      vendor: 'Delhivery'
-    }
-  ]);
+
+  const [challans, setChallans] = useState([]);
 
   const [returns, setReturns] = useState([]);
 
@@ -104,7 +58,7 @@ export default function ReturnsAndChallan() {
   const [showReports, setShowReports] = useState(false);
   const [customers, setCustomers] = useState([customerss])
   const [customerOrders, setCustomerOrders] = useState([])
-  const [showCreateChallanModal, setShowCreateChallanModal] = useState(false);
+  const [showCreateChallanModal, setShowCreateChallanModal] = useState(location.state?.model === true ? true : false);
   const [showCreateReturnModal, setShowCreateReturnModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -201,6 +155,7 @@ export default function ReturnsAndChallan() {
 
   // CRUD operations with stock management
   const handleEdit = (item, type) => {
+    console.log("item==>", item)
     setEditingItem({ ...item, type });
     setEditForm({ _id: item?._id, items: item.items, status: item.status, checkStatus: item.status, reason: item.items[0]?.reason || '', notes: item?.notes || '' });
     setShowEditModal(true);
@@ -269,12 +224,12 @@ export default function ReturnsAndChallan() {
 
   const handleOrderChange = (orderId, formType) => {
     const order = selectedCustomerOrders.find(o => o._id === orderId);
-
+    console.log("ZZZZZZZZZ==>", selectedCustomerOrders)
     if (order) {
       if (formType === 'challan') {
 
-        // console.log("ZZZZZZZZZ==>", order?.items)
-        const challanItems = order?.items?.filter(item => item?.quantity > 0).map(item => ({ ...item, dispatchQty: 0 }));
+        console.log("ZZZZZZZZZ==>", order?.items)
+        const challanItems = order?.items?.filter(item => item?.quantity > 0).map(item => ({ ...item, color: item?.color, dispatchQty: 0 }));
         setChallanForm({ ...challanForm, orderId, orderNumber: order?.orderNumber, items: challanItems });
 
       } else {
@@ -382,6 +337,8 @@ export default function ReturnsAndChallan() {
   useEffect(() => {
     fetchRoles()
   }, [user?.role])
+
+
 
   return (
     <AdminLayout>
@@ -497,6 +454,7 @@ export default function ReturnsAndChallan() {
             challans={challans}
             setChallans={setChallans}
             fetchChallan={fetchChallan}
+            orders={location?.state?.order}
           />
         )}
 
@@ -544,6 +502,6 @@ export default function ReturnsAndChallan() {
             setPrintingItem={setPrintingItem}
           />)}
       </div>
-    </AdminLayout>
+    </AdminLayout >
   );
 }

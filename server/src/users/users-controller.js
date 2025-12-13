@@ -106,7 +106,7 @@ exports.userLogin = catchAsyncErrors(async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ email: email?.toLowerCase() });
         if (!user) {
             return res.status(200).json({ status: false, message: "User Not Found" });
         }
@@ -139,7 +139,7 @@ exports.sendResetPasswordEmail = catchAsyncErrors(async (req, res, next) => {
         }
         console.log("Email:", email);
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email?.toLowerCase() });
 
         if (!user) {
             return res.status(401).json({ status: false, message: "User not found" });
@@ -238,7 +238,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
 
         const rewardPoint = await RewardPoints.findOne({ userId: user._id });
         if (rewardPoint) {
-            await RewardPoints.deleteOne();
+            await RewardPoints.findByIdAndDelete(rewardPoint?._id).exec();
         }
 
         await user.deleteOne();
@@ -271,7 +271,7 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
 
         // Prepare updated data
         const updateData = {
-            name, email, phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, }, fcmToken
+            name, email: emailtoLowerCase(), phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, }, fcmToken
         };
 
         // Update and return new document
@@ -320,10 +320,10 @@ exports.changePassword = catchAsyncErrors(async (req, res, next) => {
 exports.updateUser = catchAsyncErrors(async (req, res, next) => {
     try {
         const userId = req.params.id;
-        const { name, email, street, city, state, zipCode, country, phone, shopname, fcmToken } = req.body
+        const { name, email, street, city, state, zipCode, isActive, country, phone, shopname, fcmToken } = req.body
 
 
-        const updatedUser = await User.findByIdAndUpdate(userId, { name, email, phone, shopname, address: { street, city, state, zipCode, country, }, fcmToken });
+        const updatedUser = await User.findByIdAndUpdate(userId, { name, isActive, email: email.toLowerCase(), phone, shopname, address: { street, city, state, zipCode, country, }, fcmToken });
 
         if (!updatedUser) {
             return next(new ErrorHandler("User Not Found", 404));
