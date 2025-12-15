@@ -271,7 +271,7 @@ exports.updateUserWithPhoto = catchAsyncErrors(async (req, res, next) => {
 
         // Prepare updated data
         const updateData = {
-            name, email: emailtoLowerCase(), phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, }, fcmToken
+            name, email: email.toLowerCase(), phone, shopname, photo: imageUrl, address: { street, city, state, zipCode, country, }, fcmToken
         };
 
         // Update and return new document
