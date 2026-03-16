@@ -760,6 +760,8 @@ export default function OrdersManagement() {
 
   }
 
+  console.log("selectedOrder=>>>", selectedOrder,)
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -1190,6 +1192,14 @@ export default function OrdersManagement() {
                           )}
                         </div>
                       </div>
+
+                      {selectedOrder?.createdBy && <div>
+                        <h3 className="font-medium mb-3">Order Created By</h3>
+                        <div className="space-y-2 text-sm">
+                          <div><span className="text-gray-500">Name:</span> {selectedOrder?.createdBy?.name}</div>
+                          <div><span className="text-gray-500">Email:</span> {selectedOrder?.createdBy?.email}</div>
+                        </div>
+                      </div>}
                     </div>
 
                     {/* Enhanced Payment Information */}

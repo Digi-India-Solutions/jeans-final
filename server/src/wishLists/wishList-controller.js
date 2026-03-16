@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
 const sendResponse = require("../../middleware/response");
 const ErrorHandler = require("../../utils/ErrorHandler");
@@ -122,7 +123,21 @@ exports.createWishList = catchAsyncErrors(async (req, res, next) => {
         const { productId, userId, quantity, status } = req.body;
         console.log("BODY:=>", req.body)
         if (!productId || !userId) {
-            return next(new ErrorHandler("Product ID, User ID & Price are required", 400));
+            return next(
+                new ErrorHandler("Product ID and User ID are required", 400)
+            );
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return next(
+                new ErrorHandler("Product ID is not a valid ObjectId", 400)
+            );
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return next(
+                new ErrorHandler("User ID is not a valid ObjectId", 400)
+            );
         }
 
         let wishList = await WishList.findOne({ userId });

@@ -4,7 +4,7 @@ import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
 import Select from "react-select";
 
-function EditOrderModel({ subProducts,fetchAllOrder, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowEditOrderModal, setNewOrderForm, newOrderForm }) {
+function EditOrderModel({ subProducts, fetchAllOrder, orders, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowEditOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
     const [showUserModal, setShowUserModal] = useState(false)
@@ -276,6 +276,7 @@ function EditOrderModel({ subProducts,fetchAllOrder, orders, setOrders, setFilte
             },
             items: newOrderForm.items.map(item => ({
                 ...item,
+                productId: item.productId,
                 // Add product images and selected sizes for display
                 images: [subProducts.find(p => p.id === item.productId)?.image || ''],
                 selectedSizes: subProducts.find(p => p.id === item.productId)?.sizes || []
@@ -304,6 +305,7 @@ function EditOrderModel({ subProducts,fetchAllOrder, orders, setOrders, setFilte
         };
         setLoding(true)
         // alert(JSON.stringify(newOrder))
+        // console.log("newOrder==>", newOrder, newOrderForm?._id);
         const response = await postData(`api/order/update-order-by-admin/${newOrderForm?._id}`, newOrder);
         if (!response?.success) {
             setLoding(false)
@@ -918,7 +920,7 @@ function EditOrderModel({ subProducts,fetchAllOrder, orders, setOrders, setFilte
                                                             const cleaned = e.target.value.replace(/[^0-9]/g, '');
                                                             updatePaymentMethod(index, 'amount', cleaned);
                                                         }}
-                                                         placeholder="Amount (₹)"
+                                                        placeholder="Amount (₹)"
                                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                                         min="0"
                                                         step="0.01"

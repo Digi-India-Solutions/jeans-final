@@ -352,6 +352,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             status = "Pending",
             paymentType,
             paidAmount = 0,
+            createdBy,
             balanceAmount = 0,
             payments = [],
             paymentMethod,
@@ -432,8 +433,10 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
             status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
             orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
-            transportName, orderNote
+            transportName, orderNote, createdBy: req.body.createdBy ? req.body.createdBy : customer?.userId
         });
+        console.log("createdBycreatedBy=> D", newOrder,)
+        console.log("createdBycreatedBy=> D", req.body.createdBy)
         if (newOrder) {
             for (const item of items) {
                 const product = await subProductsModel?.findById(item.productId);
@@ -486,6 +489,7 @@ exports.createOrderByclient = catchAsyncErrors(async (req, res, next) => {
             pointsEarnedValue = 0,
             orderNote,
             transportName,
+            createdBy,
         } = req.body;
 
         // ✅ Validate required fields
@@ -554,7 +558,7 @@ exports.createOrderByclient = catchAsyncErrors(async (req, res, next) => {
             orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
             status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
             orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
-            transportName, orderNote
+            transportName, orderNote, createdBy: createdBy || customer?.userId
         });
 
         if (newOrder) {
@@ -681,7 +685,7 @@ exports.getAllOrdersByAdminWithPagination = catchAsyncErrors(async (req, res, ne
 
         // ✅ Fetch orders
         const [orders, totalOrders] = await Promise.all([
-            AdminOrder.find({ recycleBin: false, ...query }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId"),
+            AdminOrder.find({ recycleBin: false, ...query }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("items.productId").populate("items.productId.productId").populate("customer.userId").populate("createdBy"),
             AdminOrder.countDocuments({ recycleBin: false, ...query })
         ]);
 
