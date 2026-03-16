@@ -250,6 +250,9 @@ const { Schema } = mongoose;
 
 /* ------------------------- User Order Schema ------------------------- */
 const orderSchema = new Schema({
+    createdBy: {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "SuperAdmin", default: null },
+    },
     orderUniqueId: { type: String, trim: true, default: "" },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
@@ -322,6 +325,7 @@ const Order = mongoose.model('Order', orderSchema);
 
 /* ------------------------- Admin Order Schema ------------------------- */
 const adminOrderSchema = new Schema({
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "SuperAdmin", default: null },
     orderNumber: { type: String, required: true, unique: true },
     customer: {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -380,7 +384,7 @@ const adminOrderSchema = new Schema({
     pointsEarned: { type: Number, default: 0 },
     pointsEarnedValue: { type: Number, default: 0 },
     recycleBin: { type: Boolean, default: false },
-   
+
     statusHistory: [{
         status: { type: String, required: true },
         date: { type: String, required: true }, // format: YYYY-MM-DD

@@ -3,12 +3,12 @@ import Button from '../../../components/base/Button';
 import { getData, postData } from '../../../services/FetchNodeServices';
 import CreateUserModel from './CreateUserModels.jsx';
 import Select from "react-select";
-function CreateOrderModal({ subProducts, orders, fetchAllOrder,setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
+function CreateOrderModal({ subProducts, orders, fetchAllOrder, setOrders, setFilteredOrders, filteredOrders, setOrderToPrint, openProductSelection, setShowPrintOrderModal, setShowProductSelectionModal, calculatePointsValue, calculatePointsToEarn, getTotalPaidAmount, setShowCreateOrderModal, setNewOrderForm, newOrderForm }) {
     const [customers, setCustomers] = useState(null);
     const [qrScanInput, setQrScanInput] = useState('');
     const [showUserModal, setShowUserModal] = useState(false)
     const [loding, setLoding] = useState(false)
-
+    const AdminUser = JSON.parse(sessionStorage.getItem("JeansUser"))
     const removeItemFromOrder = (index) => {
         setNewOrderForm({
             ...newOrderForm,
@@ -261,7 +261,7 @@ function CreateOrderModal({ subProducts, orders, fetchAllOrder,setOrders, setFil
         });
     };
 
-    console.log("XXXXXXX:==>newOrderForm", newOrderForm)
+    console.log("XXXXXXX:==>newOrderForm=>", AdminUser, newOrderForm)
     const createOrder = async (e) => {
         e.preventDefault();
         if (newOrderForm.items.length === 0) {
@@ -280,6 +280,7 @@ function CreateOrderModal({ subProducts, orders, fetchAllOrder,setOrders, setFil
 
         const newOrder = {
             id: Date.now(),
+            createdBy: AdminUser?.id,
             // orderNumber: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
             customer: {
                 userId: newOrderForm.customerId,
@@ -318,6 +319,7 @@ function CreateOrderModal({ subProducts, orders, fetchAllOrder,setOrders, setFil
             ]
         };
         // alert(JSON.stringify(newOrder))
+        console.log("S::=>newOrder", newOrder)
         const response = await postData('api/order/create-order-by-admin', newOrder);
         console.log('Response:==>', response);
         if (!response.success) {
