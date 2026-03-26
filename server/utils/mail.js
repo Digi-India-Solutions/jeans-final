@@ -65,7 +65,7 @@ exports.sendResetPasswordSuperAdmin = async (data) => {
                         <!-- Logo -->
                         <tr>
                             <td align="center" style="padding-bottom:20px;">
-                                <img src="https://api.sddipl.com/uploads/logo/logowithText.png" 
+                                <img src="https://api.anibhavicreations.com/uploads/logo/logowithText.png" 
                                      alt="Logo" width="180" 
                                      style="display:block; margin:0 auto;" />
                             </td>
@@ -213,7 +213,7 @@ exports.sendOtpForUserSignup = async (data) => {
     <div style="margin: 0 auto">
         <div class="container">
             <div class="logo">
-                <img src="https://api.sddipl.com/uploads/logo/logowithText.png"  style="width: 180px;"
+                <img src="https://api.anibhavicreations.com/uploads/logo/logowithText.png"  style="width: 180px;"
                     alt="Anibhavi Creation">
             </div>
             <div class="title">Verify your Email</div>
