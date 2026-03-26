@@ -13,6 +13,8 @@ const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder
 const { Order } = require("../orders/orders-model");
 const { AdminOrder } = require("../orders/orders-model");
 const dayjs = require("dayjs");
+const pLimit = require('p-limit'); // npm i p-limit@3
+
 const { sendOrderNotificationByAdminOnWhatsapp, sendWhatsAppByUserForRequastActiveAccount, sendWhatsAppByUserForRequastDeactiveAccount, sendWhatsAppByAdminForRequastActiveAccount } = require("../../utils/whatsAppCampaigns");
 
 exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
@@ -599,4 +601,144 @@ exports.bulkNotification = catchAsyncErrors(async (req, res, next) => {
         console.error("bulkOrderNotification Error:", error);
         return next(new ErrorHandler(error.message, 500));
     }
+});
+
+
+
+exports.bulkCreateUsers = catchAsyncErrors(async (req, res, next) => {
+    const { users } = req.body;
+
+    if (!Array.isArray(users) || users.length === 0) {
+        return res.status(400).json({ success: false, message: "No users provided" });
+    }
+
+    // ── 1. Fast field validation (no DB, no hashing yet) ──────────────────────
+    const valid = [];
+    const invalid = [];
+
+    for (let i = 0; i < users.length; i++) {
+        const u = users[i];
+        const rowErrors = [];
+
+        if (!u.name?.trim()) rowErrors.push('Name required');
+        if (!u.email?.trim()) rowErrors.push('Email required');
+        else if (!/\S+@\S+\.\S+/.test(u.email)) rowErrors.push('Email invalid');
+        if (!u.password) rowErrors.push('Password required');
+        else if (String(u.password).length < 6) rowErrors.push('Password too short');
+
+        if (rowErrors.length) {
+            invalid.push({ row: i + 1, email: u.email, errors: rowErrors });
+        } else {
+            valid.push({ ...u, _rowIndex: i + 1 });
+        }
+    }
+
+    if (!valid.length) {
+        return res.status(400).json({
+            success: false,
+            message: "All rows failed validation",
+            totalInserted: 0,
+            totalFailed: invalid.length,
+            errors: invalid,
+        });
+    }
+
+    // ── 2. Bulk dedup — one query, not N queries ───────────────────────────────
+    const emailsToCheck = valid.map(u => u.email.toLowerCase().trim());
+
+    const existingDocs = await User.find(
+        { email: { $in: emailsToCheck } },
+        { email: 1 }          // project only email — fast index scan
+    ).lean();
+
+    const existingSet = new Set(existingDocs.map(d => d.email));
+
+    const toInsert = [];
+    const dupErrors = [];
+
+    for (const u of valid) {
+        const email = u.email.toLowerCase().trim();
+        if (existingSet.has(email)) {
+            dupErrors.push({ row: u._rowIndex, email, errors: ['Email already exists'] });
+        } else {
+            toInsert.push(u);
+            existingSet.add(email); // guard against duplicates within the batch itself
+        }
+    }
+
+    // ── 3. Parallel bcrypt hashing (concurrency-capped, not Promise.all) ───────
+    const BCRYPT_CONCURRENCY = 10; // tune to CPU core count; bcrypt is CPU-bound
+    const limit = pLimit(BCRYPT_CONCURRENCY);
+
+    const hashTasks = toInsert.map(u =>
+        limit(async () => {
+            const hashed = await bcrypt.hash(String(u.password), 10);
+            return { ...u, _hashedPassword: hashed };
+        })
+    );
+
+    const hashed = await Promise.all(hashTasks);
+
+    // ── 4. Build final documents ───────────────────────────────────────────────
+    const docs = hashed.map((u, idx) => ({
+        name: u.name.trim(),
+        email: u.email.toLowerCase().trim(),
+        phone: u.phone?.trim() || '',
+        password: u._hashedPassword,
+        shopname: u.shopname?.trim() || '',
+        address: {
+            street: u.street?.trim() || '',
+            city: u.city?.trim() || '',
+            state: u.state?.trim() || '',
+            zipCode: u.zipCode?.trim() || '',
+            country: u.country?.trim() || '',
+        },
+        isActive: true,
+        isUser: true,
+        // Unique ID: timestamp + batch position → no collision across concurrent requests
+        uniqueUserId: `USR${Date.now()}${idx}`,
+    }));
+
+    // ── 5. Chunked insertMany — avoids 16 MB BSON doc limit ───────────────────
+    const CHUNK_SIZE = 500;
+    let totalInserted = 0;
+    const writeErrors = [];
+
+    for (let i = 0; i < docs.length; i += CHUNK_SIZE) {
+        const chunk = docs.slice(i, i + CHUNK_SIZE);
+        try {
+            const result = await User.insertMany(chunk, {
+                ordered: false,     // don't stop on first error; write as many as possible
+                rawResult: true,    // get MongoBulkWriteResult with detailed info
+            });
+            totalInserted += result.insertedCount;
+        } catch (err) {
+            // ordered:false throws BulkWriteError but STILL inserts valid docs
+            if (err.name === 'MongoBulkWriteError') {
+                totalInserted += err.result?.nInserted ?? 0;
+                for (const we of (err.writeErrors || [])) {
+                    const failedDoc = chunk[we.index];
+                    writeErrors.push({
+                        row: toInsert[i + we.index]?._rowIndex,
+                        email: failedDoc?.email,
+                        errors: [we.errmsg || 'Write error'],
+                    });
+                }
+            } else {
+                // Unexpected error — log and continue to next chunk
+                console.error(`Chunk ${i}–${i + CHUNK_SIZE} failed:`, err.message);
+                writeErrors.push({ row: i, errors: [err.message] });
+            }
+        }
+    }
+
+    const allErrors = [...invalid, ...dupErrors, ...writeErrors];
+
+    return res.status(200).json({
+        success: true,
+        message: `Bulk upload complete`,
+        totalInserted,
+        totalFailed: allErrors.length,
+        errors: allErrors,
+    });
 });
