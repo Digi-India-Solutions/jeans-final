@@ -31,7 +31,7 @@ function OverviewTab({ dateRange, setDateRange }) {
 
     // total revenue & orders
     const totalRevenue = (salesDatas?.jeans?.total || 0) + (salesDatas?.shirts?.total || 0);
-    const totalOrders = (salesDatas?.jeans?.orders || 0) + (salesDatas?.shirts?.orders || 0);
+    const totalOrders = salesDatas?.totalOrder || 0 || (salesDatas?.jeans?.orders || 0) + (salesDatas?.shirts?.orders || 0);
     const totalPieces = (salesDatas?.jeans?.pieces || 0) + (salesDatas?.shirts?.pieces || 0);
 
     console.log("GGG:=>", salesDatas, totalRevenue)

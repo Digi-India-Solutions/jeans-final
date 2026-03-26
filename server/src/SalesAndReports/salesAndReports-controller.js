@@ -106,6 +106,7 @@ exports.getJeansShirtRevenueAndOrder = catchAsyncErrors(async (req, res, next) =
             data: {
                 jeans: { ...buckets.jeans.current, growth: calcGrowth(buckets.jeans.current.total, buckets.jeans.last.total).toFixed(2) },
                 shirts: { ...buckets.shirts.current, growth: calcGrowth(buckets.shirts.current.total, buckets.shirts.last.total).toFixed(2) },
+                totalOrder: orders?.length || 0
             },
         });
     } catch (err) {

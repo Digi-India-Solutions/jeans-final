@@ -365,7 +365,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             orderNote,
             transportName,
         } = req.body;
-
+console.log("SSSSSSXXXXX==>" , req.body)
         // ✅ Validate required fields
         if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
             return next(new ErrorHandler("Customer info and at least 1 item are required.", 200));
