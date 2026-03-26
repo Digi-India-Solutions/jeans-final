@@ -71,7 +71,7 @@ export default function SalesReports() {
         const res = await getData(
           `api/salesAndReports/get-SalesData?range=${selectedPeriod}`
         );
-        // console.log("XXXXXXXXXXXX:==>", res.data)
+        console.log("XXXXXXXXXXXX:==>", res.data)
         if (res?.success === true) {
           setSalesData(res?.data || salesData);
         }

@@ -1215,35 +1215,35 @@ export default function OrdersManagement() {
                           </div>
                           <div>
                             <span className="text-gray-500">Paid Amount:</span>
-                            <div className="font-medium text-green-600">₹{selectedOrder.paidAmount.toLocaleString()}</div>
+                            <div className="font-medium text-green-600">₹{selectedOrder?.paidAmount.toLocaleString()}</div>
                           </div>
                           <div>
                             <span className="text-gray-500">Balance Amount:</span>
-                            <div className={`font-medium ${selectedOrder.balanceAmount > 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                              ₹{selectedOrder.balanceAmount.toLocaleString()}
+                            <div className={`font-medium ${selectedOrder?.balanceAmount || selectedOrder?.total - selectedOrder?.paidAmount > 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                              ₹{selectedOrder?.balanceAmount?.toLocaleString() || (selectedOrder?.total - selectedOrder?.paidAmount)}
                             </div>
                           </div>
                         </div>
 
                         {/* Points Information */}
-                        {(selectedOrder.pointsRedeemed > 0 || selectedOrder.pointsEarned > 0) && (
+                        {(selectedOrder?.pointsRedeemed > 0 || selectedOrder?.pointsEarned > 0) && (
                           <div className="border-t pt-3">
                             <h4 className="font-medium text-sm mb-2">Points Activity</h4>
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                              {selectedOrder.pointsRedeemed > 0 && (
+                              {selectedOrder?.pointsRedeemed > 0 && (
                                 <div>
                                   <span className="text-gray-500">Points Redeemed:</span>
                                   <div className="text-right">
                                     <div className="font-medium text-orange-800">
-                                      {selectedOrder.pointsRedeemed.toLocaleString()} pts
+                                      {selectedOrder?.pointsRedeemed.toLocaleString()} pts
                                     </div>
                                     <div className="text-xs text-orange-600">
-                                      Discount: ₹{selectedOrder.pointsRedemptionValue.toLocaleString()}
+                                      Discount: ₹{selectedOrder?.pointsRedemptionValue?.toLocaleString()}
                                     </div>
                                   </div>
                                 </div>
                               )}
-                              {selectedOrder.pointsEarned > 0 && (
+                              {selectedOrder?.pointsEarned > 0 && (
                                 <div>
                                   <span className="text-gray-500">Points Earned:</span>
                                   <div className="text-right">
@@ -1251,7 +1251,7 @@ export default function OrdersManagement() {
                                       {selectedOrder.pointsEarned.toLocaleString()} pts
                                     </div>
                                     <div className="text-xs text-green-600">
-                                      Value: ₹{selectedOrder.pointsEarnedValue?.toLocaleString() || calculatePointsValue(selectedOrder.pointsEarned).toLocaleString()}
+                                      Value: ₹{selectedOrder?.pointsEarnedValue?.toLocaleString() || calculatePointsValue(selectedOrder?.pointsEarned).toLocaleString()}
                                     </div>
                                   </div>
                                 </div>
@@ -1261,13 +1261,13 @@ export default function OrdersManagement() {
                         )}
 
                         {/* Multiple Payment Methods Display */}
-                        {selectedOrder.payments && selectedOrder.payments.length > 0 && (
+                        {selectedOrder?.payments && selectedOrder?.payments.length > 0 && (
                           <div className="border-t pt-3">
                             <h4 className="font-medium text-sm mb-2">Payment Methods</h4>
                             <div className="space-y-1">
-                              {selectedOrder.payments.map((payment, index) => (
+                              {selectedOrder?.payments?.map((payment, index) => (
                                 <div key={index} className="flex justify-between text-sm">
-                                  <span>{payment.method}:</span>
+                                  <span>{payment?.method}:</span>
                                   <span className="font-medium">₹{parseFloat(payment.amount).toLocaleString()}</span>
                                 </div>
                               ))}

@@ -299,7 +299,7 @@ function CreateOrderModal({ subProducts, orders, fetchAllOrder, setOrders, setFi
             subtotal: subtotal,
             pointsRedeemed: newOrderForm.redeemPoints,
             pointsRedemptionValue: pointsRedemptionValue,
-            total: finalTotal,
+            total: finalTotal ? finalTotal : subtotal,
             status: 'Pending',
             paymentType: balanceAmount === 0 ? 'Complete Payment' : 'Partial Payment',
             paidAmount,

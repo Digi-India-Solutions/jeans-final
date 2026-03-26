@@ -594,10 +594,10 @@ function SubProductModel({
                       ))} */}
 
 
-                      {uploadedFiles.map((file, index) => (
+                      {/* {uploadedFiles?.map((file, index) => (
                         <div key={`new-${index}`} className="relative">
                           <img
-                            src={typeof file === 'string' && file.startsWith('https://res.cloudinary.com') ? file : URL.createObjectURL(file)}
+                            src={typeof file === 'string' && file?.startsWith('https://res.cloudinary.com') ? file : URL.createObjectURL(file)}
                             alt={`Upload ${index + 1}`}
                             className="w-full h-20 object-cover rounded-lg border border-gray-200"
                           />
@@ -610,7 +610,42 @@ function SubProductModel({
                             <i className="ri-close-line"></i>
                           </button>
                         </div>
-                      ))}
+                      ))} */}
+                      {uploadedFiles?.map((file, index) => {
+                        // Safely derive the preview URL
+                        const isCloudinaryUrl =
+                          typeof file === 'string' && file.startsWith('https://res.cloudinary.com');
+                        const isFileObject = file instanceof File || file instanceof Blob;
+
+                        const previewUrl = isCloudinaryUrl
+                          ? file
+                          : isFileObject
+                            ? URL.createObjectURL(file)
+                            : null;
+
+                        // Skip rendering if we can't resolve a valid URL
+                        if (!previewUrl) return null;
+
+                        return (
+                          <div key={`new-${index}`} className="relative">
+                            <img
+                              src={previewUrl}
+                              alt={`Upload ${index + 1}`}
+                              className="w-full h-20 object-cover rounded-lg border border-gray-200"
+                              onError={(e) => {
+                                e.currentTarget.src = '/fallback-image.png'; // optional fallback
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index, true)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                            >
+                              <i className="ri-close-line"></i>
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   {formErrors.images && (

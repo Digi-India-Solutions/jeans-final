@@ -5,73 +5,210 @@ const { uploadImage, deleteImage } = require("../../middleware/Uploads");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
 
 // 📝 CREATE a Challan
+// exports.createChallan = catchAsyncErrors(async (req, res, next) => {
+
+//     const year = new Date().getFullYear();
+
+//     // Get the latest challan of this year
+//     const lastChallan = await Challan.findOne({ challanNumber: { $regex: `^CHN-${year}` } }).sort({ createdAt: -1 }).lean();
+
+//     let serial = 1;
+
+//     if (lastChallan && lastChallan.challanNumber) {
+//         const parts = lastChallan.challanNumber.split("-");
+//         const lastSerial = parseInt(parts[2], 10);
+//         serial = lastSerial + 1;
+//     }
+
+//     const challanNumber = `CHN-${year}-${serial.toString().padStart(3, "0")}`;
+
+//     const ExistOrder = await AdminOrder.findOne({ _id: req.body.orderId });
+
+//     if (!ExistOrder) {
+//         return res.status(404).json({ success: false, message: "Order not found" });
+//     }
+//     if (Array.isArray(req.body.items)) {
+//         req.body.items.forEach(bodyItem => {
+//             // find the matching item in the order by name or productId
+//             const orderItem = ExistOrder.items.find(
+//                 i => i.color === bodyItem.color // or i.productId.equals(bodyItem.productId)
+//             );
+
+//             if (orderItem) {
+//                 orderItem.dispatchedQty = (Number(bodyItem.dispatchedQty) + Number(bodyItem.alreadyDispatched || 0)) || orderItem.dispatchedQty;
+//                 orderItem.deliveredPcs = (orderItem.dispatchedQty * orderItem.pcsInSet)
+//             }
+//         });
+
+//         // tell mongoose that the items array has been modified
+//         ExistOrder.markModified('items');
+//     }
+//     // console.log("ExistOrder:==>", ExistOrder.status)
+//     ExistOrder.status = 'Shipped';
+//     ExistOrder.statusHistory.push({
+//         status: 'Shipped',
+//         date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+//         updatedBy: "Admin",
+//     });
+
+//     ExistOrder.trackingId = req.body.notes || ExistOrder.trackingId;
+//     ExistOrder.deliveryVendor = req.body.vendor || ExistOrder.deliveryVendor;
+
+//     // persist changes
+//     await ExistOrder.save();
+
+
+//     console.log("ExistOrder:==>", ExistOrder)
+//     console.log("BODY:==>", req.body)
+
+//     const challan = await Challan.create({ ...req.body, challanNumber });
+//     console.log("SSSS:==>", challan)
+//     res.status(201).json({ success: true, challan, });
+// });
+
 exports.createChallan = catchAsyncErrors(async (req, res, next) => {
+    const {
+        customerId,
+        customer,
+        orderId,
+        orderNumber,
+        items,
+        totalValue,
+        date,
+        status,
+        vendor,
+        notes,
+    } = req.body;
 
-    const year = new Date().getFullYear();
+    // ─── 1. Validate required fields ─────────────────────────────────────────
+    if (!orderId) return next(new ErrorHandler("orderId is required", 400));
+    if (!customerId) return next(new ErrorHandler("customerId is required", 400));
+    if (!Array.isArray(items) || items.length === 0)
+        return next(new ErrorHandler("items array is required and cannot be empty", 400));
 
-    // Get the latest challan of this year
-    const lastChallan = await Challan.findOne({ challanNumber: { $regex: `^CHN-${year}` } }).sort({ createdAt: -1 }).lean();
+    // ─── 2. Find the order ────────────────────────────────────────────────────
+    const existOrder = await AdminOrder.findById(orderId);
+    if (!existOrder) return next(new ErrorHandler("Order not found", 404));
 
-    let serial = 1;
+    // ─── 3. Validate & update each dispatched item ────────────────────────────
+    const errors = [];
 
-    if (lastChallan && lastChallan.challanNumber) {
-        const parts = lastChallan.challanNumber.split("-");
-        const lastSerial = parseInt(parts[2], 10);
-        serial = lastSerial + 1;
-    }
+    for (const bodyItem of items) {
+        // Match by BOTH productId and color for safety
+        const orderItem = existOrder.items.find(
+            (i) =>
+                i.color === bodyItem.color &&
+                (bodyItem.productId
+                    ? i.productId.toString() === bodyItem.productId.toString()
+                    : true)
+        );
 
-    const challanNumber = `CHN-${year}-${serial.toString().padStart(3, "0")}`;
+        if (!orderItem) {
+            errors.push(`Item with color "${bodyItem.color}" not found in order`);
+            continue;
+        }
 
-    const ExistOrder = await AdminOrder.findOne({ _id: req.body.orderId });
+        const newDispatchedQty = Number(bodyItem.dispatchedQty);
 
-    if (!ExistOrder) {
-        return res.status(404).json({ success: false, message: "Order not found" });
-    }
-    if (Array.isArray(req.body.items)) {
-        req.body.items.forEach(bodyItem => {
-            // find the matching item in the order by name or productId
-            const orderItem = ExistOrder.items.find(
-                i => i.color === bodyItem.color // or i.productId.equals(bodyItem.productId)
+        if (isNaN(newDispatchedQty) || newDispatchedQty < 0) {
+            errors.push(`Invalid dispatchedQty for color "${bodyItem.color}"`);
+            continue;
+        }
+
+        const totalDispatched =
+            Number(bodyItem.alreadyDispatched || 0) + newDispatchedQty;
+
+        if (totalDispatched > orderItem.quantity) {
+            errors.push(
+                `Dispatched qty (${totalDispatched}) exceeds ordered qty (${orderItem.quantity}) for color "${bodyItem.color}"`
             );
+            continue;
+        }
 
-            if (orderItem) {
-                // update dispatchedQty and anything else you want
-                // console.log("bodyItem.dispatchedQty:==>", bodyItem.dispatchedQty)
-                // console.log("bodyItem.alreadyDispatched:==>", bodyItem.alreadyDispatched, req.body.items)
-
-                orderItem.dispatchedQty = (Number(bodyItem.dispatchedQty) + Number(bodyItem.alreadyDispatched || 0)) || orderItem.dispatchedQty;
-                orderItem.deliveredPcs = (orderItem.dispatchedQty * orderItem.pcsInSet)
-                // optionally update deliveredPcs, etc.
-                // orderItem.deliveredPcs = (orderItem.quantity * orderItem.pcsInSet)
-            }
-        });
-
-        // tell mongoose that the items array has been modified
-        ExistOrder.markModified('items');
+        // Update: store cumulative dispatched total
+        orderItem.dispatchedQty = totalDispatched;
+        orderItem.deliveredPcs = totalDispatched * orderItem.pcsInSet;
     }
-    // console.log("ExistOrder:==>", ExistOrder.status)
-    ExistOrder.status = 'Shipped';
-    ExistOrder.statusHistory.push({
-        status: 'Shipped',
-        date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+
+    if (errors.length > 0) {
+        return next(new ErrorHandler(errors.join(" | "), 400));
+    }
+
+    existOrder.markModified("items");
+
+    // ─── 4. Update order meta ─────────────────────────────────────────────────
+    existOrder.status = "Shipped";
+    existOrder.statusHistory.push({
+        status: "Shipped",
+        date: new Date().toISOString().split("T")[0],
         updatedBy: "Admin",
     });
 
-    ExistOrder.trackingId = req.body.notes || ExistOrder.trackingId;
-    ExistOrder.deliveryVendor = req.body.vendor || ExistOrder.deliveryVendor;
+    if (notes) existOrder.trackingId = notes;
+    if (vendor) existOrder.deliveryVendor = vendor;
 
-    // persist changes
-    await ExistOrder.save();
+    // ─── 5. Generate challan number (atomic via findOneAndUpdate trick) ────────
+    const year = new Date().getFullYear();
 
+    const lastChallan = await Challan.findOne({
+        challanNumber: { $regex: `^CHN-${year}-` },
+    })
+        .sort({ createdAt: -1 })
+        .select("challanNumber")
+        .lean();
 
-    console.log("ExistOrder:==>", ExistOrder)
-    console.log("BODY:==>", req.body)
+    let serial = 1;
+    if (lastChallan?.challanNumber) {
+        const parts = lastChallan.challanNumber.split("-");
+        const lastSerial = parseInt(parts[2], 10);
+        if (!isNaN(lastSerial)) serial = lastSerial + 1;
+    }
 
-    const challan = await Challan.create({ ...req.body, challanNumber });
-    console.log("SSSS:==>", challan)
-    res.status(201).json({ success: true, challan, });
+    const challanNumber = `CHN-${year}-${serial.toString().padStart(4, "0")}`;
+
+    // ─── 6. Save order + create challan (use session for atomicity) ───────────
+    const session = await AdminOrder.startSession();
+    session.startTransaction();
+
+    try {
+        await existOrder.save({ session });
+
+        const challanData = {
+            challanNumber,
+            customerId,
+            customer,
+            orderId,
+            orderNumber,
+            items: items.map((item) => ({
+                color: item.color,
+                productId: item.productId,
+                dispatchedQty: Number(item.dispatchedQty),
+                alreadyDispatched: Number(item.alreadyDispatched || 0),
+                price: item.price,
+                pcsInSet: item.pcsInSet,
+                availableSizes: item.availableSizes,
+                selectedSizes: item.selectedSizes,
+            })),
+            totalValue,
+            date: date || new Date().toISOString().split("T")[0],
+            status: status || "Dispatched",
+            vendor,
+            notes,
+        };
+
+        const [challan] = await Challan.create([challanData], { session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(201).json({ success: true, challan });
+
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        return next(new ErrorHandler("Failed to create challan: " + err.message, 500));
+    }
 });
-
 
 // exports.createChallanWithSlip = catchAsyncErrors(async (req, res, next) => {
 //     const year = new Date().getFullYear();
