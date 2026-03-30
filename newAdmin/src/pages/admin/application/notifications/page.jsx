@@ -10,13 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function NotificationsManagement() {
   const [notifications, setNotifications] = useState([]);
   const [templates, setTemplates] = useState([]);
-  const [firebaseSettings, setFirebaseSettings] = useState({
-    apiKey: '',
-    projectId: '',
-    messagingSenderId: '',
-    appId: '',
-    serverKey: ''
-  });
+  const [firebaseSettings, setFirebaseSettings] = useState({ apiKey: '', projectId: '', messagingSenderId: '', appId: '', serverKey: '' });
 
   const [isEditingFirebase, setIsEditingFirebase] = useState(false);
   const [firebaseSaved, setFirebaseSaved] = useState(false);
@@ -311,7 +305,8 @@ export default function NotificationsManagement() {
             {activeTab === 'notifications' ? (
               <Button onClick={() => setShowNotificationModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
                 <i className="ri-notification-line mr-2"></i>
-                Send Push Notification
+                {/* Send Push Notification */}
+                Add Template
               </Button>
             ) : (
               <Button onClick={() => setShowTemplateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -707,7 +702,7 @@ export default function NotificationsManagement() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
                     <textarea
-                      value={notificationForm.message}
+                      value={notificationForm?.message}
                       onChange={(e) => setNotificationForm({ ...notificationForm, message: e.target.value })}
                       rows="3"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -715,7 +710,7 @@ export default function NotificationsManagement() {
                       maxLength="200"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      {notificationForm.message.length}/200 characters
+                      {notificationForm?.message?.length}/200 characters
                     </p>
                   </div>
                   <div>
