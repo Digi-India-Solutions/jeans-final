@@ -49,7 +49,7 @@ function ShowProductPrintModal({ selectedForPrint, setShowPrintModal, generateEA
                                                 <i className="ri-subtract-line text-sm"></i>
                                             </button>
                                             <input
-                                                type="number"
+                                                type="test"
                                                 min="1"
                                                 max="100"
                                                 value={printQuantities[item._id] || 1}

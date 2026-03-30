@@ -226,7 +226,7 @@ export default function SubProductsManagement() {
   // Handle print execution with improved multi-label per page layout
   const handlePrint = () => {
     const totalLabels = Object.values(printQuantities).reduce((sum, qty) => sum + qty, 0);
-
+    console.log("totalLabels==>", totalLabels)
     if (totalLabels === 0) {
       alert('Please select at least one label to print');
       return;
@@ -312,16 +312,16 @@ export default function SubProductsManagement() {
       const quantity = printQuantities[item.id] || 1;
       const svgBarcode = generateEAN13SVG(item.barcode);
 
-      for (let i = 0; i < quantity; i++) {
+      for (let i = 0; i < totalLabels; i++) {
         printContent += `
           <div class="label">
             <div class="barcode-section">
               <img src="${svgBarcode}" alt="Barcode" class="barcode-image" />
-              <div class="price-text">₹${item.singlePicPrice}</div>
             </div>
           </div>
         `;
       }
+        //  <div class="price-text">₹${item.singlePicPrice}</div>
     });
 
     printContent += `
@@ -507,7 +507,7 @@ export default function SubProductsManagement() {
                 {item?.dateOfOpening && (
                   <div className="mb-3 text-sm ">
                     <span className="text-gray-500">Date of Opening: </span>
-                    <p className="font-medium text-gray-700">{ item?.dateOfOpening.split('T')[0]}</p>
+                    <p className="font-medium text-gray-700">{item?.dateOfOpening.split('T')[0]}</p>
                   </div>
                 )}
 
