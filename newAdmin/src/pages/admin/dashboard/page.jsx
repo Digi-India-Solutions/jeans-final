@@ -69,11 +69,12 @@ export default function Dashboard() {
   }
   const fetchDashboardData = async () => {
     const response = await getData('api/dashboard/get-dashboard-data');
-    // console.log("response:==>", response)
+    console.log("response:==>", response)
     if (response?.success === true) {
       setData(response?.stats)
     }
   }
+  
   const fetchCategoryComparisons = async () => {
     const response = await getData('api/dashboard/get-category-comparisons');
     // console.log("response:==>SSS=>", response.categoryComparison)
