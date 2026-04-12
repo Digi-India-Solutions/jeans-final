@@ -131,7 +131,6 @@ exports.sendResetPasswordSuperAdmin = async (data) => {
     return await sendMail({ to: email, subject, html: body });
 };
 
-
 exports.sendOtpForUserSignup = async (data) => {
     const { otp, email } = data;
     console.log("XXXXXXX", otp, email)
