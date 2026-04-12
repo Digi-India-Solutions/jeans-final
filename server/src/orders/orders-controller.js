@@ -1123,11 +1123,11 @@ exports.moveToRecycleBin = catchAsyncErrors(async (req, res, next) => {
             });
         }
         if (orderData?.status !== 'Cancelled') {
-            if (orderData?.status !== 'Packed') {
+            // if (orderData?.status !== 'Packed') {
                 return res.status(200).json({
                     status: false, message: "Please cancel the order first"
                 });
-            }
+            // }
         }
 
         orderData.recycleBin = true;
