@@ -487,7 +487,7 @@ function CreateChallanModal({
       vendor: challanForm?.deliveryVendor,
       notes: challanForm?.notes,
     };
-    // console.log("SSSSSSSS::=>",payload )
+    console.log("SSSSSSSS::=>",payload )
     try {
       const response = await postData("api/challan/create-challan", payload);
 

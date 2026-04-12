@@ -365,7 +365,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             orderNote,
             transportName,
         } = req.body;
-console.log("SSSSSSXXXXX==>" , req.body)
+        console.log("SSSSSSXXXXX==>", req.body)
         // ✅ Validate required fields
         if (!customer?.name || !customer?.deliveryAddress || !Array.isArray(items) || items.length === 0) {
             return next(new ErrorHandler("Customer info and at least 1 item are required.", 200));
@@ -833,49 +833,165 @@ exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+// exports.changeStatusByAdmin = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const { orderId } = req.params;
+//         const { newStatus, trackingId = "", deliveryVendor = "" } = req.body;
+
+//         if (!newStatus) {
+//             return next(new ErrorHandler("New status is required.", 400));
+//         }
+
+//         const order = await AdminOrder.findById(orderId);
+//         if (!order) {
+//             return next(new ErrorHandler("Order not found.", 404));
+//         }
+//         if (newStatus === 'Cancelled') {
+//             if (order?.customer?.userId) {
+//                 const RewardPoint = await RewardPoints.findOne({ userId: order?.customer?.userId });
+//                 console.log("orderstatus===>", RewardPoint)
+//                 RewardPoint.points -= order.pointsEarned
+//                 history: [
+//                     {
+//                         type: {
+//                             type: String,
+//                             enum: ["earned", "redeemed", "expired", "reversal"],
+//                             required: true,
+//                         },
+//                         amount: {
+//                             type: Number,
+//                             required: true,
+//                             min: 0,
+//                         },
+//                         description: {
+//                             type: String,
+//                             trim: true,
+//                         },
+//                         date: {
+//                             type: Date,
+//                             default: Date.now,
+//                         },
+//                     },
+//                 ],
+
+//             }
+//         }
+
+//         // ✅ Update status
+//         order.status = newStatus;
+//         console.log("orderstatus===>", order)
+//         console.log("orderstatus===>", order.customer.userId)
+//         // ✅ Push into history
+//         order.statusHistory.push({
+//             status: newStatus,
+//             date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+//             updatedBy: "Admin",
+//         });
+
+//         // ✅ If shipped, add tracking details
+//         if (newStatus === "Shipped") {
+//             order.trackingId = trackingId;
+//             order.deliveryVendor = deliveryVendor;
+//         }
+
+//         // if (newStatus === 'Delivered') {
+//         //     order.items.forEach(item => {
+//         //         item.deliveredPcs = (Number(item.quantity) * Number(item.pcsInSet)) || 0;
+//         //     });
+//         // }
+
+//         await order.save();
+
+//         res.status(200).json({ success: true, message: `Order status updated to ${newStatus}.`, order, });
+//     } catch (err) {
+//         return next(new ErrorHandler(err.message || "Failed to update order status.", 500));
+//     }
+// });
+
 exports.changeStatusByAdmin = catchAsyncErrors(async (req, res, next) => {
-    try {
-        const { orderId } = req.params;
-        const { newStatus, trackingId = "", deliveryVendor = "" } = req.body;
+    const { orderId } = req.params;
+    const { newStatus, trackingId = "", deliveryVendor = "" } = req.body;
 
-        if (!newStatus) {
-            return next(new ErrorHandler("New status is required.", 400));
-        }
-
-        const order = await AdminOrder.findById(orderId);
-        if (!order) {
-            return next(new ErrorHandler("Order not found.", 404));
-        }
-
-        // ✅ Update status
-        order.status = newStatus;
-
-        // ✅ Push into history
-        order.statusHistory.push({
-            status: newStatus,
-            date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
-            updatedBy: "Admin",
-        });
-
-        // ✅ If shipped, add tracking details
-        if (newStatus === "Shipped") {
-            order.trackingId = trackingId;
-            order.deliveryVendor = deliveryVendor;
-        }
-
-        // if (newStatus === 'Delivered') {
-        //     order.items.forEach(item => {
-        //         item.deliveredPcs = (Number(item.quantity) * Number(item.pcsInSet)) || 0;
-        //     });
-        // }
-
-
-        await order.save();
-
-        res.status(200).json({ success: true, message: `Order status updated to ${newStatus}.`, order, });
-    } catch (err) {
-        return next(new ErrorHandler(err.message || "Failed to update order status.", 500));
+    if (!newStatus) {
+        return next(new ErrorHandler("New status is required.", 400));
     }
+
+    const order = await AdminOrder.findById(orderId);
+    if (!order) {
+        return next(new ErrorHandler("Order not found.", 404));
+    }
+
+    // ✅ Prevent redundant status update
+    if (order.status === newStatus) {
+        return next(new ErrorHandler(`Order is already in '${newStatus}' status.`, 400));
+    }
+
+    // ✅ Prevent updating a cancelled order
+    if (order.status === 'Cancelled') {
+        return next(new ErrorHandler("Cannot update a cancelled order.", 400));
+    }
+
+    // ✅ Handle Cancellation — deduct reward points & log history
+   if (newStatus === 'Cancelled') {
+    if (order?.customer?.userId) {
+        const rewardPoint = await RewardPoints.findOne({ userId: order.customer.userId });
+        console.log("rewardPoint==>", rewardPoint);
+
+        if (rewardPoint) {
+            // ✅ Deduct earned points (reverse what was earned on this order)
+            if (order.pointsEarned > 0) {
+                rewardPoint.points = Math.max(0, rewardPoint.points - order.pointsEarned);
+
+                rewardPoint.history.push({
+                    type: "reversal",
+                    amount: order.pointsEarned,
+                    description: `Earned points reversed due to order #${orderId} cancellation`,
+                    date: new Date(),
+                });
+            }
+
+            // ✅ Refund redeemed points (give back what customer spent on this order)
+            if (order.pointsRedeemed > 0) {
+                rewardPoint.points += order.pointsRedeemed;
+
+                rewardPoint.history.push({
+                    type: "reversal",
+                    amount: order.pointsRedeemed,
+                    description: `Redeemed points refunded due to order #${orderId} cancellation`,
+                    date: new Date(),
+                });
+            }
+
+            await rewardPoint.save();
+        }
+    }
+}
+    // ✅ Handle Shipped — require tracking details
+    if (newStatus === "Shipped") {
+        if (!trackingId || !deliveryVendor) {
+            return next(new ErrorHandler("Tracking ID and Delivery Vendor are required for Shipped status.", 400));
+        }
+        order.trackingId = trackingId;
+        order.deliveryVendor = deliveryVendor;
+    }
+
+    // ✅ Update order status
+    order.status = newStatus;
+
+    // ✅ Push into status history
+    order.statusHistory.push({
+        status: newStatus,
+        date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+        updatedBy: "Admin",
+    });
+
+    await order.save();
+
+    res.status(200).json({
+        success: true,
+        message: `Order status updated to '${newStatus}' successfully.`,
+        order,
+    });
 });
 
 exports.updateOrderPaymentByAdmin = catchAsyncErrors(async (req, res, next) => {
@@ -1005,6 +1121,13 @@ exports.moveToRecycleBin = catchAsyncErrors(async (req, res, next) => {
             return res.status(404).json({
                 status: false, message: "Order not found"
             });
+        }
+        if (orderData?.status !== 'Cancelled') {
+            if (orderData?.status !== 'Packed') {
+                return res.status(200).json({
+                    status: false, message: "Please cancel the order first"
+                });
+            }
         }
 
         orderData.recycleBin = true;

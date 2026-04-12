@@ -702,6 +702,7 @@ export default function OrdersManagement() {
     if (result.isConfirmed) {
       try {
         const response = await getData(`api/order/move-to-recycle-bin/${order?._id}`);
+        console.log("SXSXXXXXX==>" ,response)
         if (response.status === true) {
           Swal.fire("Deleted!", "The cart has been deleted.", "success");
           fetchAllOrder();

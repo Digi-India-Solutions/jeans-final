@@ -3,6 +3,8 @@ const fs = require("fs");
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
 const { uploadImage, deleteImage } = require("../../middleware/Uploads");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
+const admin = require("firebase-admin");
+const path = require("path");
 const User = require("../users/users-model");
 
 // CREATE Notification
@@ -288,26 +290,17 @@ exports.deleteNotification = catchAsyncErrors(async (req, res, next) => {
 // });
 
 
-const admin = require("firebase-admin");
-const path = require("path");
-
-// ✅ Path to service account
 const serviceAccountPath = path.join(__dirname, "../../firebase-service-account.json");
 
-// ✅ Load and fix the service account (handles corrupted \n in private key)
 function loadServiceAccount() {
-    const raw = require("fs").readFileSync(serviceAccountPath, "utf8");
+    const raw = fs.readFileSync(serviceAccountPath, "utf8");
     const sa = JSON.parse(raw);
-
-    // 🔧 Fix: Ensure private_key has proper newlines (not literal \n strings)
     if (sa.private_key && !sa.private_key.includes("\n")) {
         sa.private_key = sa.private_key.replace(/\\n/g, "\n");
     }
-
     return sa;
 }
 
-// ✅ Initialize Firebase only once
 let firebaseInitialized = false;
 
 function initFirebase() {
@@ -321,7 +314,6 @@ function initFirebase() {
     }
 }
 
-// ✅ Send a single FCM notification using Firebase Admin SDK (no manual OAuth needed)
 async function sendFCMNotification({ token, title, body, image, data }) {
     const message = {
         token,
@@ -350,13 +342,10 @@ async function sendFCMNotification({ token, title, body, image, data }) {
     return await admin.messaging().send(message);
 }
 
-// ✅ RESEND NOTIFICATION CONTROLLER
 exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
     try {
-        // Initialize Firebase (safe to call multiple times)
         initFirebase();
 
-        // ✅ Find the notification by ID
         const notificationExist = await Notification.findById(req.params.id);
         if (!notificationExist) {
             return res.status(404).json({
@@ -365,7 +354,6 @@ exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
             });
         }
 
-        // ✅ Get all users who have an FCM token
         const usersWithToken = await User.find({
             fcmToken: { $exists: true, $ne: null, $ne: "" },
         }).select("name email fcmToken _id");
@@ -378,9 +366,8 @@ exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
             });
         }
 
-        console.log(`📤 Sending notification to ${usersWithToken.length} user(s)...`);
+        console.log(`Sending notification to ${usersWithToken.length} user(s)...`);
 
-        // ✅ Send all notifications in parallel
         const results = await Promise.allSettled(
             usersWithToken.map(async (user) => {
                 try {
@@ -404,42 +391,34 @@ exports.resendNotification = catchAsyncErrors(async (req, res, next) => {
                         messageId,
                     };
                 } catch (err) {
-                    // ✅ Handle invalid/expired FCM tokens gracefully
+                    // ✅ LOG THE REAL ERROR so you can see what's happening
+                    console.error(`❌ Failed for ${user.email}:`, err.code, err.message);
+
                     const isInvalidToken =
                         err.code === "messaging/invalid-registration-token" ||
                         err.code === "messaging/registration-token-not-registered";
 
                     if (isInvalidToken) {
-                        // Remove stale token from DB
                         await User.findByIdAndUpdate(user._id, { $unset: { fcmToken: "" } });
                         console.warn(`⚠️  Removed stale FCM token for user: ${user.email}`);
                     }
 
-                    throw new Error(
-                        isInvalidToken
-                            ? `Invalid/expired FCM token (token removed)`
-                            : err.message
-                    );
+                    // ✅ Return failure instead of throwing — so Promise.allSettled works correctly
+                    return {
+                        user: user.email,
+                        status: "failed",
+                        error: isInvalidToken
+                            ? "Invalid/expired FCM token (token removed)"
+                            : err.message,
+                    };
                 }
             })
         );
 
-        // ✅ Format results into success/failure buckets
-        const formatted = results.map((r, i) => {
-            const user = usersWithToken[i];
-            if (r.status === "fulfilled") {
-                return {
-                    user: user.email,
-                    status: "success",
-                    messageId: r.value.messageId,
-                };
-            } else {
-                return {
-                    user: user.email,
-                    status: "failed",
-                    error: r.reason?.message || "Unknown error",
-                };
-            }
+        // ✅ Fixed: results now always return objects, not thrown errors
+        const formatted = results.map((r) => {
+            if (r.status === "fulfilled") return r.value;
+            return { status: "failed", error: r.reason?.message || "Unknown error" };
         });
 
         const successCount = formatted.filter((r) => r.status === "success").length;
