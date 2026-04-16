@@ -1,29 +1,30 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors");
-const sendResponse = require("../../middleware/response");
 const ErrorHandler = require("../../utils/ErrorHandler");
-const fs = require('fs');
 const Banner = require("./banners-model");
-const { console } = require("inspector");
 const { uploadImage, deleteImage } = require("../../middleware/Uploads");
 const { deleteLocalFile } = require("../../middleware/DeleteImageFromLoaclFolder");
 
+const normalizeImages = (images) => {
+    if (!images) return [];
+    return Array.isArray(images) ? images.filter(Boolean) : [images];
+};
+
 exports.createBanners = catchAsyncErrors(async (req, res, next) => {
     try {
+        console.log("FILE:", req.file);
+console.log("BODY:", req.body);
         const { name, isActive, url } = req.body;
-        console.log('req.body::', req.body)
-        console.log('req.FILE::', req.file)
+        console.log("Request Body:==>", req.body);
+
+        if (!req.file) {
+            return res.status(400).json({ status: false, message: "Image is required" });
+        }
+
         const existingBanner = await Banner.findOne({ name: name });
         if (existingBanner) {
             return res.status(200).json({ status: false, message: "Banner already exists!" });
         }
 
-        // if (!req.files || req.file.length === 0) {
-        //     return res.status(200).json({ status: false, message: "No files uploaded" });
-        // }
-
-        // const imagePaths = req.files.map((file) => file.filename);
-        const imageUrls = [];
-        // for (let file of req.files) {
         const imageUrl = await uploadImage(req.file.path);
         // imageUrls.push(imageUrl);
         // deleteLocalFile(file.path);
@@ -35,7 +36,6 @@ exports.createBanners = catchAsyncErrors(async (req, res, next) => {
         const newBanner = await Banner.create({ name, images: imageUrl, url: url, isActive: isActive === "true" || isActive === true, position: req.body.position, startDate: req.body.startDate, endDate: req.body.endDate });
 
         deleteLocalFile(req.file.path);
-        // return sendResponse(res, 200, "Banner Created Successfully", newBanner);
         res.status(200).json({ status: true, message: "Banner created", data: newBanner });
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
@@ -43,6 +43,57 @@ exports.createBanners = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+
+// exports.updateBanner = catchAsyncErrors(async (req, res, next) => {
+//     const { name, oldImages, isActive } = req.body;
+//     const { id } = req.params;
+
+//     try {
+//         let banner = await Banner.findById(id);
+//         if (!banner) {
+//             return res.status(404).json({ success: false, message: 'Banner not found' });
+//         }
+
+//         let updatedImageUrl = oldImages || banner.images;
+
+//         // if (req.file) {
+//         //     if (banner.images && normalizeImages(banner.images).length > 0) {
+//         //         await deleteImage(banner.images);
+//         //     }
+
+//         //     updatedImageUrl = await uploadImage(req.file.path);
+//         //     deleteLocalFile(req.file.path);
+//         // }
+
+//         if (req.file) {
+//     if (banner.images && normalizeImages(banner.images).length > 0) {
+//         await deleteImage(banner.images);
+//     }
+
+//     const result = await uploadImage(req.file.path);
+//     updatedImageUrl = result.secure_url; // ✅ FIX
+
+//     deleteLocalFile(req.file.path);
+// }
+
+//         const updatedBannerData = {
+//             name: name || banner.name,
+//             images: normalizeImages(updatedImageUrl),
+//             url: req.body.url || banner.url,
+//             position: req.body.position || banner.position,
+//             startDate: req.body.startDate || banner.startDate,
+//             endDate: req.body.endDate || banner.endDate,
+//             isActive: isActive !== undefined ? isActive === "true" || isActive === true : banner.isActive,
+//         };
+
+//         const updatedBanner = await Banner.findByIdAndUpdate(id, updatedBannerData, { new: true });
+
+//         res.status(200).json({ success: true, message: "Banner updated successfully", banner: updatedBanner, });
+//     } catch (error) {
+//         console.error("Update banner error:", error);
+//         res.status(500).json({ success: false, message: "Failed to update banner", error: error.message, });
+//     }
+// });
 
 exports.updateBanner = catchAsyncErrors(async (req, res, next) => {
     const { name, oldImages, isActive } = req.body;
@@ -54,24 +105,24 @@ exports.updateBanner = catchAsyncErrors(async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Banner not found' });
         }
 
-        let updatedImageUrl = oldImages; // default to old image
-        console.log("XXXXXX:-", req.file)
+        let updatedImageUrl = oldImages || banner.images;
+
         if (req.file) {
-            // Delete previous image from cloud if exists
-            if (banner.images) {
-                await deleteImage(banner.images); // Cloudinary
+            if (banner.images && normalizeImages(banner.images).length > 0) {
+                await deleteImage(banner.images);
             }
 
-            // Upload new image
             updatedImageUrl = await uploadImage(req.file.path);
+            if (!updatedImageUrl) {
+                return res.status(500).json({ success: false, message: "Image upload failed" });
+            }
 
-            // Delete from local disk
             deleteLocalFile(req.file.path);
         }
 
         const updatedBannerData = {
             name: name || banner.name,
-            images: updatedImageUrl,
+            images: normalizeImages(updatedImageUrl),
             url: req.body.url || banner.url,
             position: req.body.position || banner.position,
             startDate: req.body.startDate || banner.startDate,
@@ -87,15 +138,14 @@ exports.updateBanner = catchAsyncErrors(async (req, res, next) => {
         res.status(500).json({ success: false, message: "Failed to update banner", error: error.message, });
     }
 });
-
 // Delete banner
 exports.deleteBanner = catchAsyncErrors(async (req, res, next) => {
     try {
         const banner = await Banner.findById(req.params.id);
         if (!banner) return res.status(404).json({ success: false, message: "Banner not found" });
 
-        if (banner.images) {
-            deleteImage(banner.images)
+        if (banner.images && normalizeImages(banner.images).length > 0) {
+            await deleteImage(banner.images);
         }
 
         await banner.deleteOne();

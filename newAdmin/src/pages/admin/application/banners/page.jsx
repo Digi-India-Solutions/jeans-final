@@ -30,7 +30,8 @@ export default function BannersManagement() {
   const fetchBanners = async () => {
     try {
       setIsLoading(true);
-      const response = await getData("api/banner");
+      const response = await getData("api/banner/get-all-banners");
+      console.log("SSSSSSS:=>" ,response)
       if (response?.success) {
         setBanners(response?.data);
       } else {
