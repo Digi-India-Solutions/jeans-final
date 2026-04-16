@@ -27,7 +27,7 @@ exports.createBanners = catchAsyncErrors(async (req, res, next) => {
         const imageUrl = await uploadImage(req.file.path);
         // imageUrls.push(imageUrl);
         // deleteLocalFile(file.path);
-        // deleteLocalFile(req.file.path);
+        deleteLocalFile(req.file.path);
         // }
 
         // console.log("---------", imageUrls)

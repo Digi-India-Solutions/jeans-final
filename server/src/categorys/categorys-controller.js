@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require("path");
 const ShortUniqueId = require("short-unique-id");
 
+
 exports.createCategory = catchAsyncErrors(async (req, res, next) => {
     try {
         const { name, mainCategoryId, description, status,slug } = req.body;
