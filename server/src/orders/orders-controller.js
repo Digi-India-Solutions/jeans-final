@@ -438,26 +438,17 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
         console.log("createdBycreatedBy=> D", newOrder,)
         console.log("createdBycreatedBy=> D", req.body.createdBy)
         if (newOrder) {
-            for (const item of items) {
-                const product = await subProductsModel?.findById(item.productId);
-
+            // ✅ update all stock in parallel instead of sequential loop
+            await Promise.all(items.map(async (item) => {
+                const product = await subProductsModel.findById(item.productId).select('lotStock stock');
                 if (product) {
-                    // ensure both are numbers
-                    const currentStock = Number(product.lotStock) || 0;
-                    const quantityOrdered = Number(item.quantity) || 0;
-
-                    // update stock
-                    product.lotStock = currentStock - quantityOrdered;
-
-                    // if stock depleted
-                    if (product.lotStock <= 0) {
-                        product.lotStock = 0; // avoid negative stock
-                        product.stock = 'Out of Stock';
-                    }
-
-                    await product.save();
+                    const newStock = Math.max(0, (Number(product.lotStock) || 0) - (Number(item.quantity) || 0));
+                    await subProductsModel.updateOne(
+                        { _id: item.productId },
+                        { lotStock: newStock, ...(newStock <= 0 ? { stock: 'Out of Stock' } : {}) }
+                    );
                 }
-            }
+            }));
         }
 
         res.status(201).json({ success: true, message: "Order created successfully.", order: newOrder, });
@@ -1070,19 +1061,17 @@ exports.updateOrderNoteByAdmin = catchAsyncErrors(async (req, res, next) => {
 
 exports.getAllOrdersByUser = catchAsyncErrors(async (req, res, next) => {
     try {
-        // const { pageNumber } = req.query;
         const userID = req.params.id;
-        console.log("orders=>", userID)
-        const orders = await AdminOrder.find({ "customer.userId": userID }).sort({ createdAt: -1 }).populate({
-            path: "items.productId",
-            populate: [
-                { path: "productId" },
-                // { path: "sizes" }
-            ]
-        }).populate("customer.userId", "name email , phone")
-        console.log("orders=>", orders)
-        // .populate("products.subProduct");
-        // console.log("orders:==>", !orders[0].products.length);
+        const orders = await AdminOrder.find({ "customer.userId": userID })
+            .sort({ createdAt: -1 })
+            .select("items createdAt status total customer orderNumber paymentMethod")
+            .populate({
+                path: "items.productId",
+                select: "productId singlePicPrice pcsInSet quantity color subProductImages",
+                populate: { path: "productId", select: "productName images price" }
+            })
+            .populate("customer.userId", "name email phone")
+            .lean()
         if (!orders || orders?.length === 0) {
             return res.status(201).json({ success: false, message: "Your Orders is empty" });
         }

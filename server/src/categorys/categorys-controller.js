@@ -182,17 +182,28 @@ exports.deleteCategoryByID = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 });
+const mainCatCache = {};
+const MAIN_CAT_TTL = 5 * 60 * 1000;
 
 exports.getCategoryByMainCategoryID = catchAsyncErrors(async (req, res, next) => {
     try {
         const categoryID = req.params.id;
-        const category = await Category.find({ mainCategoryId: categoryID }).populate("mainCategoryId")
-        // .populate("productId");
 
-        res.status(200).json({ success: true, data: category });
+        // check cache first
+        const cached = mainCatCache[categoryID];
+        if (cached && Date.now() - cached.time < MAIN_CAT_TTL) {
+            return res.status(200).json(cached.data);
+        }
 
+        const category = await Category.find({ mainCategoryId: categoryID })
+            .select("name images status mainCategoryId slug categoryBanner")
+            .populate("mainCategoryId", "mainCategoryName")
+            .lean()
+
+        const result = { success: true, data: category };
+        mainCatCache[categoryID] = { data: result, time: Date.now() };
+        res.status(200).json(result);
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
 })
-
