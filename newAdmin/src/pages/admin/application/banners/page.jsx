@@ -31,7 +31,7 @@ export default function BannersManagement() {
     try {
       setIsLoading(true);
       const response = await getData("api/banner/get-all-banners");
-      console.log("SSSSSSS:=>" ,response)
+      console.log("SSSSSSS:=>", response)
       if (response?.success) {
         setBanners(response?.data);
       } else {
@@ -75,10 +75,11 @@ export default function BannersManagement() {
       }
 
       const apiUrl = editingBanner
-        ? `api/banner/update/${editingBanner?._id}`
-        : "api/banner/create";
+        ? `api/banner/update-banner/${editingBanner?._id}`
+        : "api/banner/create-banner";
 
       const response = await postData(apiUrl, submitData);
+      console.log("ggg==>", response)
       if (response.status || response?.success === true) {
         toast.success(
           editingBanner ? "Banner updated successfully" : "Banner added successfully"
@@ -121,8 +122,8 @@ export default function BannersManagement() {
       });
 
       if (result?.isConfirmed) {
-        const data = await getData(`api/banner/delete/${id}`);
-        if (data?.success === true) {
+        const data = await getData(`api/banner/delete-banner/${id}`);
+        if (data.status === true || data?.success === true) {
           setBanners(banners.filter(banner => banner?._id !== id));
           toast.success("Banner deleted successfully");
         } else {
