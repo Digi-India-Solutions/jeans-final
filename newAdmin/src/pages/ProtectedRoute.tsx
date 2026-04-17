@@ -1,11 +1,11 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute() {
     const login = sessionStorage.getItem("login");
-
+    
     if (!login) {
         return <Navigate to="/login" replace />;
     }
 
-    return children;
+    return <Outlet />; // ✅ renders nested admin routes
 }

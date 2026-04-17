@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import HomePage from "../pages/home/page";
 import NotFound from "../pages/NotFound";
+import ProtectedRoute from "../pages/ProtectedRoute"; // ✅ use this
 
 // Admin Pages
 import AdminDashboard from "../pages/admin/dashboard/page";
@@ -11,8 +12,6 @@ import ReturnsAndChallan from "../pages/admin/returns/page";
 import SalesReports from "../pages/admin/sales/page";
 import MarketingPage from "../pages/admin/marketing/page";
 import EnquiriesPage from "../pages/admin/enquiries/page";
-
-// Application Management
 import CategoriesManagement from "../pages/admin/application/categories/page";
 import SubCategoriesManagement from "../pages/admin/application/subcategories/page";
 import ProductsManagement from "../pages/admin/application/products/page";
@@ -28,29 +27,22 @@ import RewardsManagement from "../pages/admin/application/rewards/page";
 import FaqsManagement from "../pages/admin/application/faqs/page";
 import Login from "../components/auth/Login";
 import ResetPassword from "../components/auth/ResetPassword";
-// User & Role Management
 import UserRolesManagement from "../pages/admin/user-roles/page";
-// Challan Management
 import ChallanCreate from "../pages/admin/challan/create/page";
-import CartsManagement from "../pages/admin/application/cart/page"
+import CartsManagement from "../pages/admin/application/cart/page";
 
 const CatalogueUpload = lazy(() => import('../pages/admin/catalogue/page'));
 
-// Check login status
-const login = sessionStorage.getItem("login");
-console.log("Login status:=>", login);
-// Common routes
-const commonRoutes: RouteObject[] = [
+const routes: RouteObject[] = [
+  // ✅ Public routes
   { path: "/", element: <HomePage /> },
   { path: "/login", element: <Login /> },
   { path: "/admin/reset-password/:token", element: <ResetPassword /> },
-  { path: "*", element: <NotFound /> },
-];
 
-// Admin routes (only if logged in)
-const adminRoutes: RouteObject[] = [
+  // ✅ Protected admin routes — auth checked inside ProtectedRoute
   {
     path: "/admin",
+    element: <ProtectedRoute />, // ← wraps all admin routes
     children: [
       { path: "", element: <AdminDashboard /> },
       { path: "dashboard", element: <AdminDashboard /> },
@@ -62,7 +54,7 @@ const adminRoutes: RouteObject[] = [
       { path: "enquiries", element: <EnquiriesPage /> },
       { path: "user-roles", element: <UserRolesManagement /> },
       { path: "users", element: <UsersManagement /> },
-      { path: '/admin/catalogue', element: <CatalogueUpload /> },
+      { path: "catalogue", element: <CatalogueUpload /> },
       {
         path: "application",
         children: [
@@ -87,9 +79,8 @@ const adminRoutes: RouteObject[] = [
       },
     ],
   },
-];
 
-// Merge routes based on login
-const routes: RouteObject[] = login ? [...commonRoutes, ...adminRoutes] : [...commonRoutes];
+  { path: "*", element: <NotFound /> },
+];
 
 export default routes;
