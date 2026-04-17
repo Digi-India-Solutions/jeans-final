@@ -50,19 +50,25 @@ exports.createCategory = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
+const categoryCache = {};
+const CATEGORY_TTL = 5 * 60 * 1000;
+
 exports.getAllCategorys = catchAsyncErrors(async (req, res, next) => {
     try {
+        const cached = categoryCache['all'];
+        if (cached && Date.now() - cached.time < CATEGORY_TTL) {
+            return res.status(200).json(cached.data);
+        }
         const { pageNumber } = req.query;
         const totalCategorys = await Category.countDocuments();
-
-        const categorys = await Category.find({}).sort({ createdAt: -1 }).populate("mainCategoryId");
-
-        res.status(200).json({ success: true, data: categorys, totalCategorys, });
+        const categorys = await Category.find({}).sort({ createdAt: -1 }).populate("mainCategoryId").lean();
+        const result = { success: true, data: categorys, totalCategorys };
+        categoryCache['all'] = { data: result, time: Date.now() };
+        res.status(200).json(result);
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
 });
-
 exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
     try {
         const { categoryId, status } = req.body;

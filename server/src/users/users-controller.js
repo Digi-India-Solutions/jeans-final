@@ -207,16 +207,48 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
         return res.status(500).json({ status: false, message: "Internal server error", error: error.message });
     }
 })
-
 exports.getAllUser = catchAsyncErrors(async (req, res, next) => {
     try {
-        const users = await User.find().sort({ createdAt: -1 });
-        res.status(200).json({ success: true, data: users });
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
-    }
-});
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 20
+        const skip = (page - 1) * limit
+        const search = req.query.search?.trim() || ""
 
+        let query = {}
+        if (search) {
+            query = {
+                $or: [
+                    { name: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } },
+                    { phone: { $regex: search, $options: "i" } },
+                ]
+            }
+        }
+
+        const [users, total] = await Promise.all([
+            User.find(query)
+                .select("-password")
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            User.countDocuments(query)
+        ])
+
+        res.status(200).json({
+            success: true,
+            data: users,
+            pagination: {
+                total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: page,
+                limit
+            }
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+})
 exports.getUserById = catchAsyncErrors(async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id).sort({ createdAt: -1 });

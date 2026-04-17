@@ -42,68 +42,13 @@ exports.createSubProduct = catchAsyncErrors(async (req, res, next) => {
 
 exports.getAllSubProducts = catchAsyncErrors(async (req, res, next) => {
     try {
-        const subProducts = await SubProduct.find().populate([{ path: "productId", populate: { path: "categoryId", } }, { path: "sizes" }]);
+        const subProducts = await SubProduct.find().populate([{ path: "productId", populate: { path: "categoryId", } }, { path: "sizes" }]).lean();
         return res.status(200).json({ success: true, data: subProducts });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Something went wrong' });
     }
 });
 
-// exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const page = parseInt(req.query.page, 10) || 1;
-//         const limit = parseInt(req.query.limit, 10) || 10;
-//         const skip = (page - 1) * limit;
-//         const search = req.query.search?.trim() || "";
-//         console.log("search===>", search)
-//         // 🔎 Build search query
-//         let query = {};
-//         if (search) {
-//             query = {
-//                 $or: [
-//                     { name: { $regex: search, $options: "i" } },
-//                     { lotNumber: { $regex: search, $options: "i" } },
-//                     { 'productId.productName': { $regex: search, $options: "i" } },
-//                     { barcode: { $regex: search, $options: "i" } },
-//                     { stock: { $regex: search, $options: "i" } },
-//                     // { status: { $regex: search, $options: "i" } },
-//                     { description: { $regex: search, $options: "i" } },
-//                     { singlePicPrice: !isNaN(Number(search)) ? Number(search) : undefined }
-//                 ].filter(Boolean)
-//             };
-//         }
-
-//         // 📊 Count total documents with query
-//         const totalSubProducts = await SubProduct.countDocuments(query);
-
-//         // 📦 Fetch paginated + populated sub-products
-//         const subProducts = await SubProduct.find(query)
-//             .populate([
-//                 {
-//                     path: "productId",
-//                     populate: { path: "categoryId" } // Populate category inside product
-//                 },
-//                 // { path: "sizes" } // Populate sizes
-//             ])
-//             .sort({ createdAt: -1 })
-//             .skip(skip)
-//             .limit(limit);
-//         console.log("subProducts==>", subProducts ,subProducts.length)
-//         // ✅ Return response
-//         return res.status(200).json({
-//             success: true,
-//             data: subProducts,
-//             pagination: {
-//                 totalSubProducts,
-//                 totalPages: Math.ceil(totalSubProducts / limit),
-//                 currentPage: page,
-//                 limit
-//             }
-//         });
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// });
 
 exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -147,27 +92,6 @@ exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next
             .limit(limit)
             .lean(); // return plain JS objects
 
-        // 🛠 Normalize fields before sending
-        // const normalizedSubProducts = subProducts.map(sp => ({
-        //     ...sp,
-        //     sizes: (() => {
-        //         try {
-        //             if (Array.isArray(sp.sizes)) return sp.sizes;
-        //             if (typeof sp.sizes === "string") {
-        //                 // try JSON parse
-        //                 try {
-        //                     return JSON.parse(sp.sizes);
-        //                 } catch {
-        //                     // fallback comma-separated
-        //                     return sp.sizes.split(",").map(s => s.trim());
-        //                 }
-        //             }
-        //             return [];
-        //         } catch {
-        //             return [];
-        //         }
-        //     })()
-        // }));
 
         // ✅ Return response
         return res.status(200).json({
@@ -200,11 +124,10 @@ exports.changeStockStatus = catchAsyncErrors(async (req, res, next) => {
     }
 })
 
-
 exports.getSubProductByID = catchAsyncErrors(async (req, res, next) => {
     try {
         const productID = req.params.id;
-        const product = await SubProduct.findOne({ _id: productID }).populate([{ path: "productId", populate: { path: "categoryId", } }, { path: "sizes" }]).sort({ createdAt: -1 })
+        const product = await SubProduct.findOne({ _id: productID }).populate([{ path: "productId", populate: { path: "categoryId", } }, { path: "sizes" }]).lean()
         sendResponse(res, 200, "Product Fetched Successfully", product);
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
@@ -261,59 +184,6 @@ exports.updateSubProductByID = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-
-// exports.deleteSubProductByID = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const productID = req.params.id;
-
-//         const productData = await SubProduct.findById(productID);
-//         if (!productData) {
-//             return next(new ErrorHandler("Product not found", 400));
-//         }
-
-//         if (productData?.subProductImages) {
-//             for (let oldImage of productData.subProductImages) {
-//                 await deleteImage(oldImage);
-//             }
-
-//         }
-//         const wishlists = await Wishlist.find({ productId: productID });
-
-//         if (wishlists.length > 0) {
-//             for (let wishlist of wishlists) {
-//                 await Wishlist.deleteOne({ _id: wishlist._id });
-//             }
-//         }
-
-//         const carts = await Cart.find({ "items.productId": productID });
-
-//         if (carts.length > 0) {
-//             for (let cart of carts) {
-
-//                 // Remove only the matching item
-//                 cart.items = cart.items.filter(
-//                     (item) => item.productId.toString() !== productID.toString()
-//                 );
-
-//                 // If items become empty → delete the cart
-//                 if (cart.items.length === 0) {
-//                     await Cart.deleteOne({ _id: cart._id });
-//                 } else {
-//                     // Otherwise update the cart
-//                     await cart.save();
-//                 }
-//             }
-//         }
-
-//         const product = await SubProduct.deleteOne({ _id: productID });
-
-
-//         res.status(200).json({ message: "Product deleted successfully", success: true, data: product });
-
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
 
 exports.deleteSubProductByID = catchAsyncErrors(async (req, res, next) => {
     try {
@@ -392,197 +262,9 @@ exports.getAllSubProductsByProductId = catchAsyncErrors(async (req, res, next) =
         const productID = req.params.id;
         const product = await SubProduct.find({ productId: productID }).populate([
             { path: "productId", populate: { path: "categoryId" } },
-            { path: "sizes" }]).sort({ createdAt: -1 });
+            { path: "sizes" }]).sort({ createdAt: -1 }).lean();
         sendResponse(res, 200, "Product Fetched Successfully", product);
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }
 })
-
-// exports.searchProduct = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { term } = req.params;
-
-//         // Match category names
-//         const matchingCategories = await Category.find({
-//             name: { $regex: term, $options: 'i' }
-//         }).select('_id');
-//         const matchingCategoryIds = matchingCategories.map(cat => cat._id);
-
-//         // Match color names
-//         const matchingColors = await Color.find({
-//             colorName: { $regex: term, $options: 'i' }
-//         }).select('_id');
-//         const matchingColorIds = matchingColors.map(c => c._id);
-
-//         // Match size names
-//         const matchingSizes = await Size.find({
-//             size: { $regex: term, $options: 'i' }
-//         }).select('_id');
-//         const matchingSizeIds = matchingSizes.map(s => s._id);
-
-//         // Build the search query
-//         const query = {
-//             $or: [
-//                 { productName: { $regex: term, $options: 'i' } },
-//                 { type: { $regex: term, $options: 'i' } },
-//                 { "Variant.finalPrice": !isNaN(term) ? Number(term) : undefined },
-//                 { categoryId: { $in: matchingCategoryIds } },
-//                 { "Variant.color": { $in: matchingColorIds } },
-//                 { "Variant.sizes": { $in: matchingSizeIds } },
-//             ].filter(Boolean)
-//         };
-
-//         // Find and populate related fields
-//         const products = await Product.find(query)
-//             .populate("categoryId")
-//             .populate("Variant.sizes");
-
-//         console.log("products:-------s", products.length)
-//         sendResponse(res, 200, "Product Fetched Successfully", { products });
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// });
-
-// exports.createProduct = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { productName, productDescription, Variant, type, categoryId } = req.body;
-//         console.log("XXXXXXXXXXX:==", req?.body)
-//         // Basic validation
-//         if (!productName || !productDescription || !type || !categoryId) {
-//             return next(new ErrorHandler("All required fields must be filled.", 400));
-//         }
-
-//         // Safe parsing for frontend JSON-encoded arrays/objects
-//         const parsedVariants = typeof Variant === "string" ? JSON.parse(Variant) : Variant;
-//         const parsedTypes = typeof type === "string" ? JSON.parse(type) : type;
-//         const parsedCategoryId = typeof categoryId === "string" ? JSON.parse(categoryId) : categoryId;
-
-//         // Separate image uploads
-//         const productImages = [];
-//         const variantImages = [];
-
-//         // Split files: assume frontend sends files under fieldname 'productImages' and 'variantImages'
-//         const allFiles = req.files || [];
-//         console.log("XXXXXXXXXXX:==", req?.files?.productImages)
-
-//         const productFiles = req?.files?.productImages;
-//         const variantFiles = req?.files?.variantImages;
-
-//         for (let file of productFiles) {
-//             const url = await uploadImage(file.path);
-//             productImages.push(url);
-//             deleteLocalFile(file.path);
-//         }
-
-//         for (let i = 0; i < parsedVariants.length; i++) {
-//             const variantImageFile = variantFiles[i];
-//             if (variantImageFile) {
-//                 const imageUrl = await uploadImage(variantImageFile.path);
-//                 parsedVariants[i].productSingleImage = imageUrl;
-//                 deleteLocalFile(variantImageFile.path);
-//             } else {
-//                 parsedVariants[i].productSingleImage = "";
-//             }
-//         }
-
-//         const newProduct = await Product.create({
-//             productName,
-//             productDescription,
-//             categoryId: parsedCategoryId,
-//             type: parsedTypes,
-//             Variant: parsedVariants,
-//             images: productImages
-//         });
-
-//         res.status(200).json({ success: true, data: newProduct });
-
-//     } catch (error) {
-//         console.error("Product Creation Error:", error);
-
-//         // Clean up local files on error
-//         if (req.files) {
-//             req.files.forEach(file => deleteImage(file.path));
-//         }
-
-//         return next(new ErrorHandler("Failed to create product. " + error.message, 500));
-//     }
-// });
-
-
-
-// exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { pageNumber } = req.query;
-//         const totalProducts = await Product.countDocuments();
-
-//         const products = await Product.find({}).populate("Variant.sizes").populate("categoryId").sort({ createdAt: -1 })
-
-//         res.status(200).json({ success: true, data: products, });
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
-
-// exports.typeProducts = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { type, productId } = req.body;
-//         const products = await Product.findByIdAndUpdate(productId, { type }).populate("Variant.sizes").populate("categoryId").sort({ createdAt: -1 })
-//         res.status(200).json({ massage: "Product Type Updated Successfully", success: true, data: products });
-//         // sendResponse(res, 200, "Product Fetched Successfully", products);
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
-
-// exports.changeStatus = catchAsyncErrors(async (req, res, next) => {
-//     try {
-//         const { productId, status } = req.body;
-//         const products = await Product.findByIdAndUpdate(productId, { status }).populate("Variant.sizes").populate("categoryId").sort({ createdAt: -1 })
-//         res.status(200).json({ massage: "Product Status Updated Successfully", success: true, data: products });
-//     } catch (error) {
-//         return next(new ErrorHandler(error.message, 500));
-//     }
-// })
-
-
-
-
-
-
-
-
-// // exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
-// //     try {
-// //         const products = await Product.find({})
-// //         res.status(200).json({ success: true, message: "Product Fetched Successfully", data: products });
-// //     } catch (error) {
-// //         return next(new ErrorHandler(error.message, 500));
-// //     }
-// // })
-
-
-// // exports.getAllProductsForOptions = catchAsyncErrors(async (req, res, next) => {
-// //     try {
-// //         const products = await Product.find({}).sort({ createdAt: -1 })
-// //         sendResponse(res, 200, "Product Fetched Successfully", products);
-// //     } catch (error) {
-// //         return next(new ErrorHandler(error.message, 500));
-// //     }
-// // })
-
-
-// // exports.getProductForCart = catchAsyncErrors(async (req, res, next) => {
-// //     try {
-// //         const productID = req.body.productId;
-
-// //         const product = await Product.find({ _id: productID })
-// //             .populate("accessories");
-
-// //         sendResponse(res, 200, "Product Fetched Successfully", product);
-// //     } catch (error) {
-// //         return next(new ErrorHandler(error.message, 500));
-// //     }
-// // })
-
