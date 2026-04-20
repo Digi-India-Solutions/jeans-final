@@ -307,7 +307,7 @@ export default function ReturnsAndChallan() {
   const fetchAllOrder = async () => {
     try {
       const response = await getData(`api/order/get-all-orders-by-user/${challanForm?.customerId || returnForm?.customerId}`);
-      // console.log("XXXXXXXXXXX:=-=>yy", response)
+      console.log("XXXXXXXXXXX:=-=>yy", response)
       if (response.success === true) {
         setCustomerOrders(response?.orders || []);
         setSelectedCustomerOrders(response?.orders || []);

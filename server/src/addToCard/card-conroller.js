@@ -19,9 +19,9 @@ exports.AddToCard = catchAsyncErrors(async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid user ID' });
         }
 
+
         // Validate each item
         for (let cardItem of items) {
-
             if (!cardItem.subProduct || !mongoose.Types.ObjectId.isValid(cardItem.subProduct) || !cardItem.price || typeof cardItem.quantity !== 'number' || cardItem.quantity < 1) {
                 return res.status(400).json({ success: false, message: 'Invalid card item format' });
             }
@@ -29,9 +29,7 @@ exports.AddToCard = catchAsyncErrors(async (req, res) => {
             if (!productExists) {
                 return res.status(404).json({ success: false, message: `Product not found: ${cardItem.subProduct}` });
             }
-
         }
-
         // Find or create cart
         let card = await Card.findOne({ user });
         if (!card) {
@@ -69,12 +67,14 @@ exports.AddToCard = catchAsyncErrors(async (req, res) => {
             };
         }
 
-        await card.save();
-        await card.populate({ path: 'items.subProduct', populate: { path: 'productId' } });
-
-        // Instead of just sending filtered item, send full updated card
+await card.save();
+        // ✅ populate on existing document - no extra DB call
+        await card.populate({ 
+            path: 'items.subProduct', 
+            select: 'productId subProductImages singlePicPrice pcsInSet color sizes',
+            populate: { path: 'productId', select: 'productName images price' } 
+        });
         res.status(200).json({ success: true, message: 'Cart updated successfully', card });
-
     } catch (error) {
         console.error('Add to card error:', error);
         res.status(500).json({ success: false, message: 'Failed to update card', error: error.message });
@@ -82,118 +82,26 @@ exports.AddToCard = catchAsyncErrors(async (req, res) => {
 });
 
 
-// exports.AddToCard = catchAsyncErrors(async (req, res) => {
-//     try {
-//         const { user, items , totalAmount } = req.body;
-
-//         // Validate main fields
-//         if (!user || !Array.isArray(items) || items.length === 0) {
-//             return res.status(400).json({ success: false, message: 'Missing required card fields' });
-//         }
-//         if (!mongoose.Types.ObjectId.isValid(user)) {
-//             return res.status(400).json({ success: false, message: 'Invalid user ID' });
-//         }
-
-//         // Validate each item
-//         for (let item of items) {
-//             if (!item.subProduct || !mongoose.Types.ObjectId.isValid(item.subProduct) || !item.price || typeof item.quantity !== 'number' || item.quantity < 1) {
-//                 return res.status(200).json({ success: false, message: 'Invalid card item format' });
-//             }
-//             const productExists = await SubProduct.findById(item.subProduct);
-//             if (!productExists) {
-//                 return res.status(204).json({ success: false, message: `Product not found: ${item.subProduct}` });
-//             }
-//         }
-
-//         // Find or create card
-//         let card = await Card.findOne({ user });
-
-//         if (!card) {
-//             // No card, create new
-//             card = new Card({
-//                 user,
-//                 items: [],
-//                 totalAmount: 0
-//             });
-//         }
-
-//         // Add or update items
-//         for (let newItem of items) {
-//             const existingItemIndex = card.items.findIndex(
-//                 i => i.subProduct.toString() === newItem.subProduct && i.price === newItem.price
-//             );
-
-//             if (existingItemIndex > -1) {
-//                 // If item exists, increase quantity
-//                 card.items[existingItemIndex].quantity += newItem.quantity;
-//             } else {
-//                 // Else, push new item
-//                 card.items.push({
-//                     subProduct: newItem.subProduct,
-//                     quantity: newItem.quantity,
-//                     price: newItem.price,
-//                     status: 'pending'
-//                 });
-//             }
-//         }
-
-//         // Recalculate totalAmount
-//         card.totalAmount = card.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-//         await card.save();
-
-//         await card.populate({
-//             path: 'items.subProduct',
-//         });
-
-//         res.status(200).json({
-//             success: true,
-//             message: 'Card updated successfully',
-//             card
-//         });
-
-//     } catch (error) {
-//         console.error('Add to card error:', error);
-//         res.status(500).json({
-//             success: false,
-//             message: 'Failed to update card',
-//             error: error.message
-//         });
-//     }
-// });
-
 exports.getCardById = catchAsyncErrors(async (req, res) => {
     try {
         const { id } = req.params;
-        // if (!mongoose.Types.ObjectId.isValid(id)) {
-        //     return res.status(400).json({ success: false, message: 'Invalid user ID' });
-        // }
         let card = await Card.findOne({ user: id })
             .populate({ path: 'items.subProduct', populate: { path: 'productId', select: "productName sizes" } })
-            .populate({ path: 'user', select: 'name email phone' });
-        // card.items.map((item) => Number(item?.subProduct.pcsInSet) * item?.quantity).reduce((a, b) => a + b, 0)
-        // console.log("XXXXXXXXXXX2=>",);
+            .populate({ path: 'user', select: 'name email phone' })
+            .lean();
+
+        // ✅ if no cart found return empty
+        if (!card) {
+            return res.status(200).json({
+                success: true,
+                card: null,
+                Totalquantity: 0,
+                TotlePsc: 0
+            });
+        }
 
         let Totalquantity = card.items.map((item) => item?.quantity).reduce((a, b) => a + b, 0)
         let TotlePsc = card.items.filter((item) => !isNaN(Number(item?.subProduct?.pcsInSet))).map((item) => Number(item.subProduct.pcsInSet) * item.quantity).reduce((a, b) => a + b, 0)
-        // console.log("XXXXXXXXXXX2=>", card.items.map((item) => Number(item?.subProduct.set) * item?.quantity).reduce((a, b) => a + b, 0));
-        // if (!card) {
-        //     card = new Card({ user: id, items: [], totalAmount: 0, });
-        //     await card.save();
-        // }
-
-        // // Filter out invalid or mismatched products/variants
-        // card.items = card.items.filter(item => {
-        //     if (!item.product || !item.product.variant) return false;
-
-        //     return item.product.variant.some(variant => variant?.finalPrice === item?.price);
-        // });
-
-        // // Optional: update totalAmount based on filtered items
-        // card.totalAmount = card.items.reduce((total, item) => total + item.price * item.quantity, 0);
-
-        // await card.save();
-
         res.status(200).json({ success: true, card, Totalquantity, TotlePsc });
     } catch (error) {
         console.error('Get card error:', error);
@@ -205,35 +113,28 @@ exports.updateCard = catchAsyncErrors(async (req, res) => {
     try {
         const { userId, itemId, action } = req.body;
 
-        // Validate ObjectIds
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(itemId)) {
             return res.status(200).json({ success: false, message: 'Invalid userId or itemId' });
         }
 
-        // Fetch user's cart
         const cart = await Card.findOne({ user: userId, items: { $elemMatch: { _id: itemId } } });
-
         if (!cart) {
             return res.status(204).json({ success: false, message: 'Cart not found' });
         }
 
-        // Find item index
         const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
-
         if (itemIndex === -1) {
             return res.status(204).json({ success: false, message: 'Item not found in cart' });
         }
 
         const item = cart.items[itemIndex];
 
-        // Fetch product to check stock
-        const product = await SubProduct.findById(item.subProduct);
-
+        // ✅ only fetch stock field - not entire product
+        const product = await SubProduct.findById(item.subProduct).select('stock lotStock').lean();
         if (!product) {
             return res.status(204).json({ success: false, message: 'Product not found' });
         }
 
-        // Update quantity based on action
         if (action === "increase") {
             if (item.quantity + 1 > product.stock) {
                 return res.status(200).json({ success: false, message: `Cannot exceed stock. Available: ${product.stock}` });
@@ -245,28 +146,31 @@ exports.updateCard = catchAsyncErrors(async (req, res) => {
             }
             item.quantity -= 1;
         } else {
-            return res.status(200).json({ success: false, message: 'Invalid action. Use "increase" or "decrease"' });
+            return res.status(200).json({ success: false, message: 'Invalid action' });
         }
 
         item.status = "pending";
-
-        // Recalculate total amount
-        cart.totalAmount = cart.items.reduce(
-            (total, item) => total + item.quantity * item.price,
-            0
-        );
+        cart.totalAmount = cart.items.reduce((total, i) => total + i.quantity * i.price, 0);
 
         await cart.save();
-        await cart.populate({ path: 'items.subProduct', select: 'name images price finalPrice stock variant' });
 
-        return res.status(200).json({ success: true, message: 'Cart updated', cart });
+        // ✅ just return updated quantity and total — no populate needed
+        return res.status(200).json({
+            success: true,
+            message: 'Cart updated',
+            updatedItem: {
+                itemId,
+                quantity: item.quantity,
+                price: item.price,
+            },
+            totalAmount: cart.totalAmount
+        });
 
     } catch (error) {
         console.error('Update cart error:', error);
         return res.status(500).json({ success: false, message: 'Failed to update cart', error: error.message });
     }
 });
-
 
 exports.updateAllQuantityCard = catchAsyncErrors(async (req, res) => {
     try {

@@ -95,8 +95,11 @@ function CreateOrderModal({ subProducts, orders, fetchAllOrder, setOrders, setFi
     console.log("customercustomercustomer:==>", newOrderForm);
     const handleQRScan = () => {
         if (!qrScanInput.trim()) return;
-
-        const foundProduct = subProducts?.find(p => p?.barcode === qrScanInput.trim());
+         const foundProduct = subProducts.find(p => 
+    p.barcode === value || 
+    p.barcode === value.padStart(13, '0') || // ✅ handle scanner dropping leading zero
+    p.barcode === value.replace(/^0+/, '')    // ✅ handle extra leading zeros
+);
         if (foundProduct) {
             // Check if product already exists in items
             const existingItemIndex = newOrderForm?.items?.findIndex(item => item?.productId === foundProduct?._id);
@@ -132,7 +135,11 @@ function CreateOrderModal({ subProducts, orders, fetchAllOrder, setOrders, setFi
         if (value.length === 13 && /^\d{13}$/.test(value)) {
             // Small delay to ensure scanner has finished
             setTimeout(() => {
-                const foundProduct = subProducts.find(p => p.barcode === value);
+                const foundProduct = subProducts.find(p => 
+    p.barcode === value || 
+    p.barcode === value.padStart(13, '0') || // ✅ handle scanner dropping leading zero
+    p.barcode === value.replace(/^0+/, '')    // ✅ handle extra leading zeros
+); 
                 if (foundProduct) {
                     // Check if product already exists in items
                     const existingItemIndex = newOrderForm?.items?.findIndex(item => item.productId === foundProduct._id);

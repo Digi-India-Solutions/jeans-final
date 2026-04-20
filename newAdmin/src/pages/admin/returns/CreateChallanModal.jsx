@@ -412,15 +412,12 @@ function CreateChallanModal({
   const filteredOrders = useMemo(
     () =>
       selectedCustomerOrders.filter(
-        (o) =>
-          !["Cancelled", "Returned", "Dispatched"].includes(
-            o?.status
-          ) && o?.recycleBin === false
+        (o) => !["Cancelled", "Returned", "Dispatched"].includes(o?.status) && o?.recycleBin === false
       ),
     [selectedCustomerOrders]
   );
 
-  console.log("selectedCustomerOrders=>" ,selectedCustomerOrders)
+  console.log("selectedCustomerOrders=>", selectedCustomerOrders, filteredOrders)
   // 🧩 Update dispatch qty for an item
   const updateChallanItemQuantity = (index, dispatchQty, alreadyDispatched) => {
     const updatedItems = challanForm.items.map((item, i) =>
@@ -488,7 +485,7 @@ function CreateChallanModal({
       vendor: challanForm?.deliveryVendor,
       notes: challanForm?.notes,
     };
-    console.log("SSSSSSSS::=>",payload )
+    console.log("SSSSSSSS::=>", payload)
     try {
       const response = await postData("api/challan/create-challan", payload);
 
