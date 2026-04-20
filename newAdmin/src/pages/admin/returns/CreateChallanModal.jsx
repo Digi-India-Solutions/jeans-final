@@ -420,6 +420,7 @@ function CreateChallanModal({
     [selectedCustomerOrders]
   );
 
+  console.log("selectedCustomerOrders=>" ,selectedCustomerOrders)
   // 🧩 Update dispatch qty for an item
   const updateChallanItemQuantity = (index, dispatchQty, alreadyDispatched) => {
     const updatedItems = challanForm.items.map((item, i) =>
