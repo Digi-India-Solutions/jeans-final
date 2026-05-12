@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const path = require("path");
 const app = express();
+const connectDatabase = require("./db/database");
 
 // built-in middlewares
 app.use(cors());
@@ -13,6 +14,9 @@ app.use(express.urlencoded({ limit: "50mb" }));
 app.use("/uploads", express.static(path.join(__dirname + "/uploads")));
 app.use("/Public", express.static(path.join(__dirname + "/Public")));
 // app.set(express.static("./Public"));
+//connect db
+connectDatabase();
+
 
 const superAdminRoutes = require("./src/super-admin/super-admin-routes");
 const adminRoleRoutes = require("./src/adminRole/adminRole-routes");
@@ -39,6 +43,7 @@ const challanRoutes = require("./src/challan/challan-routes");
 const returnRoutes = require("./src/return/return-routes");
 const cataloguesRoutes = require("./src/catalogues/catalogues-routes");
 const dashboardRoutes = require("./src/dashboard/dashboard-routes")
+const termAndConditionRoutes = require("./src/termAndCondition/termAndCondition-routes")
 
 
 app.use("/api/admin", superAdminRoutes);
@@ -66,11 +71,11 @@ app.use("/api/challan", challanRoutes)
 app.use("/api/return", returnRoutes)
 app.use("/api/catalogues", cataloguesRoutes)
 app.use("/api/dashboard", dashboardRoutes)
+app.use("/api/termAndCondition",termAndConditionRoutes)
 
-const connectDatabase = require("./db/database");
 
-//connect db
-connectDatabase();
+
+
 
 // sendBillingToClient();
 app.use("/", (req, res) => {

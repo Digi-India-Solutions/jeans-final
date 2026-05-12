@@ -3,7 +3,7 @@ const sendResponse = require("../../middleware/response");
 const ErrorHandler = require("../../utils/ErrorHandler");
 const fs = require('fs');
 const path = require("path");
-// const Product = require("./subProducts-model.js");
+const Product = require("../products/products-model.js");
 const SubProduct = require("./subProducts-model.js");
 const Category = require("../categorys/categorys-model.js")
 const Color = require("../colors/colors-model.js");
@@ -50,55 +50,189 @@ exports.getAllSubProducts = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+// exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
+//     try {
+//         const page = parseInt(req.query.page, 10) || 1;
+//         const limit = parseInt(req.query.limit, 10) || 10;
+//         const skip = (page - 1) * limit;
+//         const search = req.query.search?.trim() || "";
+
+//         // 🔎 Build search query
+//         let query = {};
+//         if (search) {
+//             const numericSearch = !isNaN(Number(search)) ? Number(search) : null;
+
+//             query = {
+//                 $or: [
+//                     { name: { $regex: search, $options: "i" } },
+//                     { lotNumber: { $regex: search, $options: "i" } },
+//                     { "productId.productName": { $regex: search, $options: "i" } },
+//                     { barcode: { $regex: search, $options: "i" } },
+//                     { stock: { $regex: search, $options: "i" } },
+//                     { description: { $regex: search, $options: "i" } },
+//                     ...(numericSearch !== null ? [{ singlePicPrice: numericSearch }] : [])
+//                 ]
+//             };
+//         }
+
+//         // 📊 Count total documents with query
+//         const totalSubProducts = await SubProduct.countDocuments(query);
+
+//         // 📦 Fetch paginated + populated sub-products
+//         const subProducts = await SubProduct.find(query)
+//             .populate([
+//                 {
+//                     path: "productId",
+//                     populate: { path: "categoryId" }
+//                 },
+//                 { path: "sizes" }
+//             ])
+//             .sort({ createdAt: -1 })
+//             .skip(skip)
+//             .limit(limit)
+//             .lean(); // return plain JS objects
+
+
+//         // ✅ Return response
+//         return res.status(200).json({
+//             success: true,
+//             data: subProducts,
+//             pagination: { totalSubProducts, totalPages: Math.ceil(totalSubProducts / limit), currentPage: page, limit }
+//         });
+//     } catch (error) {
+//         return next(new ErrorHandler(error.message, 500));
+//     }
+// });
+
 exports.getAllSubProductsWithPagination = catchAsyncErrors(async (req, res, next) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
-        const limit = parseInt(req.query.limit, 10) || 10;
+        const limit = parseInt(req.query.limit, 10) || 12;
         const skip = (page - 1) * limit;
         const search = req.query.search?.trim() || "";
+        const category = req.query.category?.trim() || "";  // mainCategoryId _id
+        const subCategory = req.query.subCategory?.trim() || "";  // categoryId (sub) _id
+        const status = req.query.status?.trim() || "";  // "In Stock" | "Low Stock" | "Out of Stock"
 
-        // 🔎 Build search query
+        // ─── Build base query ─────────────────────────────────────────────────
+
         let query = {};
+
+        // 🔎 Text search across common fields
         if (search) {
             const numericSearch = !isNaN(Number(search)) ? Number(search) : null;
-
-            query = {
-                $or: [
-                    { name: { $regex: search, $options: "i" } },
-                    { lotNumber: { $regex: search, $options: "i" } },
-                    { "productId.productName": { $regex: search, $options: "i" } },
-                    { barcode: { $regex: search, $options: "i" } },
-                    { stock: { $regex: search, $options: "i" } },
-                    { description: { $regex: search, $options: "i" } },
-                    ...(numericSearch !== null ? [{ singlePicPrice: numericSearch }] : [])
-                ]
-            };
+            query.$or = [
+                { color: { $regex: search, $options: "i" } },
+                { lotNumber: { $regex: search, $options: "i" } },
+                { barcode: { $regex: search, $options: "i" } },
+                { stock: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+                ...(numericSearch !== null
+                    ? [{ singlePicPrice: numericSearch }, { lotStock: numericSearch }]
+                    : []),
+            ];
         }
 
-        // 📊 Count total documents with query
+        // 📦 Stock status filter (exact match — frontend sends label string)
+        if (status) {
+            query.stock = status;
+        }
+
+        // ─── Category + SubCategory filter ───────────────────────────────────
+        // Product schema:
+        //   mainCategoryId → Single ObjectId   ← filter by `category` param
+        //   categoryId     → Array of ObjectIds ← filter by `subCategory` param
+        //
+        // IMPORTANT: When both are provided, we must INTERSECT the two productId
+        // sets — NOT let the second block overwrite the first.
+        // Strategy: collect each set independently, then take the intersection.
+
+        if (category || subCategory) {
+            let categoryProductIds = null; // null = "not filtered"
+            let subCategoryProductIds = null;
+
+            // ── Main category filter ──
+            if (category) {
+                const matched = await Product.find({ mainCategoryId: category })
+                    .select("_id")
+                    .lean();
+                categoryProductIds = matched.map(p => p._id.toString());
+            }
+
+            // ── Sub-category filter ──
+            // categoryId is an Array on Product — Mongoose/MongoDB handles
+            // { categoryId: subCategory } as "array contains this value" natively.
+            if (subCategory) {
+                const matched = await Product.find({ categoryId: subCategory })
+                    .select("_id")
+                    .lean();
+                subCategoryProductIds = matched.map(p => p._id.toString());
+
+                console.log("matched==>", matched)
+            }
+
+            // ── Intersect both sets if both filters are active ──────────────
+            let finalProductIds;
+
+            if (categoryProductIds !== null && subCategoryProductIds !== null) {
+                // Both active → intersection (products that satisfy BOTH conditions)
+                const subCategorySet = new Set(subCategoryProductIds);
+                finalProductIds = categoryProductIds.filter(id => subCategorySet.has(id));
+            } else {
+                // Only one active → use whichever is not null
+                finalProductIds = categoryProductIds ?? subCategoryProductIds;
+            }
+
+            // ── Short-circuit if intersection is empty ──────────────────────
+            if (finalProductIds.length === 0) {
+                return res.status(200).json({
+                    success: true,
+                    data: [],
+                    pagination: {
+                        totalSubProducts: 0,
+                        totalPages: 0,
+                        currentPage: page,
+                        limit,
+                    },
+                });
+            }
+
+            query.productId = { $in: finalProductIds };
+        }
+
+        // ─── Count + fetch ─────────────────────────────────────────────────────
+
         const totalSubProducts = await SubProduct.countDocuments(query);
 
-        // 📦 Fetch paginated + populated sub-products
         const subProducts = await SubProduct.find(query)
             .populate([
                 {
                     path: "productId",
-                    populate: { path: "categoryId" }
+                    populate: [
+                        { path: "categoryId" },     // sub-categories array
+                        { path: "mainCategoryId" }, // main category
+                    ],
                 },
-                { path: "sizes" }
+                { path: "sizes" },
             ])
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .lean(); // return plain JS objects
+            .lean();
 
+        // ─── Response ──────────────────────────────────────────────────────────
 
-        // ✅ Return response
         return res.status(200).json({
             success: true,
             data: subProducts,
-            pagination: { totalSubProducts, totalPages: Math.ceil(totalSubProducts / limit), currentPage: page, limit }
+            pagination: {
+                totalSubProducts,
+                totalPages: Math.ceil(totalSubProducts / limit),
+                currentPage: page,
+                limit,
+            },
         });
+
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
     }

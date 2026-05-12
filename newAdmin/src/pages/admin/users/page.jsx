@@ -156,7 +156,7 @@ export default function UsersManagement() {
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, success: 0, failed: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
-
+ const [isExporting, setIsExporting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -705,6 +705,92 @@ useEffect(() => {
 
   // ─── RENDER ──────────────────────────────────────────────────────────────────
 
+
+   // ─── Export All Users to Excel ────────────────────────────────────────────
+  const exportUsersToExcel = async () => {
+    setIsExporting(true);
+    try {
+      // Fetch all users (no pagination limit)
+      const params = new URLSearchParams({ page: 1, limit: 99999 });
+      if (filters.search) params.append('search', filters.search);
+      if (filters.status) params.append('status', filters.status);
+ 
+      const response = await getData(`api/user/get-all-user?${params.toString()}`);
+      const allExportUsers = response?.data || filteredUsers;
+ 
+      // Build order lookup for totals
+      const orderLookup = {};
+      orders.forEach(order => {
+        const uid = order?.customer?.userId?._id;
+        if (!uid) return;
+        if (!orderLookup[uid]) orderLookup[uid] = { count: 0, spent: 0 };
+        orderLookup[uid].count++;
+        orderLookup[uid].spent += order?.total || 0;
+      });
+ 
+      const rows = allExportUsers.map((user) => {
+        const stats = orderLookup[user._id] || { count: 0, spent: 0 };
+        return {
+          'User ID':          user?.uniqueUserId || user._id || '',
+          'Name':             user.name || '',
+          'Email':            user.email || '',
+          'Phone':            user.phone || '',
+          'Shop Name':        user.shopname || '',
+          'Status':           user.isActive ? 'Active' : 'Inactive',
+          'Street':           user.address?.street || '',
+          'City':             user.address?.city || '',
+          'State':            user.address?.state || '',
+          'Zip Code':         user.address?.zipCode || '',
+          'Country':          user.address?.country || '',
+          'Total Orders':     stats.count,
+          'Total Spent (₹)':  stats.spent,
+          'Joined Date':      user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN') : '',
+        };
+      });
+ 
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      worksheet['!cols'] = [
+        { wch: 22 }, { wch: 22 }, { wch: 28 }, { wch: 16 }, { wch: 22 },
+        { wch: 10 }, { wch: 25 }, { wch: 16 }, { wch: 16 }, { wch: 12 },
+        { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
+      ];
+ 
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+ 
+      // Summary sheet
+      const activeCount   = allExportUsers.filter(u => u.isActive).length;
+      const inactiveCount = allExportUsers.length - activeCount;
+      const totalSpent    = Object.values(orderLookup).reduce((s, v) => s + v.spent, 0);
+      const totalOrders   = Object.values(orderLookup).reduce((s, v) => s + v.count, 0);
+ 
+      const summarySheet = XLSX.utils.aoa_to_sheet([
+        ['Users Export Summary'],
+        ['Generated On', new Date().toLocaleString()],
+        ['Total Users', allExportUsers.length],
+        [],
+        ['Status Breakdown'],
+        ['Active Users',   activeCount],
+        ['Inactive Users', inactiveCount],
+        [],
+        ['Order Summary'],
+        ['Total Orders Placed', totalOrders],
+        ['Total Revenue (₹)',   totalSpent],
+      ]);
+      summarySheet['!cols'] = [{ wch: 22 }, { wch: 20 }];
+      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+ 
+      const fileName = `Users_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success(`Exported ${allExportUsers.length} users to ${fileName}`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export users. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+ 
   return (
     <AdminLayout>
       <ToastContainer />
@@ -715,7 +801,49 @@ useEffect(() => {
             <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
             <p className="text-gray-600 mt-1">Manage customer accounts and profiles</p>
           </div>
-          <div className="flex space-x-2 flex-wrap gap-y-2">
+           <div className="flex flex-wrap gap-2">
+            {/* Export Excel Button */}
+            <Button
+              onClick={exportUsersToExcel}
+              disabled={isExporting}
+              className="bg-teal-600 hover:bg-teal-700 text-white flex items-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isExporting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  <span>Exporting...</span>
+                </>
+              ) : (
+                <>
+                  <i className="ri-file-excel-line"></i>
+                  <span>Export Excel</span>
+                </>
+              )}
+            </Button>
+ 
+            <Button onClick={handlesubmitExel} className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center space-x-2">
+              <i className="ri-file-excel-line"></i>
+              <span>Bulk Upload (Excel)</span>
+            </Button>
+ 
+            <Button onClick={handleAdd} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2">
+              <i className="ri-user-add-line"></i>
+              <span>Add User</span>
+            </Button>
+ 
+            <Button
+              onClick={handleOrderClick}
+              className="bg-green-600 hover:bg-green-700 text-white flex items-center space-x-2"
+              disabled={loading || filteredUsers.length === 0}
+            >
+              <i className="ri-notification-line"></i>
+              <span>{loading ? 'Sending...' : 'Send Notifications'}</span>
+            </Button>
+          </div>
+          {/* <div className="flex space-x-2 flex-wrap gap-y-2">
             <Button
               onClick={handlesubmitExel}
               className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center space-x-2"
@@ -738,7 +866,7 @@ useEffect(() => {
               <i className="ri-notification-line"></i>
               <span>{loading ? 'Sending...' : 'Send Notifications'}</span>
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Filters */}

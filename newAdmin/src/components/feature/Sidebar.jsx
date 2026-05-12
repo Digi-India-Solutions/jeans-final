@@ -69,6 +69,7 @@ export default function Sidebar({ isOpen, onClose, isDarkMode }) {
     ...(permissions?.enquiries?.read ? [{ title: 'Enquiries', icon: 'ri-question-answer-line', path: '/admin/enquiries', }] : []),
     ...(permissions?.catalogueUpload?.read ? [{ title: 'Catalogue Upload', icon: 'ri-file-pdf-line', path: '/admin/catalogue', }] : []),
      ...(permissions?.recycledOrder?.read || user?.role === 'Super Admin' ? [{ title: 'Recycled Order', icon: 'ri-recycle-line', path: '/admin/recycledOrder', }] : []),
+     ...(permissions?.recycledOrder?.read || user?.role === 'Super Admin' ? [{ title: 'Term And Condition', icon: 'ri-recycle-line', path: '/admin/term-and-condition', }] : []),
   ];
   console.log("GGGGGGGG:=>", permissions)
   return (

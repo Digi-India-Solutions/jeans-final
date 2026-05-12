@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import Card from "../../../components/base/Card";
 import { getData } from "../../../services/FetchNodeServices";
 
-function OverviewTab({ dateRange, setDateRange }) {
+function OverviewTab({ dateRange, setDateRange ,startDate ,endDate }) {
     const [salesDatas, setSalesData] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const res = await getData(
-                    `api/salesAndReports/get-jeans-shirt-revenue-and-order?range=${dateRange}`
+                    `api/salesAndReports/get-jeans-shirt-revenue-and-order?range=${startDate || endDate ? 'custom' : dateRange}&startDate=${startDate}&endDate=${endDate}`
                 );
                 if (res?.success === true) {
                     console.log("get-jeans-shirt-revenue-and-order", res?.data)
@@ -20,7 +20,7 @@ function OverviewTab({ dateRange, setDateRange }) {
             }
         };
         fetchData();
-    }, [dateRange]);
+    }, [dateRange , startDate && endDate]);
 
     // helper: format currency in Lakh
     // const formatLakh = (num = 0) => (num / 1000).toFixed(1);

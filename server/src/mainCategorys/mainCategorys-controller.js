@@ -60,14 +60,15 @@ const MAIN_CATEGORY_TTL = 5 * 60 * 1000;
 
 exports.getAllMainCategorys = catchAsyncErrors(async (req, res, next) => {
     try {
-        const cached = mainCategoryCache['all'];
-        if (cached && Date.now() - cached.time < MAIN_CATEGORY_TTL) {
-            return res.status(200).json(cached.data);
-        }
+        // const cached = mainCategoryCache['all'];
+        // if (cached && Date.now() - cached.time < MAIN_CATEGORY_TTL) {
+        //     return res.status(200).json(cached.data);
+        // }
         const { pageNumber } = req.query;
         const totalMainCategorys = await MainCategory.countDocuments();
         const mainCategorys = await MainCategory.find({}).sort({ createdAt: -1 }).lean();
         const result = { success: true, data: mainCategorys, totalMainCategorys };
+        console.log("SSSSSS==>result" ,result)
         mainCategoryCache['all'] = { data: result, time: Date.now() };
         res.status(200).json(result);
     } catch (error) {

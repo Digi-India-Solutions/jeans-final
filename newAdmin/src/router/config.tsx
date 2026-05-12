@@ -30,6 +30,12 @@ import ResetPassword from "../components/auth/ResetPassword";
 import UserRolesManagement from "../pages/admin/user-roles/page";
 import ChallanCreate from "../pages/admin/challan/create/page";
 import CartsManagement from "../pages/admin/application/cart/page";
+import TermAndCondition from "../pages/admin/termAndCondition/page.jsx";
+import Categorys from "../pages/website/category/page.jsx"
+import SubCategorys from "../pages/website/subCategorys/page.jsx"
+import Products from "../pages/website/product/page.jsx"
+import SubProducts from "../pages/website/subProduct/page.jsx"
+import ProductDeatils from "../pages/website/productDetails/page.jsx"
 
 const CatalogueUpload = lazy(() => import('../pages/admin/catalogue/page'));
 
@@ -38,6 +44,11 @@ const routes: RouteObject[] = [
   { path: "/", element: <HomePage /> },
   { path: "/login", element: <Login /> },
   { path: "/admin/reset-password/:token", element: <ResetPassword /> },
+  { path: "/main-category", element: <Categorys /> },
+  { path: "/sub-category/:name", element: <SubCategorys /> },
+  { path: "/products/:name", element: <Products /> },
+  { path: "/sub-products/:name", element: <SubProducts /> },
+  { path: "/product-details/:name", element: <ProductDeatils /> },
 
   // ✅ Protected admin routes — auth checked inside ProtectedRoute
   {
@@ -55,6 +66,9 @@ const routes: RouteObject[] = [
       { path: "user-roles", element: <UserRolesManagement /> },
       { path: "users", element: <UsersManagement /> },
       { path: "catalogue", element: <CatalogueUpload /> },
+      { path: "term-and-condition", element: <TermAndCondition /> },
+
+
       {
         path: "application",
         children: [

@@ -259,3 +259,33 @@ exports.getProductsByCategory = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
+exports.getProductsBySubCategory = catchAsyncErrors(
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "Category id is required",
+        });
+      }
+
+      const products = await Product.find({
+        categoryId: { $in: [id] },
+        isActive: true,
+      })
+        .populate("categoryId")
+        .populate("mainCategoryId");
+
+      return res.status(200).json({
+        success: true,
+        count: products.length,
+        data: products,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+

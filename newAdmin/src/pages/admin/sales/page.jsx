@@ -1,421 +1,731 @@
-import { useState } from 'react';
+// import { useState } from 'react';
+// import AdminLayout from '../../../components/feature/AdminLayout';
+// import Card from '../../../components/base/Card';
+// import Button from '../../../components/base/Button';
+// import JeansSalesTab from './JeansSalesTab';
+// import ShirtsSalesTab from './ShirtsSalesTab';
+// import OverviewTab from './OverviewTab';
+// import { getData } from '../../../services/FetchNodeServices';
+
+// export default function SalesReports() {
+//   const [activeTab, setActiveTab] = useState('overview');
+//   const [dateRange, setDateRange] = useState('thisMonth');
+//   const [selectedPeriod, setSelectedPeriod] = useState('Monthly');
+
+//   // Sample sales data for Jeans and Shirts with piece counts
+//   const salesData = {
+//     jeans: {
+//       total: 0,
+//       pieces: 0,
+//       growth: 0,
+//       orders: 0,
+//       avgOrder: 0,
+//       dailyData: [
+//         { date: '2024-01-01', sales: 0, orders: 0, pieces: 0 },
+//       ]
+//     },
+//     shirts: {
+//       total: 0,
+//       pieces: 0,
+//       growth: 0,
+//       orders: 0,
+//       avgOrder: 0,
+//       dailyData: [
+//         { date: '2024-01-01', sales: 0, orders: 0, pieces: 0 },
+//       ]
+//     }
+//   };
+
+//   const [salesDatas, setSalesData] = useState(salesData);
+
+//   const topProductsss = [
+//     { name: 'Premium Skinny Jeans', sales: 485000, units: 194, pieces: 194, growth: 15.2 },
+//     { name: 'Regular Fit Jeans', sales: 420000, units: 191, pieces: 191, growth: 8.7 },
+//     { name: 'Formal Cotton Shirts', sales: 380000, units: 200, pieces: 200, growth: 12.1 },
+//     { name: 'Casual Denim Shirts', sales: 295000, units: 184, pieces: 184, growth: -2.5 },
+//     { name: 'Bootcut Jeans', sales: 275000, units: 125, pieces: 125, growth: 22.3 }
+//   ];
+//   const [topProducts, setTopProducts] = useState(topProductsss || [])
+//   // const categoryDistribution = [
+//   //   { name: 'Jeans', value: 2450000, pieces: 980, percentage: 56.4, color: '#3B82F6' },
+//   //   { name: 'Shirts', value: 1890000, pieces: 1250, percentage: 43.6, color: '#10B981' }
+//   // ];
+
+
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const res = await getData(
+//           `api/salesAndReports/get-SalesData?range=${selectedPeriod}`
+//         );
+//         console.log("XXXXXXXXXXXX:==>", res.data)
+//         if (res?.success === true) {
+//           setSalesData(res?.data || salesData);
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch sales data:", err);
+//       }
+//     };
+//     fetchData();
+//   }, [selectedPeriod]);
+
+//   useEffect(() => {
+//     const fetchTopProductData = async () => {
+//       try {
+//         const res = await getData(
+//           `api/salesAndReports/get-top-products?range=${dateRange}`
+//         );
+//         console.log("XXXXXXXXXXXX:==>", res?.data)
+//         if (res?.success === true) {
+//           setTopProducts(res?.data || salesData);
+//         }
+//       } catch (err) {
+//         console.error("Failed to fetch sales data:", err);
+//       }
+//     };
+//     fetchTopProductData();
+//   }, [dateRange]);
+
+
+//   const renderChart = () => {
+//     // Determine max value safely
+//     const jeansSales = salesDatas?.jeans?.dailyData?.map(d => d?.sales) || [0];
+//     const shirtsSales = salesDatas?.shirts?.dailyData?.map(d => d?.sales) || [0];
+//     const maxValue = Math.max(...jeansSales, ...shirtsSales, 1);
+//     console.log("maxValue==>", maxValue, jeansSales, shirtsSales)
+
+//     // Combine dailyData for X-axis if dates differ
+//     const allDates = Array.from(
+//       new Set([
+//         ...salesDatas?.jeans?.dailyData?.map(d => d?.date || ""),
+//         ...salesDatas?.shirts?.dailyData?.map(d => d?.date || "")
+//       ])
+//     ).sort((a, b) => new Date(a) - new Date(b));
+
+//     const getSalesForDate = (categoryData, date) => {
+//       const item = categoryData.find(d => d?.date === date);
+//       return item ? item?.sales : 0;
+//     };
+
+//     return (
+//       <div className="relative h-64 bg-gray-50 rounded-lg p-4">
+//         <div className="flex justify-between items-center mb-4">
+//           <h3 className="font-medium">Sales Trend ({selectedPeriod})</h3>
+//           <div className="flex space-x-4 text-sm">
+//             <div className="flex items-center">
+//               <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+//               <span>Jeans Sales</span>
+//             </div>
+//             <div className="flex items-center">
+//               <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+//               <span>Shirts Sales</span>
+//             </div>
+//           </div>
+//         </div>
+
+//         <svg width="100%" height="200" className="overflow-visible">
+//           {/* Grid lines */}
+//           {[0, 25, 50, 75, 100].map(y => (
+//             <line
+//               key={y}
+//               x1="40"
+//               y1={40 + (y * 1.2)}
+//               x2="95%"
+//               y2={40 + (y * 1.2)}
+//               stroke="#E5E7EB"
+//               strokeWidth="1"
+//             />
+//           ))}
+
+//           {/* Jeans sales line */}
+//           <polyline
+//             fill="none"
+//             stroke="#3B82F6"
+//             strokeWidth="3"
+//             points={allDates
+//               .map((date, i) => {
+//                 const x = 50 + i * 80;
+//                 const y = 180 - ((getSalesForDate(salesDatas?.jeans?.dailyData || [], date) / maxValue) * 140);
+//                 return `${x},${y}`;
+//               })
+//               .join(" ")}
+//           />
+
+//           {/* Shirts sales line */}
+//           <polyline
+//             fill="none"
+//             stroke="#10B981"
+//             strokeWidth="3"
+//             points={allDates
+//               .map((date, i) => {
+//                 const x = 50 + i * 80;
+//                 const y = 180 - ((getSalesForDate(salesDatas?.shirts?.dailyData || [], date) / maxValue) * 140);
+//                 return `${x},${y}`;
+//               })
+//               .join(" ")}
+//           />
+
+//           {/* Data points */}
+//           {allDates.map((date, i) => {
+//             const jeansY = 180 - ((getSalesForDate(salesDatas?.jeans?.dailyData || [], date) / maxValue) * 140);
+//             const shirtsY = 180 - ((getSalesForDate(salesDatas?.shirts?.dailyData || [], date) / maxValue) * 140);
+//             return (
+//               <g key={i}>
+//                 {/* Jeans */}
+//                 <circle
+//                   cx={50 + i * 80}
+//                   cy={jeansY}
+//                   r="4"
+//                   fill="#3B82F6"
+//                   className="hover:r-6 cursor-pointer transition-all"
+//                 >
+//                   <title>Jeans: ₹{getSalesForDate(salesDatas?.jeans?.dailyData || [], date).toLocaleString()} | {salesDatas?.jeans?.dailyData?.find(d => d.date === date)?.pieces || 0} Pcs ({date})</title>
+//                 </circle>
+
+//                 {/* Shirts */}
+//                 <circle
+//                   cx={50 + i * 80}
+//                   cy={shirtsY}
+//                   r="4"
+//                   fill="#10B981"
+//                   className="hover:r-6 cursor-pointer transition-all"
+//                 >
+//                   <title>Shirts: ₹{getSalesForDate(salesDatas?.shirts?.dailyData || [], date).toLocaleString()} | {salesDatas?.shirts?.dailyData?.find(d => d.date === date)?.pieces || 0} Pcs ({date})</title>
+//                 </circle>
+//               </g>
+//             );
+//           })}
+
+//           {/* X-axis labels */}
+//           {allDates.map((date, i) => (
+//             <text
+//               key={i}
+//               x={50 + i * 80}
+//               y="195"
+//               textAnchor="middle"
+//               className="text-xs fill-gray-500"
+//             >
+//               {new Date(date).getDate()}
+//             </text>
+//           ))}
+
+//           {/* Y-axis labels */}
+//           {[0, Math.round(maxValue * 0.25), Math.round(maxValue * 0.5), Math.round(maxValue * 0.75), Math.round(maxValue)].map((value, i) => (
+//             <text
+//               key={i}
+//               x="35"
+//               y={185 - (i * 35)}
+//               textAnchor="end"
+//               className="text-xs fill-gray-500"
+//             >
+//               ₹{Math.round(value / 1000)}k
+//             </text>
+//           ))}
+//         </svg>
+//       </div>
+//     );
+//   };
+
+
+//   const renderPieChart = () => {
+//     if (!salesDatas) return null;
+
+//     const centerX = 120;
+//     const centerY = 120;
+//     const radius = 80;
+//     let currentAngle = 0;
+
+//     // Build category distribution from API response
+//     const totalSales = (salesDatas?.jeans?.total || 0) + (salesDatas?.shirts?.total || 0);
+
+//     const categoryDistribution = [
+//       {
+//         name: "Jeans",
+//         value: salesDatas?.jeans?.total || 0,
+//         pieces: salesDatas?.jeans?.pieces || 0,
+//         percentage: totalSales ? ((salesDatas?.jeans?.total / totalSales) * 100).toFixed(1) : 0,
+//         color: "#4F46E5", // indigo
+//       },
+//       {
+//         name: "Shirts",
+//         value: salesDatas?.shirts?.total || 0,
+//         pieces: salesDatas?.shirts?.pieces || 0,
+//         percentage: totalSales ? ((salesDatas?.shirts?.total / totalSales) * 100).toFixed(1) : 0,
+//         color: "#22C55E", // amber
+//       },
+//     ];
+
+//     return (
+//       <div className="relative">
+//         <svg width="240" height="240" className="mx-auto">
+//           {categoryDistribution.map((category, index) => {
+//             const angle = (category.percentage / 100) * 2 * Math.PI;
+//             const x1 = centerX + radius * Math.cos(currentAngle);
+//             const y1 = centerY + radius * Math.sin(currentAngle);
+//             const x2 = centerX + radius * Math.cos(currentAngle + angle);
+//             const y2 = centerY + radius * Math.sin(currentAngle + angle);
+
+//             const largeArcFlag = angle > Math.PI ? 1 : 0;
+
+//             const pathData = [
+//               `M ${centerX} ${centerY}`,
+//               `L ${x1} ${y1}`,
+//               `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+//               "Z",
+//             ].join(" ");
+
+//             currentAngle += angle;
+
+//             return (
+//               <g key={index}>
+//                 <path
+//                   d={pathData}
+//                   fill={category.color}
+//                   className="hover:opacity-80 cursor-pointer transition-opacity"
+//                 >
+//                   <title>
+//                     {category.name}: ₹{category.value.toLocaleString()} | {category.pieces} Pcs (
+//                     {category.percentage}%)
+//                   </title>
+//                 </path>
+//               </g>
+//             );
+//           })}
+
+//           {/* Center circle */}
+//           <circle cx={centerX} cy={centerY} r="35" fill="white" />
+//           <text
+//             x={centerX}
+//             y={centerY - 8}
+//             textAnchor="middle"
+//             className="text-xs font-medium fill-gray-700"
+//           >
+//             Total Sales
+//           </text>
+//           <text
+//             x={centerX}
+//             y={centerY + 2}
+//             textAnchor="middle"
+//             className="text-xs fill-gray-500"
+//           >
+//             ₹{totalSales.toLocaleString()}
+//           </text>
+//           <text
+//             x={centerX}
+//             y={centerY + 12}
+//             textAnchor="middle"
+//             className="text-xs fill-gray-500"
+//           >
+//             {(salesDatas?.jeans?.pieces || 0) + (salesDatas?.shirts?.pieces || 0)} Pcs
+//           </text>
+//         </svg>
+
+//         {/* Legend */}
+//         <div className="flex justify-center space-x-6 mt-4">
+//           {categoryDistribution.map((category, index) => (
+//             <div key={index} className="flex items-center">
+//               <div
+//                 className="w-4 h-4 rounded-full mr-2"
+//                 style={{ backgroundColor: category.color }}
+//               ></div>
+//               <span className="text-sm">
+//                 {category.name} ({category.percentage}%)
+//               </span>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     );
+//   };
+
+//   const handleExportExcel = async () => {
+//     try {
+
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   }
+
+//   console.log("XXXXXXX:==>", salesDatas)
+//   return (
+//     <AdminLayout>
+//       <div className="p-6">
+//         <div className="flex justify-between items-center mb-6">
+//           <div>
+//             <h1 className="text-2xl font-bold text-gray-900">Sales & Reports</h1>
+//             <p className="text-gray-600 mt-1">Monitor your sales performance by category</p>
+//           </div>
+//           <div className="flex space-x-3">
+//             <div className="relative">
+//               <select
+//                 value={dateRange}
+//                 onChange={(e) => { setDateRange(e.target.value), setSelectedPeriod(e.target.value) }}
+//                 className="px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+//               >
+//                 <option value="today">Today</option>
+//                 <option value="thisWeek">This Week</option>
+//                 <option value="thisMonth">This Month</option>
+//                 <option value="thisYear">This Year</option>
+//                 <option value="custom">Custom Range</option>
+//               </select>
+//               <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+//             </div>
+//             {/* <Button onClick={handleExportExcel} className="bg-green-600 hover:bg-green-700 text-white">
+//               <i className="ri-download-line mr-2"></i>
+//               Export Excel
+//             </Button> */}
+//             {/* <Button className="bg-red-600 hover:bg-red-700 text-white">
+//               <i className="ri-file-pdf-line mr-2"></i>
+//               Export PDF
+//             </Button> */}
+//           </div>
+//         </div>
+
+//         {/* Tab Navigation */}
+//         <div className="flex space-x-1 mb-6">
+//           <button
+//             onClick={() => setActiveTab('overview')}
+//             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
+//           >
+//             <i className="ri-dashboard-line mr-2"></i>
+//             Overview
+//           </button>
+//           <button
+//             onClick={() => setActiveTab('jeans')}
+//             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'jeans' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
+//           >
+//             <i className="ri-shirt-line mr-2"></i>
+//             Jeans Sales
+//           </button>
+//           <button
+//             onClick={() => setActiveTab('shirts')}
+//             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'shirts' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
+//           >
+//             <i className="ri-t-shirt-line mr-2"></i>
+//             Shirts Sales
+//           </button>
+//         </div>
+
+//         {/* Overview Tab */}
+//         {activeTab === 'overview' && (
+//           <div className="space-y-6">
+//             {/* Summary Cards */}
+
+//             <OverviewTab salesData={salesData} dateRange={dateRange} setDateRange={setDateRange} />
+
+//             {/* Charts Row */}
+//             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//               {/* Sales Trend Chart */}
+//               <Card className="p-6">
+//                 <div className="flex justify-between items-center mb-4">
+//                   <h3 className="text-lg font-semibold">Interactive Sales Trend</h3>
+//                   <div className="flex space-x-2">
+//                     {['Daily', 'Weekly', 'Monthly', 'Yearly'].map(period => (
+//                       <button
+//                         key={period}
+//                         onClick={() => setSelectedPeriod(period)}
+//                         className={`px-3 py-1 text-xs rounded-full ${selectedPeriod === period
+//                           ? 'bg-blue-100 text-blue-700'
+//                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+//                           }`}
+//                       >
+//                         {period}
+//                       </button>
+//                     ))}
+//                   </div>
+//                 </div>
+//                 {renderChart()}
+//               </Card>
+
+//               {/* Sales Distribution Chart */}
+//               <Card className="p-6">
+//                 <div className="flex justify-between items-center mb-4">
+//                   <h3 className="text-lg font-semibold">Sales Distribution</h3>
+//                   <div className="text-sm text-gray-500">By Category</div>
+//                 </div>
+//                 {renderPieChart()}
+//               </Card>
+//             </div>
+
+//             {/* Top Products */}
+//             <Card>
+//               <div className="p-6 border-b border-gray-200">
+//                 <h3 className="text-lg font-semibold">Top Performing Products</h3>
+//               </div>
+//               <div className="overflow-x-auto">
+//                 <table className="w-full">
+//                   <thead className="bg-gray-50">
+//                     <tr>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sales Revenue & Pieces</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units Sold</th>
+//                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Growth</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody className="bg-white divide-y divide-gray-200">
+//                     {topProducts.map((product, index) => (
+//                       <tr key={index} className="hover:bg-gray-50">
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <div className="flex items-center">
+//                             <div className="flex-shrink-0 h-8 w-8">
+//                               <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${index === 0 ? 'bg-yellow-500' :
+//                                 index === 1 ? 'bg-gray-400' :
+//                                   index === 2 ? 'bg-orange-500' : 'bg-blue-500'
+//                                 }`}>
+//                                 {index + 1}
+//                               </div>
+//                             </div>
+//                             <div className="ml-4">
+//                               <div className="text-sm font-medium text-gray-900">{product.name}</div>
+//                             </div>
+//                           </div>
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <div className="text-sm font-medium text-gray-900">₹{product.sales.toLocaleString()} | {product.pieces} Pcs</div>
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <div className="text-sm text-gray-900">{product.units}</div>
+//                         </td>
+//                         <td className="px-6 py-4 whitespace-nowrap">
+//                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.growth >= 0
+//                             ? 'bg-green-100 text-green-800'
+//                             : 'bg-red-100 text-red-800'
+//                             }`}>
+//                             {product.growth >= 0 ? '+' : ''}{product.growth}%
+//                           </span>
+//                         </td>
+//                       </tr>
+//                     ))}
+//                   </tbody>
+//                 </table>
+//               </div>
+//             </Card>
+//           </div>
+//         )}
+
+//         {/* Jeans Sales Tab */}
+//         {activeTab === 'jeans' && (
+//           <JeansSalesTab setSalesData={setSalesData} salesData={salesDatas} />
+//         )}
+
+//         {/* Shirts Sales Tab */}
+//         {activeTab === 'shirts' && (
+//           <ShirtsSalesTab setSalesData={setSalesData} salesData={salesDatas} />
+//         )}
+//       </div>
+//     </AdminLayout>
+//   );
+// }
+
+import { useState, useEffect } from 'react';   // ← was missing useEffect
 import AdminLayout from '../../../components/feature/AdminLayout';
 import Card from '../../../components/base/Card';
-import Button from '../../../components/base/Button';
 import JeansSalesTab from './JeansSalesTab';
 import ShirtsSalesTab from './ShirtsSalesTab';
 import OverviewTab from './OverviewTab';
 import { getData } from '../../../services/FetchNodeServices';
 
+const emptySalesData = {
+  jeans: { total: 0, pieces: 0, growth: 0, orders: 0, avgOrder: 0, dailyData: [] },
+  shirts: { total: 0, pieces: 0, growth: 0, orders: 0, avgOrder: 0, dailyData: [] },
+};
+
 export default function SalesReports() {
   const [activeTab, setActiveTab] = useState('overview');
   const [dateRange, setDateRange] = useState('thisMonth');
   const [selectedPeriod, setSelectedPeriod] = useState('Monthly');
+  const [salesDatas, setSalesData] = useState(emptySalesData);
+  const [topProducts, setTopProducts] = useState([]);
+  const [loadingSales, setLoadingSales] = useState(false);
+  const [loadingTop, setLoadingTop] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
-  // Sample sales data for Jeans and Shirts with piece counts
-  const salesData = {
-    jeans: {
-      total: 2450000,
-      pieces: 980,
-      growth: 12.5,
-      orders: 980,
-      avgOrder: 2500,
-      dailyData: [
-        { date: '2024-01-01', sales: 45000, orders: 18, pieces: 18 },
-        { date: '2024-01-02', sales: 52000, orders: 21, pieces: 21 },
-        { date: '2024-01-03', sales: 38000, orders: 15, pieces: 15 },
-        { date: '2024-01-04', sales: 65000, orders: 26, pieces: 26 },
-        { date: '2024-01-05', sales: 48000, orders: 19, pieces: 19 },
-        { date: '2024-01-06', sales: 71000, orders: 28, pieces: 28 },
-        { date: '2024-01-07', sales: 55000, orders: 22, pieces: 22 }
-      ]
-    },
-    shirts: {
-      total: 1890000,
-      pieces: 1250,
-      growth: 8.3,
-      orders: 1250,
-      avgOrder: 1512,
-      dailyData: [
-        { date: '2024-01-01', sales: 32000, orders: 21, pieces: 21 },
-        { date: '2024-01-02', sales: 28000, orders: 18, pieces: 18 },
-        { date: '2024-01-03', sales: 45000, orders: 30, pieces: 30 },
-        { date: '2024-01-04', sales: 38000, orders: 25, pieces: 25 },
-        { date: '2024-01-05', sales: 51000, orders: 34, pieces: 34 },
-        { date: '2024-01-06', sales: 42000, orders: 28, pieces: 28 },
-        { date: '2024-01-07', sales: 35000, orders: 23, pieces: 23 }
-      ]
-    }
-  };
-
-  const [salesDatas, setSalesData] = useState(salesData);
-
-  const topProductsss = [
-    { name: 'Premium Skinny Jeans', sales: 485000, units: 194, pieces: 194, growth: 15.2 },
-    { name: 'Regular Fit Jeans', sales: 420000, units: 191, pieces: 191, growth: 8.7 },
-    { name: 'Formal Cotton Shirts', sales: 380000, units: 200, pieces: 200, growth: 12.1 },
-    { name: 'Casual Denim Shirts', sales: 295000, units: 184, pieces: 184, growth: -2.5 },
-    { name: 'Bootcut Jeans', sales: 275000, units: 125, pieces: 125, growth: 22.3 }
-  ];
-  const [topProducts, setTopProducts] = useState(topProductsss || [])
-  // const categoryDistribution = [
-  //   { name: 'Jeans', value: 2450000, pieces: 980, percentage: 56.4, color: '#3B82F6' },
-  //   { name: 'Shirts', value: 1890000, pieces: 1250, percentage: 43.6, color: '#10B981' }
-  // ];
-
-
-
+  // ── Fetch sales trend data ──────────────────────────────────────────────────
   useEffect(() => {
     const fetchData = async () => {
+      setLoadingSales(true);
       try {
         const res = await getData(
-          `api/salesAndReports/get-SalesData?range=${selectedPeriod}`
+          `api/salesAndReports/get-SalesData?range=${startDate || endDate ? 'custom' : selectedPeriod}&startDate=${startDate}&endDate=${endDate}`
         );
-        console.log("XXXXXXXXXXXX:==>", res.data)
-        if (res?.success === true) {
-          setSalesData(res?.data || salesData);
-        }
+        if (res?.success) setSalesData(res.data || emptySalesData);
       } catch (err) {
         console.error("Failed to fetch sales data:", err);
+      } finally {
+        setLoadingSales(false);
       }
     };
     fetchData();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, startDate && endDate]);
 
+  // ── Fetch top products ──────────────────────────────────────────────────────
   useEffect(() => {
     const fetchTopProductData = async () => {
+      setLoadingTop(true);
       try {
         const res = await getData(
-          `api/salesAndReports/get-top-products?range=${dateRange}`
+          `api/salesAndReports/get-top-products?range=${startDate || endDate ? 'custom' : dateRange}&startDate=${startDate}&endDate=${endDate}`
         );
-        console.log("XXXXXXXXXXXX:==>", res?.data)
-        if (res?.success === true) {
-          setTopProducts(res?.data || salesData);
-        }
+        if (res?.success) setTopProducts(res.data || []);
       } catch (err) {
-        console.error("Failed to fetch sales data:", err);
+        console.error("Failed to fetch top products:", err);
+      } finally {
+        setLoadingTop(false);
       }
     };
     fetchTopProductData();
-  }, [dateRange]);
+  }, [dateRange, startDate && endDate]);
 
-
+  // ── Sales trend SVG chart ───────────────────────────────────────────────────
   const renderChart = () => {
-    // Determine max value safely
-    const jeansSales = salesDatas?.jeans?.dailyData?.map(d => d?.sales) || [0];
-    const shirtsSales = salesDatas?.shirts?.dailyData?.map(d => d?.sales) || [0];
+    const jeansSales = salesDatas?.jeans?.dailyData?.map(d => d.sales) || [0];
+    const shirtsSales = salesDatas?.shirts?.dailyData?.map(d => d.sales) || [0];
     const maxValue = Math.max(...jeansSales, ...shirtsSales, 1);
-    console.log("maxValue==>", maxValue, jeansSales, shirtsSales)
 
-    // Combine dailyData for X-axis if dates differ
     const allDates = Array.from(
       new Set([
-        ...salesDatas?.jeans?.dailyData?.map(d => d?.date || ""),
-        ...salesDatas?.shirts?.dailyData?.map(d => d?.date || "")
+        ...(salesDatas?.jeans?.dailyData?.map(d => d.date) || []),
+        ...(salesDatas?.shirts?.dailyData?.map(d => d.date) || []),
       ])
     ).sort((a, b) => new Date(a) - new Date(b));
 
-    const getSalesForDate = (categoryData, date) => {
-      const item = categoryData.find(d => d?.date === date);
-      return item ? item?.sales : 0;
-    };
+    const getSalesForDate = (categoryData = [], date) =>
+      categoryData.find(d => d.date === date)?.sales || 0;
+
+    const getPcsForDate = (categoryData = [], date) =>
+      categoryData.find(d => d.date === date)?.pieces || 0;
+
+    if (allDates.length === 0) {
+      return (
+        <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+          No data for selected period
+        </div>
+      );
+    }
+
+    const chartWidth = 600;
+    const chartHeight = 160;
+    const paddingLeft = 50;
+    const paddingRight = 20;
+    const usableWidth = chartWidth - paddingLeft - paddingRight;
+
+    const xFor = (i) =>
+      allDates.length === 1
+        ? paddingLeft + usableWidth / 2
+        : paddingLeft + (i / (allDates.length - 1)) * usableWidth;
+
+    const yFor = (value) => chartHeight - (value / maxValue) * chartHeight;
+
+    const jeansPoints = allDates.map((d, i) => `${xFor(i)},${yFor(getSalesForDate(salesDatas.jeans.dailyData, d))}`).join(" ");
+    const shirtsPoints = allDates.map((d, i) => `${xFor(i)},${yFor(getSalesForDate(salesDatas.shirts.dailyData, d))}`).join(" ");
 
     return (
-      <div className="relative h-64 bg-gray-50 rounded-lg p-4">
+      <div className="bg-gray-50 rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium">Sales Trend ({selectedPeriod})</h3>
-          <div className="flex space-x-4 text-sm">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-              <span>Jeans Sales</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              <span>Shirts Sales</span>
-            </div>
+          <h3 className="font-medium text-sm text-gray-700">Sales Trend ({selectedPeriod})</h3>
+          <div className="flex space-x-4 text-xs">
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500" /><span>Jeans</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500" /><span>Shirts</span></div>
           </div>
         </div>
 
-        <svg width="100%" height="200" className="overflow-visible">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 30}`} className="w-full" style={{ height: 220 }}>
           {/* Grid lines */}
-          {[0, 25, 50, 75, 100].map(y => (
-            <line
-              key={y}
-              x1="40"
-              y1={40 + (y * 1.2)}
-              x2="95%"
-              y2={40 + (y * 1.2)}
-              stroke="#E5E7EB"
-              strokeWidth="1"
-            />
+          {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => (
+            <g key={i}>
+              <line x1={paddingLeft} y1={yFor(maxValue * pct)} x2={chartWidth - paddingRight} y2={yFor(maxValue * pct)} stroke="#E5E7EB" strokeWidth="1" />
+              <text x={paddingLeft - 4} y={yFor(maxValue * pct) + 4} textAnchor="end" fontSize="9" fill="#9CA3AF">
+                ₹{Math.round(maxValue * pct / 1000)}k
+              </text>
+            </g>
           ))}
 
-          {/* Jeans sales line */}
-          <polyline
-            fill="none"
-            stroke="#3B82F6"
-            strokeWidth="3"
-            points={allDates
-              .map((date, i) => {
-                const x = 50 + i * 80;
-                const y = 180 - ((getSalesForDate(salesDatas?.jeans?.dailyData || [], date) / maxValue) * 140);
-                return `${x},${y}`;
-              })
-              .join(" ")}
-          />
+          {/* Lines */}
+          <polyline fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinejoin="round" points={jeansPoints} />
+          <polyline fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinejoin="round" points={shirtsPoints} />
 
-          {/* Shirts sales line */}
-          <polyline
-            fill="none"
-            stroke="#10B981"
-            strokeWidth="3"
-            points={allDates
-              .map((date, i) => {
-                const x = 50 + i * 80;
-                const y = 180 - ((getSalesForDate(salesDatas?.shirts?.dailyData || [], date) / maxValue) * 140);
-                return `${x},${y}`;
-              })
-              .join(" ")}
-          />
-
-          {/* Data points */}
+          {/* Dots */}
           {allDates.map((date, i) => {
-            const jeansY = 180 - ((getSalesForDate(salesDatas?.jeans?.dailyData || [], date) / maxValue) * 140);
-            const shirtsY = 180 - ((getSalesForDate(salesDatas?.shirts?.dailyData || [], date) / maxValue) * 140);
+            const jY = yFor(getSalesForDate(salesDatas.jeans.dailyData, date));
+            const sY = yFor(getSalesForDate(salesDatas.shirts.dailyData, date));
             return (
               <g key={i}>
-                {/* Jeans */}
-                <circle
-                  cx={50 + i * 80}
-                  cy={jeansY}
-                  r="4"
-                  fill="#3B82F6"
-                  className="hover:r-6 cursor-pointer transition-all"
-                >
-                  <title>Jeans: ₹{getSalesForDate(salesDatas?.jeans?.dailyData || [], date).toLocaleString()} | {salesDatas?.jeans?.dailyData?.find(d => d.date === date)?.pieces || 0} Pcs ({date})</title>
+                <circle cx={xFor(i)} cy={jY} r="4" fill="#3B82F6">
+                  <title>Jeans {date}: ₹{getSalesForDate(salesDatas.jeans.dailyData, date).toLocaleString()} | {getPcsForDate(salesDatas.jeans.dailyData, date)} Pcs</title>
                 </circle>
-
-                {/* Shirts */}
-                <circle
-                  cx={50 + i * 80}
-                  cy={shirtsY}
-                  r="4"
-                  fill="#10B981"
-                  className="hover:r-6 cursor-pointer transition-all"
-                >
-                  <title>Shirts: ₹{getSalesForDate(salesDatas?.shirts?.dailyData || [], date).toLocaleString()} | {salesDatas?.shirts?.dailyData?.find(d => d.date === date)?.pieces || 0} Pcs ({date})</title>
+                <circle cx={xFor(i)} cy={sY} r="4" fill="#10B981">
+                  <title>Shirts {date}: ₹{getSalesForDate(salesDatas.shirts.dailyData, date).toLocaleString()} | {getPcsForDate(salesDatas.shirts.dailyData, date)} Pcs</title>
                 </circle>
+                {/* X-axis label */}
+                <text x={xFor(i)} y={chartHeight + 18} textAnchor="middle" fontSize="9" fill="#6B7280">
+                  {new Date(date).getDate()}/{new Date(date).getMonth() + 1}
+                </text>
               </g>
             );
           })}
-
-          {/* X-axis labels */}
-          {allDates.map((date, i) => (
-            <text
-              key={i}
-              x={50 + i * 80}
-              y="195"
-              textAnchor="middle"
-              className="text-xs fill-gray-500"
-            >
-              {new Date(date).getDate()}
-            </text>
-          ))}
-
-          {/* Y-axis labels */}
-          {[0, Math.round(maxValue * 0.25), Math.round(maxValue * 0.5), Math.round(maxValue * 0.75), Math.round(maxValue)].map((value, i) => (
-            <text
-              key={i}
-              x="35"
-              y={185 - (i * 35)}
-              textAnchor="end"
-              className="text-xs fill-gray-500"
-            >
-              ₹{Math.round(value / 1000)}k
-            </text>
-          ))}
         </svg>
       </div>
     );
   };
 
-
-  // const renderPieChart = () => {
-  //   const centerX = 120;
-  //   const centerY = 120;
-  //   const radius = 80;
-  //   let currentAngle = 0;
-
-  //   return (
-  //     <div className="relative">
-  //       <svg width="240" height="240" className="mx-auto">
-  //         {categoryDistribution?.map((category, index) => {
-  //           const angle = (category.percentage / 100) * 2 * Math.PI;
-  //           const x1 = centerX + radius * Math.cos(currentAngle);
-  //           const y1 = centerY + radius * Math.sin(currentAngle);
-  //           const x2 = centerX + radius * Math.cos(currentAngle + angle);
-  //           const y2 = centerY + radius * Math.sin(currentAngle + angle);
-
-  //           const largeArcFlag = angle > Math.PI ? 1 : 0;
-
-  //           const pathData = [
-  //             `M ${centerX} ${centerY}`,
-  //             `L ${x1} ${y1}`,
-  //             `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-  //             'Z'
-  //           ].join(' ');
-
-  //           currentAngle += angle;
-
-  //           return (
-  //             <g key={index}>
-  //               <path
-  //                 d={pathData}
-  //                 fill={category?.color}
-  //                 className="hover:opacity-80 cursor-pointer transition-opacity"
-  //               >
-  //                 <title>{category?.name}: ₹{category?.value.toLocaleString()} | {category?.pieces} Pcs ({category?.percentage}%)</title>
-  //               </path>
-  //             </g>
-  //           );
-  //         })}
-
-  //         {/* Center circle */}
-  //         <circle cx={centerX} cy={centerY} r="35" fill="white" />
-  //         <text x={centerX} y={centerY - 8} textAnchor="middle" className="text-xs font-medium fill-gray-700">
-  //           Total Sales
-  //         </text>
-  //         <text x={centerX} y={centerY + 2} textAnchor="middle" className="text-xs fill-gray-500">
-  //           ₹{(salesDatas?.jeans?.total + salesDatas?.shirts?.total).toLocaleString()}
-  //         </text>
-  //         <text x={centerX} y={centerY + 12} textAnchor="middle" className="text-xs fill-gray-500">
-  //           {(salesDatas?.jeans?.pieces + salesDatas?.shirts?.pieces)} Pcs
-  //         </text>
-  //       </svg>
-
-  //       {/* Legend */}
-  //       <div className="flex justify-center space-x-6 mt-4">
-  //         {categoryDistribution.map((category, index) => (
-  //           <div key={index} className="flex items-center">
-  //             <div
-  //               className="w-4 h-4 rounded-full mr-2"
-  //               style={{ backgroundColor: category.color }}
-  //             ></div>
-  //             <span className="text-sm">
-  //               {category.name} ({category.percentage}%)
-  //             </span>
-  //           </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   );
-  // };
-
-
+  // ── Pie / donut chart ───────────────────────────────────────────────────────
   const renderPieChart = () => {
-    if (!salesDatas) return null;
+    const jeansTotal = salesDatas?.jeans?.total || 0;
+    const shirtsTotal = salesDatas?.shirts?.total || 0;
+    const totalSales = jeansTotal + shirtsTotal;
 
-    const centerX = 120;
-    const centerY = 120;
-    const radius = 80;
-    let currentAngle = 0;
-
-    // Build category distribution from API response
-    const totalSales = (salesDatas?.jeans?.total || 0) + (salesDatas?.shirts?.total || 0);
+    if (totalSales === 0) {
+      return (
+        <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+          No data for selected period
+        </div>
+      );
+    }
 
     const categoryDistribution = [
-      {
-        name: "Jeans",
-        value: salesDatas?.jeans?.total || 0,
-        pieces: salesDatas?.jeans?.pieces || 0,
-        percentage: totalSales ? ((salesDatas?.jeans?.total / totalSales) * 100).toFixed(1) : 0,
-        color: "#4F46E5", // indigo
-      },
-      {
-        name: "Shirts",
-        value: salesDatas?.shirts?.total || 0,
-        pieces: salesDatas?.shirts?.pieces || 0,
-        percentage: totalSales ? ((salesDatas?.shirts?.total / totalSales) * 100).toFixed(1) : 0,
-        color: "#22C55E", // amber
-      },
-    ];
+      { name: "Jeans", value: jeansTotal, pieces: salesDatas?.jeans?.pieces || 0, color: "#4F46E5" },
+      { name: "Shirts", value: shirtsTotal, pieces: salesDatas?.shirts?.pieces || 0, color: "#22C55E" },
+    ].map(c => ({ ...c, percentage: ((c.value / totalSales) * 100) }));
+
+    const cx = 120, cy = 120, r = 80;
+    let currentAngle = -Math.PI / 2;
 
     return (
-      <div className="relative">
+      <div>
         <svg width="240" height="240" className="mx-auto">
-          {categoryDistribution.map((category, index) => {
-            const angle = (category.percentage / 100) * 2 * Math.PI;
-            const x1 = centerX + radius * Math.cos(currentAngle);
-            const y1 = centerY + radius * Math.sin(currentAngle);
-            const x2 = centerX + radius * Math.cos(currentAngle + angle);
-            const y2 = centerY + radius * Math.sin(currentAngle + angle);
-
-            const largeArcFlag = angle > Math.PI ? 1 : 0;
-
-            const pathData = [
-              `M ${centerX} ${centerY}`,
-              `L ${x1} ${y1}`,
-              `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-              "Z",
-            ].join(" ");
-
+          {categoryDistribution.map((cat, i) => {
+            const angle = (cat.percentage / 100) * 2 * Math.PI;
+            const x1 = cx + r * Math.cos(currentAngle);
+            const y1 = cy + r * Math.sin(currentAngle);
             currentAngle += angle;
-
+            const x2 = cx + r * Math.cos(currentAngle);
+            const y2 = cy + r * Math.sin(currentAngle);
+            const largeArc = angle > Math.PI ? 1 : 0;
             return (
-              <g key={index}>
-                <path
-                  d={pathData}
-                  fill={category.color}
-                  className="hover:opacity-80 cursor-pointer transition-opacity"
-                >
-                  <title>
-                    {category.name}: ₹{category.value.toLocaleString()} | {category.pieces} Pcs (
-                    {category.percentage}%)
-                  </title>
-                </path>
-              </g>
+              <path
+                key={i}
+                d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                fill={cat.color}
+                className="hover:opacity-80 cursor-pointer transition-opacity"
+              >
+                <title>{cat.name}: ₹{cat.value.toLocaleString()} | {cat.pieces} Pcs ({cat.percentage.toFixed(1)}%)</title>
+              </path>
             );
           })}
-
-          {/* Center circle */}
-          <circle cx={centerX} cy={centerY} r="35" fill="white" />
-          <text
-            x={centerX}
-            y={centerY - 8}
-            textAnchor="middle"
-            className="text-xs font-medium fill-gray-700"
-          >
-            Total Sales
-          </text>
-          <text
-            x={centerX}
-            y={centerY + 2}
-            textAnchor="middle"
-            className="text-xs fill-gray-500"
-          >
-            ₹{totalSales.toLocaleString()}
-          </text>
-          <text
-            x={centerX}
-            y={centerY + 12}
-            textAnchor="middle"
-            className="text-xs fill-gray-500"
-          >
+          <circle cx={cx} cy={cy} r="40" fill="white" />
+          <text x={cx} y={cy - 8} textAnchor="middle" fontSize="10" fill="#374151">Total</text>
+          <text x={cx} y={cy + 5} textAnchor="middle" fontSize="9" fill="#6B7280">₹{totalSales.toLocaleString()}</text>
+          <text x={cx} y={cy + 17} textAnchor="middle" fontSize="9" fill="#6B7280">
             {(salesDatas?.jeans?.pieces || 0) + (salesDatas?.shirts?.pieces || 0)} Pcs
           </text>
         </svg>
-
-        {/* Legend */}
-        <div className="flex justify-center space-x-6 mt-4">
-          {categoryDistribution.map((category, index) => (
-            <div key={index} className="flex items-center">
-              <div
-                className="w-4 h-4 rounded-full mr-2"
-                style={{ backgroundColor: category.color }}
-              ></div>
-              <span className="text-sm">
-                {category.name} ({category.percentage}%)
-              </span>
+        <div className="flex justify-center gap-6 mt-2">
+          {categoryDistribution.map((cat, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+              <span className="text-xs text-gray-600">{cat.name} ({cat.percentage.toFixed(1)}%)</span>
             </div>
           ))}
         </div>
@@ -423,29 +733,42 @@ export default function SalesReports() {
     );
   };
 
-  const handleExportExcel = async () => {
-    try {
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  console.log("XXXXXXX:==>", salesDatas)
   return (
     <AdminLayout>
       <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Sales & Reports</h1>
-            <p className="text-gray-600 mt-1">Monitor your sales performance by category</p>
+            <p className="text-gray-500 mt-1 text-sm">Monitor your sales performance by category</p>
           </div>
-          <div className="flex space-x-3">
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Conditional Date Inputs */}
+            {dateRange === 'custom' && (
+              <div className="flex items-center gap-2 animate-in fade-in duration-300">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+                <span className="text-gray-400 text-sm">to</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            )}
+
+            {/* Range Selector */}
             <div className="relative">
               <select
                 value={dateRange}
-                onChange={(e) => { setDateRange(e.target.value), setSelectedPeriod(e.target.value) }}
-                className="px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                onChange={(e) => setDateRange(e.target.value)}
+                className="px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white text-sm font-medium text-gray-700 cursor-pointer"
               >
                 <option value="today">Today</option>
                 <option value="thisWeek">This Week</option>
@@ -453,58 +776,41 @@ export default function SalesReports() {
                 <option value="thisYear">This Year</option>
                 <option value="custom">Custom Range</option>
               </select>
-              <i className="ri-arrow-down-s-line absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <i className="ri-calendar-line absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
-            {/* <Button onClick={handleExportExcel} className="bg-green-600 hover:bg-green-700 text-white">
-              <i className="ri-download-line mr-2"></i>
-              Export Excel
-            </Button> */}
-            {/* <Button className="bg-red-600 hover:bg-red-700 text-white">
-              <i className="ri-file-pdf-line mr-2"></i>
-              Export PDF
-            </Button> */}
           </div>
         </div>
-
         {/* Tab Navigation */}
         <div className="flex space-x-1 mb-6">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <i className="ri-dashboard-line mr-2"></i>
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('jeans')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'jeans' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <i className="ri-shirt-line mr-2"></i>
-            Jeans Sales
-          </button>
-          <button
-            onClick={() => setActiveTab('shirts')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'shirts' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            <i className="ri-t-shirt-line mr-2"></i>
-            Shirts Sales
-          </button>
+          {[
+            { id: 'overview', label: 'Overview', icon: 'ri-dashboard-line' },
+            { id: 'jeans', label: 'Jeans Sales', icon: 'ri-shirt-line' },
+            { id: 'shirts', label: 'Shirts Sales', icon: 'ri-t-shirt-line' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.id ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+              <i className={`${tab.icon} mr-2`} />
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Overview Tab */}
+        {/* ── Overview Tab ── */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Summary Cards */}
+            {/* Pass live data to OverviewTab */}
+            <OverviewTab salesData={salesDatas} dateRange={dateRange} startDate={startDate} endDate={endDate} setDateRange={setDateRange} />
 
-            <OverviewTab salesData={salesData} dateRange={dateRange} setDateRange={setDateRange} />
-
-            {/* Charts Row */}
+            {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Sales Trend Chart */}
               <Card className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Interactive Sales Trend</h3>
-                  <div className="flex space-x-2">
+                  <h3 className="text-lg font-semibold">Sales Trend</h3>
+                  <div className="flex space-x-1">
                     {['Daily', 'Weekly', 'Monthly', 'Yearly'].map(period => (
                       <button
                         key={period}
@@ -519,16 +825,21 @@ export default function SalesReports() {
                     ))}
                   </div>
                 </div>
-                {renderChart()}
+                {loadingSales
+                  ? <div className="h-48 flex items-center justify-center text-gray-400 text-sm">Loading…</div>
+                  : renderChart()
+                }
               </Card>
 
-              {/* Sales Distribution Chart */}
               <Card className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Sales Distribution</h3>
-                  <div className="text-sm text-gray-500">By Category</div>
+                  <span className="text-sm text-gray-500">By Category</span>
                 </div>
-                {renderPieChart()}
+                {loadingSales
+                  ? <div className="h-48 flex items-center justify-center text-gray-400 text-sm">Loading…</div>
+                  : renderPieChart()
+                }
               </Card>
             </div>
 
@@ -541,40 +852,39 @@ export default function SalesReports() {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sales Revenue & Pieces</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units Sold</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Growth</th>
+                      {['Product', 'Revenue & Pieces', 'Units Sold', 'Growth'].map(h => (
+                        <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {topProducts.map((product, index) => (
+                    {loadingTop ? (
+                      <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm">Loading…</td></tr>
+                    ) : topProducts.length === 0 ? (
+                      <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm">No products found</td></tr>
+                    ) : topProducts.map((product, index) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-8 w-8">
-                              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${index === 0 ? 'bg-yellow-500' :
-                                index === 1 ? 'bg-gray-400' :
-                                  index === 2 ? 'bg-orange-500' : 'bg-blue-500'
-                                }`}>
-                                {index + 1}
-                              </div>
+                          <div className="flex items-center gap-3">
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${index === 0 ? 'bg-yellow-500' :
+                              index === 1 ? 'bg-gray-400' :
+                                index === 2 ? 'bg-orange-500' : 'bg-blue-500'
+                              }`}>
+                              {index + 1}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                            </div>
+                            <span className="text-sm font-medium text-gray-900">{product.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">₹{product.sales.toLocaleString()} | {product.pieces} Pcs</div>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          ₹{product.sales.toLocaleString()} &nbsp;|&nbsp; {product.pieces} Pcs
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {product.units} lots
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{product.units}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.growth >= 0
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.growth >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                             }`}>
                             {product.growth >= 0 ? '+' : ''}{product.growth}%
                           </span>
@@ -588,12 +898,12 @@ export default function SalesReports() {
           </div>
         )}
 
-        {/* Jeans Sales Tab */}
+        {/* ── Jeans Tab ── */}
         {activeTab === 'jeans' && (
           <JeansSalesTab setSalesData={setSalesData} salesData={salesDatas} />
         )}
 
-        {/* Shirts Sales Tab */}
+        {/* ── Shirts Tab ── */}
         {activeTab === 'shirts' && (
           <ShirtsSalesTab setSalesData={setSalesData} salesData={salesDatas} />
         )}

@@ -364,6 +364,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
             pointsEarnedValue = 0,
             orderNote,
             transportName,
+            additionalDiscount,
         } = req.body;
         console.log("SSSSSSXXXXX==>", req.body)
         // ✅ Validate required fields
@@ -431,7 +432,7 @@ exports.createOrderByAdmin = catchAsyncErrors(async (req, res, next) => {
         // ✅ Create new order
         const newOrder = await AdminOrder.create({
             orderNumber, customer, items, subtotal, pointsRedeemed, pointsRedemptionValue, total,
-            status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,
+            status, paymentType, paidAmount, balanceAmount, payments, paymentMethod, orderType,additionalDiscount,
             orderDate, trackingId, deliveryVendor, pointsEarned: pointsEarneds, pointsEarnedValue: pointsEarnedValues, statusHistory,
             transportName, orderNote, createdBy: req.body.createdBy ? req.body.createdBy : customer?.userId
         });

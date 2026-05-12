@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require("../../middleware/multer")
-const { createSubProduct, getAllProducts,getAllProductsWithPagination, typeProducts, changeStatus, getProductByID, updateProductByID, deleteProductByID, changeStockStatus, getAllProductsByType ,searchProduct, getProductsByCategory} = require('./products-controller');
+const { createSubProduct, getAllProducts,getAllProductsWithPagination, typeProducts, changeStatus, getProductByID, updateProductByID, deleteProductByID, changeStockStatus, getAllProductsByType ,searchProduct, getProductsByCategory, getProductsBySubCategory} = require('./products-controller');
 
 router.post("/create-product", upload.array( 'productImages'), createSubProduct);
 
@@ -25,6 +25,7 @@ router.post("/get-all-products-by-type/:term", getAllProductsByType);
 
 router.get("/search-product/:term", searchProduct);
 router.get("/get-product-by-category/:id", getProductsByCategory);
+router.get("/get-product-by-sub-category/:id", getProductsBySubCategory);
 // router.get("/get-all-products-for-store", getAllProductsForStore);
 
 // router.get("/get-all-products-for-options", getAllProductsForOptions);

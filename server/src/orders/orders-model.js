@@ -384,7 +384,7 @@ const adminOrderSchema = new Schema({
     pointsEarned: { type: Number, default: 0 },
     pointsEarnedValue: { type: Number, default: 0 },
     recycleBin: { type: Boolean, default: false },
-
+    additionalDiscount: { type: Number, default: 0 },
     statusHistory: [{
         status: { type: String, required: true },
         date: { type: String, required: true }, // format: YYYY-MM-DD

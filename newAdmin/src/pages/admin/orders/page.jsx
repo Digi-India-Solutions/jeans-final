@@ -11,6 +11,7 @@ import FilteredOrdersCom from './FilteredOrdersCom';
 import CreateNotesModel from './CreateNotesModel';
 import Swal from "sweetalert2";
 import EditOrderModel from './EditOrderModel';
+import * as XLSX from 'xlsx';
 import { useNavigate } from 'react-router-dom';
 
 export default function OrdersManagement() {
@@ -44,7 +45,8 @@ export default function OrdersManagement() {
   const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   const [permiton, setPermiton] = useState('');
   const [filters, setFilters] = useState({ status: '', orderType: '', customerType: '', paymentType: '', search: '' });
-
+  const [terms, setTerms] = useState([])
+  const [companyName, setCompanyNam] = useState('')
   const [customers] = useState([
     {
       id: 1,
@@ -87,7 +89,7 @@ export default function OrdersManagement() {
       deliveryAddress: '34 Park Street, Bangalore, Karnataka - 560001'
     }
   ]);
-
+  const [isExporting, setIsExporting] = useState(false);
   const [newOrderForm, setNewOrderForm] = useState({ ...selectedOrder, payments: [{ method: 'Cash', amount: '' }] } || { customerId: '', customerName: '', customerEmail: '', customerPhone: '', customerType: 'Retail', deliveryAddress: '', orderType: 'Offline', payments: [{ method: 'Cash', amount: '' }], items: [], customerAvailablePoints: 0, redeemPoints: 0, pointsToEarn: 0 });
 
   const deliveryVendors = ['BlueDart', 'Delhivery', 'DTDC', 'FedEx', 'India Post', 'Aramex'];
@@ -345,279 +347,676 @@ export default function OrdersManagement() {
   };
 
 
+  // const handlePrintOrder = () => {
+  //   if (!orderToPrint) return;
+
+  //   let printContent = `
+  //     <html>
+  //       <head>
+  //         <title>Order Invoice - ${orderToPrint.orderNumber}</title>
+  //         <style>
+  //           @media print {
+  //             body { margin: 0; padding: 10mm; }
+  //             .no-print { display: none; }
+  //             * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  //           }
+  //           body { 
+  //             font-family: Arial, sans-serif; 
+  //             margin: 0;
+  //             padding: 10mm;
+  //             background: white;
+  //             color: black;
+  //           }
+  //           .header {
+  //             text-align: center;
+  //             border-bottom: 2px solid #000;
+  //             padding-bottom: 10px;
+  //             margin-bottom: 20px;
+  //           }
+  //           .company-name {
+  //             font-size: 24px;
+  //             font-weight: bold;
+  //             margin-bottom: 5px;
+  //           }
+  //           .invoice-title {
+  //             font-size: 18px;
+  //             font-weight: bold;
+  //             margin-top: 10px;
+  //           }
+  //           .section {
+  //             margin-bottom: 20px;
+  //           }
+  //           .section-title {
+  //             font-size: 14px;
+  //             font-weight: bold;
+  //             margin-bottom: 10px;
+  //             border-bottom: 1px solid #ccc;
+  //             padding-bottom: 5px;
+  //           }
+  //           .info-grid {
+  //             display: grid;
+  //             grid-template-columns: 1fr 1fr;
+  //             gap: 20px;
+  //             margin-bottom: 20px;
+  //           }
+  //           .info-item {
+  //             margin-bottom: 5px;
+  //           }
+  //           .label {
+  //             font-weight: bold;
+  //             display: inline-block;
+  //             width: 120px;
+  //           }
+  //           .items-table {
+  //             width: 100%;
+  //             border-collapse: collapse;
+  //             margin-bottom: 20px;
+  //           }
+  //           .items-table th,
+  //           .items-table td {
+  //             border: 1px solid #000;
+  //             padding: 8px;
+  //             text-align: left;
+  //           }
+  //           .items-table th {
+  //             background-color: #f5f5f5;
+  //             font-weight: bold;
+  //           }
+  //           .item-image {
+  //             width: 40px;
+  //             height: 40px;
+  //             object-fit: cover;
+  //             border-radius: 4px;
+  //           }
+  //           .sizes-list {
+  //             font-size: 12px;
+  //             color: #666;
+  //           }
+  //           .totals-section {
+  //             border-top: 2px solid #000;
+  //             padding-top: 10px;
+  //             text-align: right;
+  //           }
+  //           .total-row {
+  //             display: flex;
+  //             justify-content: space-between;
+  //             margin-bottom: 5px;
+  //           }
+  //           .total-row.final {
+  //             font-size: 16px;
+  //             font-weight: bold;
+  //             border-top: 1px solid #000;
+  //             padding-top: 5px;
+  //           }
+  //           .payment-section {
+  //             margin-top: 20px;
+  //           }
+  //           .payment-method {
+  //             display: flex;
+  //             justify-content: space-between;
+  //             margin-bottom: 3px;
+  //           }
+  //           .footer {
+  //             margin-top: 30px;
+  //             text-align: center;
+  //             font-size: 12px;
+  //             color: #666;
+  //           }
+  //         </style>
+  //       </head>
+  //       <body>
+  //         <div class="header">
+  //           <div class="company-name">Anibhavi Creation Pvt. Ltd.</div>
+  //           <div>Fashion & Apparel Store</div>
+  //           <div class="invoice-title">ORDER INVOICE</div>
+  //         </div>
+
+  //         <div class="info-grid">
+  //           <div>
+  //             <div class="section-title">Order Information</div>
+  //             <div class="info-item"><span class="label">Order Number:</span> ${orderToPrint.orderNumber}</div>
+  //             <div class="info-item"><span class="label">Order Date:</span> ${orderToPrint.orderDate}</div>
+  //             <div class="info-item"><span class="label">Order Type:</span> ${orderToPrint.orderType}</div>
+  //             <div class="info-item"><span class="label">Status:</span> ${orderToPrint.status}</div>
+  //           </div>
+  //           <div>
+  //             <div class="section-title">Customer Information</div>
+  //             <div class="info-item"><span class="label">Name:</span> ${orderToPrint.customer.name}</div>
+  //             <div class="info-item"><span class="label">Email:</span> ${orderToPrint.customer.email}</div>
+  //             <div class="info-item"><span class="label">Phone:</span> ${orderToPrint.customer.phone}</div>
+  //           </div>
+  //         </div>
+
+  //         <div class="section">
+  //           <div class="section-title">Delivery Address</div>
+  //           <div>${orderToPrint.customer.deliveryAddress}</div>
+  //         </div>
+
+  //         <div class="section">
+  //           <div class="section-title">Order Items</div>
+  //           <table class="items-table">
+  //             <thead>
+  //               <tr>
+  //                 <th>Image</th>
+  //                 <th>Product Set</th>
+  //                 <th>Qty</th>
+  //                 <th>Pcs/Set</th>
+  //                 <th>Total Pcs</th>
+  //                 <th>Price/Pc</th>
+  //                 <th>Available Sizes</th>
+  //                 <th>Total</th>
+  //               </tr>
+  //             </thead>
+  //             <tbody>
+  //   `;
+  //   console.log("GGGG:=>GGGG:=>GGGG:=>", orderToPrint)
+  //   orderToPrint.items.forEach(item => {
+  //     const product = subProducts?.find(p => p?._id === item.productId._id);
+  //     const totalPcs = item.quantity * item.pcsInSet;
+  //     const lineTotal = item.quantity * item.pcsInSet * item.singlePicPrice;
+
+  //     printContent += `
+  //       <tr>
+  //         <td>
+  //           <img src="${product?.subProductImages?.[0] || item?.productId?.subProductImages?.[0] || ''}" alt="${item.name}" class="item-image" />
+  //         </td>
+  //         <td>${item?.color}</td>
+  //         <td>${item.quantity}</td>
+  //         <td>${item.pcsInSet}</td>
+  //         <td>${totalPcs}</td>
+  //         <td>₹${item.singlePicPrice}</td>
+  //         <td class="sizes-list">${normalizeSizes(product?.sizes || product?.availableSizes) || normalizeSizes(item?.availableSizes) || 'N/A'}</td>
+  //         <td>₹${lineTotal.toLocaleString()}</td>
+  //       </tr>
+  //     `;
+  //   });
+
+  //   printContent += `
+  //             </tbody>
+  //           </table>
+  //         </div>
+
+  //         <div class="totals-section">
+  //           <div class="total-row">
+  //             <span>Subtotal:</span>
+  //             <span>₹${(orderToPrint.subtotal || orderToPrint.total + (orderToPrint.pointsRedemptionValue || 0)).toLocaleString()}</span>
+  //           </div>
+  //   `;
+
+  //   if (orderToPrint.pointsRedeemed > 0) {
+  //     printContent += `
+  //           <div class="total-row">
+  //             <span>Points Redeemed (${orderToPrint.pointsRedeemed.toLocaleString()} pts):</span>
+  //             <span>-₹${orderToPrint.pointsRedemptionValue.toLocaleString()}</span>
+  //           </div>
+  //     `;
+  //   }
+
+  //   printContent += `
+  //           <div class="total-row final">
+  //             <span>Final Payable:</span>
+  //             <span>₹${orderToPrint.total.toLocaleString()}</span>
+  //           </div>
+  //         </div>
+
+  //         <div class="payment-section">
+  //           <div class="section-title">Payment Information</div>
+  //   `;
+
+  //   if (orderToPrint.payments && orderToPrint.payments.length > 0) {
+  //     orderToPrint.payments.forEach(payment => {
+  //       if (parseFloat(payment.amount) > 0) {
+  //         printContent += `
+  //           <div class="payment-method">
+  //             <span>${payment.method}:</span>
+  //             <span>₹${parseFloat(payment.amount).toLocaleString()}</span>
+  //           </div>
+  //         `;
+  //       }
+  //     });
+  //   }
+
+  //   printContent += `
+  //           <div class="payment-method">
+  //             <span><strong>Total Paid:</strong></span>
+  //             <span><strong>₹${orderToPrint.paidAmount.toLocaleString()}</strong></span>
+  //           </div>
+  //   `;
+
+  //   if (orderToPrint.balanceAmount > 0) {
+  //     printContent += `
+  //           <div class="payment-method">
+  //             <span><strong>Balance Due:</strong></span>
+  //             <span><strong>₹${orderToPrint.balanceAmount.toLocaleString()}</strong></span>
+  //           </div>
+  //     `;
+  //   }
+
+  //   if (orderToPrint.pointsEarned > 0) {
+  //     printContent += `
+  //           <div class="payment-method">
+  //             <span><strong>Points to Earn:</strong></span>
+  //             <span><strong>${orderToPrint.pointsEarned.toLocaleString()} pts (₹${(orderToPrint.pointsEarnedValue || calculatePointsValue(orderToPrint.pointsEarned)).toLocaleString()})</strong></span>
+  //           </div>
+  //           <div class="payment-method">
+  //             <span style="font-size: 11px; color: #666;">Points expire in 90 days from credit date</span>
+  //           </div>
+  //     `;
+  //   }
+
+  //   printContent += `
+  //         </div>
+
+  //         <div class="footer">
+  //           <p>Thank you for your business!</p>
+  //           <p>Order generated on ${new Date().toLocaleString()}</p>
+  //         </div>
+  //       </body>
+  //     </html>
+  //   `;
+
+  //   // Create a hidden iframe for printing
+  //   const printFrame = document.createElement('iframe');
+  //   printFrame.style.display = 'none';
+  //   printFrame.style.position = 'absolute';
+  //   printFrame.style.left = '-9999px';
+  //   document.body.appendChild(printFrame);
+
+  //   const doc = printFrame.contentWindow.document;
+  //   doc.open();
+  //   doc.write(printContent);
+  //   doc.close();
+
+  //   // Wait for content to load then print
+  //   printFrame.onload = () => {
+  //     setTimeout(() => {
+  //       printFrame.contentWindow.focus();
+  //       printFrame.contentWindow.print();
+
+  //       setTimeout(() => {
+  //         document.body.removeChild(printFrame);
+  //       }, 1000);
+  //     }, 500);
+  //   };
+  // };
+
   const handlePrintOrder = () => {
     if (!orderToPrint) return;
 
-    let printContent = `
-      <html>
-        <head>
-          <title>Order Invoice - ${orderToPrint.orderNumber}</title>
-          <style>
-            @media print {
-              body { margin: 0; padding: 10mm; }
-              .no-print { display: none; }
-              * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            }
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 0;
-              padding: 10mm;
-              background: white;
-              color: black;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 2px solid #000;
-              padding-bottom: 10px;
-              margin-bottom: 20px;
-            }
-            .company-name {
-              font-size: 24px;
-              font-weight: bold;
-              margin-bottom: 5px;
-            }
-            .invoice-title {
-              font-size: 18px;
-              font-weight: bold;
-              margin-top: 10px;
-            }
-            .section {
-              margin-bottom: 20px;
-            }
-            .section-title {
-              font-size: 14px;
-              font-weight: bold;
-              margin-bottom: 10px;
-              border-bottom: 1px solid #ccc;
-              padding-bottom: 5px;
-            }
-            .info-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 20px;
-              margin-bottom: 20px;
-            }
-            .info-item {
-              margin-bottom: 5px;
-            }
-            .label {
-              font-weight: bold;
-              display: inline-block;
-              width: 120px;
-            }
-            .items-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 20px;
-            }
-            .items-table th,
-            .items-table td {
-              border: 1px solid #000;
-              padding: 8px;
-              text-align: left;
-            }
-            .items-table th {
-              background-color: #f5f5f5;
-              font-weight: bold;
-            }
-            .item-image {
-              width: 40px;
-              height: 40px;
-              object-fit: cover;
-              border-radius: 4px;
-            }
-            .sizes-list {
-              font-size: 12px;
-              color: #666;
-            }
-            .totals-section {
-              border-top: 2px solid #000;
-              padding-top: 10px;
-              text-align: right;
-            }
-            .total-row {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 5px;
-            }
-            .total-row.final {
-              font-size: 16px;
-              font-weight: bold;
-              border-top: 1px solid #000;
-              padding-top: 5px;
-            }
-            .payment-section {
-              margin-top: 20px;
-            }
-            .payment-method {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 3px;
-            }
-            .footer {
-              margin-top: 30px;
-              text-align: center;
-              font-size: 12px;
-              color: #666;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="company-name">Anibhavi Creation Pvt. Ltd.</div>
-            <div>Fashion & Apparel Store</div>
-            <div class="invoice-title">ORDER INVOICE</div>
-          </div>
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    const fmt = (n) => Number(n || 0).toLocaleString('en-IN');
+    const fmtCurrency = (n) => `₹${fmt(n)}`;
 
-          <div class="info-grid">
-            <div>
-              <div class="section-title">Order Information</div>
-              <div class="info-item"><span class="label">Order Number:</span> ${orderToPrint.orderNumber}</div>
-              <div class="info-item"><span class="label">Order Date:</span> ${orderToPrint.orderDate}</div>
-              <div class="info-item"><span class="label">Order Type:</span> ${orderToPrint.orderType}</div>
-              <div class="info-item"><span class="label">Status:</span> ${orderToPrint.status}</div>
-            </div>
-            <div>
-              <div class="section-title">Customer Information</div>
-              <div class="info-item"><span class="label">Name:</span> ${orderToPrint.customer.name}</div>
-              <div class="info-item"><span class="label">Email:</span> ${orderToPrint.customer.email}</div>
-              <div class="info-item"><span class="label">Phone:</span> ${orderToPrint.customer.phone}</div>
-            </div>
-          </div>
+    // ✅ Fix 3 — Payment status label + color
+    const getPaymentStatusLabel = () => {
+      const paid = Number(orderToPrint.paidAmount || 0);
+      const balance = Number(orderToPrint.balanceAmount || 0);
+      const total = Number(orderToPrint.total || 0);
+      if (paid <= 0) return { label: 'Unpaid', color: '#DC2626' };
+      if (balance <= 0) return { label: 'Fully Paid', color: '#16A34A' };
+      if (paid >= total * 0.5) return { label: 'Partial Payment', color: '#D97706' };
+      return { label: 'Partial Payment', color: '#D97706' };
+    };
+    const paymentStatus = getPaymentStatusLabel();
 
-          <div class="section">
-            <div class="section-title">Delivery Address</div>
-            <div>${orderToPrint.customer.deliveryAddress}</div>
-          </div>
+    // ✅ Fix 1 — Created by name not role
+    const createdByName = orderToPrint.createdBy?.name ?? 'System';
 
-          <div class="section">
-            <div class="section-title">Order Items</div>
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Product Set</th>
-                  <th>Qty</th>
-                  <th>Pcs/Set</th>
-                  <th>Total Pcs</th>
-                  <th>Price/Pc</th>
-                  <th>Available Sizes</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-    `;
+    // Items rows HTML
+    let itemsRows = '';
+    (orderToPrint.items || []).forEach((item) => {
+      const subProduct = item?.productId;                      // already populated in data
+      const imageUrl = subProduct?.subProductImages?.[0] ?? '';
+      const lotNumber = subProduct?.lotNumber ?? '—';
+      const color = item?.color ?? subProduct?.color ?? '—';
+      const qty = Number(item.quantity || 0);
+      const pcsInSet = Number(item.pcsInSet || subProduct?.pcsInSet || 1);
+      const price = Number(item.singlePicPrice || subProduct?.singlePicPrice || 0);
+      const totalPcs = qty * pcsInSet;
+      const lineTotal = totalPcs * price;
+      const sizes = (() => {
+        try {
+          const raw = subProduct?.sizes ?? item?.availableSizes ?? [];
+          const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          return Array.isArray(arr) ? arr.join(', ') : 'N/A';
+        } catch { return 'N/A'; }
+      })();
 
-    orderToPrint.items.forEach(item => {
-      const product = subProducts?.find(p => p?._id === item.productId._id);
-      const totalPcs = item.quantity * item.pcsInSet;
-      const lineTotal = item.quantity * item.pcsInSet * item.singlePicPrice;
-      console.log("GGGG:=>", product)
-      printContent += `
+      itemsRows += `
         <tr>
-          <td>
-            <img src="${product?.subProductImages?.[0] || item?.productId?.subProductImages?.[0] || ''}" alt="${item.name}" class="item-image" />
+          <td style="text-align:center;">
+            ${imageUrl
+          ? `<img src="${imageUrl}" alt="Product" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb;" />`
+          : `<div style="width:50px;height:50px;background:#f3f4f6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#9ca3af;">No Img</div>`
+        }
           </td>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${item.pcsInSet}</td>
-          <td>${totalPcs}</td>
-          <td>₹${item.singlePicPrice}</td>
-          <td class="sizes-list">${normalizeSizes(product?.sizes) || normalizeSizes(item?.availableSizes) || 'N/A'}</td>
-          <td>₹${lineTotal.toLocaleString()}</td>
-        </tr>
-      `;
+          <td><strong>Lot: ${lotNumber}</strong><br/><span style="color:#6b7280;font-size:11px;">Color: ${color}</span></td>
+          <td style="text-align:center;">${qty}</td>
+          <td style="text-align:center;">${pcsInSet}</td>
+          <td style="text-align:center;font-weight:600;">${totalPcs}</td>
+          <td style="text-align:right;">${fmtCurrency(price)}</td>
+          <td style="font-size:11px;color:#6b7280;">${sizes}</td>
+          <td style="text-align:right;font-weight:700;">${fmtCurrency(lineTotal)}</td>
+        </tr>`;
     });
 
-    printContent += `
-              </tbody>
-            </table>
-          </div>
+    // Payments rows HTML
+    let paymentsHTML = '';
+    (orderToPrint.payments || []).forEach((p) => {
+      if (Number(p.amount) > 0) {
+        paymentsHTML += `
+          <div class="total-row">
+            <span>${p.method}:</span>
+            <span>${fmtCurrency(p.amount)}</span>
+          </div>`;
+      }
+    });
 
-          <div class="totals-section">
-            <div class="total-row">
-              <span>Subtotal:</span>
-              <span>₹${(orderToPrint.subtotal || orderToPrint.total + (orderToPrint.pointsRedemptionValue || 0)).toLocaleString()}</span>
-            </div>
-    `;
-
-    if (orderToPrint.pointsRedeemed > 0) {
-      printContent += `
-            <div class="total-row">
-              <span>Points Redeemed (${orderToPrint.pointsRedeemed.toLocaleString()} pts):</span>
-              <span>-₹${orderToPrint.pointsRedemptionValue.toLocaleString()}</span>
-            </div>
-      `;
+    // Points section HTML
+    let pointsHTML = '';
+    if (Number(orderToPrint.pointsRedeemed) > 0) {
+      pointsHTML += `
+        <div class="total-row" style="color:#7c3aed;">
+          <span>Points Redeemed (${fmt(orderToPrint.pointsRedeemed)} pts):</span>
+          <span>-${fmtCurrency(orderToPrint.pointsRedemptionValue)}</span>
+        </div>`;
+    }
+    if (Number(orderToPrint.pointsEarned) > 0) {
+      pointsHTML += `
+        <div class="total-row" style="color:#16a34a;margin-top:4px;">
+          <span>🎁 Points Earned:</span>
+          <span>+${fmt(orderToPrint.pointsEarned)} pts (${fmtCurrency(orderToPrint.pointsEarnedValue)})</span>
+        </div>
+        <div style="font-size:10px;color:#9ca3af;text-align:right;">Points expire in 90 days from credit date</div>`;
     }
 
-    printContent += `
-            <div class="total-row final">
-              <span>Final Payable:</span>
-              <span>₹${orderToPrint.total.toLocaleString()}</span>
-            </div>
-          </div>
+    // Balance section
+    const balanceHTML = Number(orderToPrint.balanceAmount) > 0 ? `
+      <div class="total-row" style="color:#DC2626;">
+        <span><strong>Balance Due:</strong></span>
+        <span><strong>${fmtCurrency(orderToPrint.balanceAmount)}</strong></span>
+      </div>` : '';
 
-          <div class="payment-section">
-            <div class="section-title">Payment Information</div>
-    `;
+    // Transport info
+    const transportHTML = (orderToPrint.transportName || orderToPrint.trackingId || orderToPrint.deliveryVendor) ? `
+      <div class="section">
+        <div class="section-title">Transport Information</div>
+        <div class="info-grid">
+          ${orderToPrint.transportName ? `<div class="info-item"><span class="label">Transport:</span> ${orderToPrint.transportName}</div>` : ''}
+          ${orderToPrint.deliveryVendor ? `<div class="info-item"><span class="label">Vendor:</span> ${orderToPrint.deliveryVendor}</div>` : ''}
+          ${orderToPrint.trackingId ? `<div class="info-item"><span class="label">Tracking ID:</span> ${orderToPrint.trackingId}</div>` : ''}
+        </div>
+      </div>` : '';
 
-    if (orderToPrint.payments && orderToPrint.payments.length > 0) {
-      orderToPrint.payments.forEach(payment => {
-        if (parseFloat(payment.amount) > 0) {
-          printContent += `
-            <div class="payment-method">
-              <span>${payment.method}:</span>
-              <span>₹${parseFloat(payment.amount).toLocaleString()}</span>
-            </div>
-          `;
-        }
-      });
+    // Order note
+    const noteHTML = orderToPrint.orderNote ? `
+      <div class="section">
+        <div class="section-title">Order Note</div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:4px;padding:8px;font-size:12px;">${orderToPrint.orderNote}</div>
+      </div>` : '';
+
+    // ✅ Fix 2 — Dynamic Terms & Conditions (customize these as needed)
+    const termsAndConditions = [
+      "All sales are final. Goods once sold will not be returned unless found defective.",
+      "Payment is due within the credit period agreed upon at the time of order.",
+      "Any discrepancies in the invoice must be reported within 48 hours of receipt.",
+      "Goods remain the property of the seller until full payment is received.",
+      "Late payments may attract interest as per mutual agreement.",
+      "Disputes, if any, shall be subject to the jurisdiction of the local courts.",
+      "This invoice is computer-generated and does not require a signature.",
+      "Points earned will be credited within 24 hours of order confirmation.",
+      "Points are non-transferable and have no cash value.",
+    ];
+
+    const termsHTML = terms
+      .map((t, i) => `<li style="margin-bottom:4px;">${i + 1}. ${t}</li>`)
+      .join('');
+
+    // ── Full HTML ─────────────────────────────────────────────────────────────
+    const printContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Order Invoice - ${orderToPrint.orderNumber}</title>
+  <style>
+    @media print {
+      body { margin: 0; padding: 8mm; }
+      .no-print { display: none; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .page-break { page-break-before: always; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 10mm;
+      background: white; color: #111;
+      font-size: 13px; line-height: 1.5;
+    }
+    .header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 2px solid #1e293b; padding-bottom: 12px; margin-bottom: 20px;
+    }
+    .company-block { flex: 1; }
+    .company-name { font-size: 22px; font-weight: 800; color: #1e293b; }
+    .company-sub  { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .invoice-block { text-align: right; }
+    .invoice-title { font-size: 20px; font-weight: 700; color: #4f46e5; }
+    .invoice-meta  { font-size: 11px; color: #6b7280; margin-top: 4px; }
+
+    /* ✅ Fix 3 — Payment status badge */
+    .payment-status-badge {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      margin-top: 6px;
     }
 
-    printContent += `
-            <div class="payment-method">
-              <span><strong>Total Paid:</strong></span>
-              <span><strong>₹${orderToPrint.paidAmount.toLocaleString()}</strong></span>
-            </div>
-    `;
+    .section { margin-bottom: 18px; }
+    .section-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #4f46e5;
+      border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 10px;
+    }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .info-item { margin-bottom: 4px; font-size: 12px; }
+    .label { font-weight: 600; color: #374151; display: inline-block; min-width: 110px; }
 
-    if (orderToPrint.balanceAmount > 0) {
-      printContent += `
-            <div class="payment-method">
-              <span><strong>Balance Due:</strong></span>
-              <span><strong>₹${orderToPrint.balanceAmount.toLocaleString()}</strong></span>
-            </div>
-      `;
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px; }
+    .items-table th {
+      background: #f1f5f9; font-weight: 700; text-transform: uppercase;
+      font-size: 10px; letter-spacing: 0.05em;
+      border: 1px solid #e2e8f0; padding: 8px 6px;
+    }
+    .items-table td {
+      border: 1px solid #e2e8f0; padding: 8px 6px; vertical-align: middle;
+    }
+    .items-table tr:nth-child(even) td { background: #f8fafc; }
+
+    .totals-wrapper {
+      display: flex; justify-content: flex-end; margin-bottom: 20px;
+    }
+    .totals-box {
+      width: 320px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;
+    }
+    .totals-header {
+      background: #f1f5f9; padding: 8px 14px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #475569;
+    }
+    .total-row {
+      display: flex; justify-content: space-between;
+      padding: 5px 14px; font-size: 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .total-row.final {
+      background: #1e293b; color: white;
+      font-size: 14px; font-weight: 700; padding: 10px 14px;
+    }
+    .total-row.paid-row { background: #f0fdf4; color: #16a34a; font-weight: 600; }
+
+    .terms-section {
+      margin-top: 24px; padding: 12px 16px;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
+    }
+    .terms-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #374151; margin-bottom: 8px;
+    }
+    .terms-list {
+      margin: 0; padding: 0; list-style: none;
+      font-size: 10.5px; color: #6b7280; line-height: 1.6;
     }
 
-    if (orderToPrint.pointsEarned > 0) {
-      printContent += `
-            <div class="payment-method">
-              <span><strong>Points to Earn:</strong></span>
-              <span><strong>${orderToPrint.pointsEarned.toLocaleString()} pts (₹${(orderToPrint.pointsEarnedValue || calculatePointsValue(orderToPrint.pointsEarned)).toLocaleString()})</strong></span>
-            </div>
-            <div class="payment-method">
-              <span style="font-size: 11px; color: #666;">Points expire in 90 days from credit date</span>
-            </div>
-      `;
+    .footer {
+      margin-top: 24px; text-align: center;
+      font-size: 11px; color: #9ca3af;
+      border-top: 1px solid #e2e8f0; padding-top: 12px;
     }
+    .signature-row {
+      display: flex; justify-content: space-between;
+      margin-top: 30px; padding-top: 10px;
+    }
+    .signature-box { text-align: center; width: 160px; }
+    .signature-line { border-top: 1px solid #374151; padding-top: 4px; font-size: 11px; color: #6b7280; }
+  </style>
+</head>
+<body>
 
-    printContent += `
-          </div>
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="company-block">
+      <div class="company-name">Anibhavi Creation Pvt. Ltd.</div>
+      <div class="company-sub">Fashion &amp; Apparel Store</div>
+      <div class="company-sub">GST: 07AAAPZ1234A1Z5 &nbsp;|&nbsp; +91 98765 43210</div>
+    </div>
+    <div class="invoice-block">
+      <div class="invoice-title">ORDER INVOICE</div>
+      <div class="invoice-meta">${orderToPrint.orderNumber}</div>
+      <div class="invoice-meta">Date: ${orderToPrint.orderDate}</div>
+      <div class="invoice-meta">Type: ${orderToPrint.orderType}</div>
+      <!-- ✅ Fix 3 — Payment status badge -->
+      <div>
+        <span class="payment-status-badge" style="background:${paymentStatus.color}22;color:${paymentStatus.color};border:1px solid ${paymentStatus.color}44;">
+          ${paymentStatus.label}
+        </span>
+      </div>
+    </div>
+  </div>
 
-          <div class="footer">
-            <p>Thank you for your business!</p>
-            <p>Order generated on ${new Date().toLocaleString()}</p>
-          </div>
-        </body>
-      </html>
-    `;
+  <!-- ── Order + Customer Info ── -->
+  <div class="section">
+    <div class="info-grid">
+      <div>
+        <div class="section-title">Order Information</div>
+        <div class="info-item"><span class="label">Order No:</span> ${orderToPrint.orderNumber}</div>
+        <div class="info-item"><span class="label">Order Date:</span> ${orderToPrint.orderDate}</div>
+        <div class="info-item"><span class="label">Order Type:</span> ${orderToPrint.orderType}</div>
+        <div class="info-item"><span class="label">Status:</span> ${orderToPrint.status}</div>
+        <div class="info-item"><span class="label">Payment Type:</span> ${orderToPrint.paymentType}</div>
+        <!-- ✅ Fix 1 — Created by NAME not role -->
+        <div class="info-item"><span class="label">Created By:</span> ${createdByName}</div>
+      </div>
+      <div>
+        <div class="section-title">Customer Information</div>
+        <div class="info-item"><span class="label">Name:</span> ${orderToPrint.customer?.name ?? '—'}</div>
+        <div class="info-item"><span class="label">Email:</span> ${orderToPrint.customer?.email ?? '—'}</div>
+        <div class="info-item"><span class="label">Phone:</span> ${orderToPrint.customer?.phone ?? '—'}</div>
+        <div class="info-item"><span class="label">Shop:</span> ${orderToPrint.customer?.userId?.shopname ?? '—'}</div>
+        <div class="info-item"><span class="label">Customer ID:</span> ${orderToPrint.customer?.userId?.uniqueUserId ?? '—'}</div>
+      </div>
+    </div>
+  </div>
 
-    // Create a hidden iframe for printing
+  <!-- ── Delivery Address ── -->
+  <div class="section">
+    <div class="section-title">Delivery Address</div>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:8px 12px;font-size:12px;">
+      ${orderToPrint.customer?.deliveryAddress ?? '—'}
+    </div>
+  </div>
+
+  <!-- ── Transport ── -->
+  ${transportHTML}
+
+  <!-- ── Order Note ── -->
+  ${noteHTML}
+
+  <!-- ── Order Items ── -->
+  <div class="section">
+    <div class="section-title">Order Items</div>
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th style="width:60px;">Image</th>
+          <th>Lot / Color</th>
+          <th style="text-align:center;">Qty (Sets)</th>
+          <th style="text-align:center;">Pcs/Set</th>
+          <th style="text-align:center;">Total Pcs</th>
+          <th style="text-align:right;">Price/Pc</th>
+          <th>Sizes</th>
+          <th style="text-align:right;">Line Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsRows}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Totals ── -->
+  <div class="totals-wrapper">
+    <div class="totals-box">
+      <div class="totals-header">Payment Summary</div>
+      <div class="total-row">
+        <span>Subtotal:</span>
+        <span>${fmtCurrency(orderToPrint.subtotal)}</span>
+      </div>
+      ${pointsHTML}
+      <div class="total-row final">
+        <span>Final Payable:</span>
+        <span>${fmtCurrency(orderToPrint.total)}</span>
+      </div>
+      ${paymentsHTML}
+      <div class="total-row paid-row">
+        <span><strong>Total Paid:</strong></span>
+        <span><strong>${fmtCurrency(orderToPrint.paidAmount)}</strong></span>
+      </div>
+      ${balanceHTML}
+    </div>
+  </div>
+
+  <!-- ── Signature Row ── -->
+  <div class="signature-row">
+    <div class="signature-box">
+      <div style="height:40px;"></div>
+      <div class="signature-line">Customer Signature</div>
+    </div>
+    <div class="signature-box">
+      <div style="height:40px;"></div>
+      <div class="signature-line">Authorised Signatory</div>
+    </div>
+  </div>
+
+  <!-- ✅ Fix 2 — Terms & Conditions page (dynamic) -->
+  <div class="terms-section">
+    <div class="terms-title">📋 Terms &amp; Conditions</div>
+    <ul class="terms-list">
+      ${termsHTML}
+    </ul>
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <p>Thank you for your business with Anibhavi Creation Pvt. Ltd.!</p>
+    <p>Generated on ${new Date().toLocaleString('en-IN')} &nbsp;|&nbsp; Order: ${orderToPrint.orderNumber}</p>
+  </div>
+
+</body>
+</html>`;
+
+    // ── Print via hidden iframe ────────────────────────────────────────────────
     const printFrame = document.createElement('iframe');
-    printFrame.style.display = 'none';
-    printFrame.style.position = 'absolute';
-    printFrame.style.left = '-9999px';
+    printFrame.style.cssText = 'display:none;position:absolute;left:-9999px;width:0;height:0;';
     document.body.appendChild(printFrame);
 
     const doc = printFrame.contentWindow.document;
@@ -625,18 +1024,19 @@ export default function OrdersManagement() {
     doc.write(printContent);
     doc.close();
 
-    // Wait for content to load then print
     printFrame.onload = () => {
       setTimeout(() => {
         printFrame.contentWindow.focus();
         printFrame.contentWindow.print();
-
         setTimeout(() => {
-          document.body.removeChild(printFrame);
-        }, 1000);
-      }, 500);
+          if (document.body.contains(printFrame)) {
+            document.body.removeChild(printFrame);
+          }
+        }, 2000);
+      }, 600);
     };
   };
+
 
   const fetchProductsWithPagination = async () => {
     try {
@@ -668,8 +1068,26 @@ export default function OrdersManagement() {
     }
   }
 
+  const fetchTermAndCondition = useCallback(async () => {
+    try {
+      const res = await getData("api/termAndCondition/get");
+
+      if (res?.success && res?.data) {
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+
+        if (data) {
+          setTerms(data.terms ?? data.termsList ?? []);
+          setCompanyName(data.companyName ?? "Anibhavi Creation Pvt. Ltd.");
+        }
+      }
+    } catch (err) {
+      console.error("fetchTermAndCondition:", err); // ✅ never silent
+    }
+  }, []);
+
   useEffect(() => {
     fetchAllOrder()
+    fetchTermAndCondition()
   }, [currentPage, filters.search])
 
   useEffect(() => {
@@ -702,7 +1120,7 @@ export default function OrdersManagement() {
     if (result.isConfirmed) {
       try {
         const response = await getData(`api/order/move-to-recycle-bin/${order?._id}`);
-        console.log("SXSXXXXXX==>" ,response)
+        console.log("SXSXXXXXX==>", response)
         if (response.status === true) {
           Swal.fire("Deleted!", "The cart has been deleted.", "success");
           fetchAllOrder();
@@ -761,6 +1179,107 @@ export default function OrdersManagement() {
 
   }
 
+  // ─── Excel Export ──────────────────────────────────────────────────────────
+  const exportToExcel = async () => {
+    setIsExporting(true);
+    try {
+      // Fetch ALL orders (no pagination limit) for export
+      const response = await getData(`api/order/get-all-orders-by-admin-with-pagination?page=1&limit=99999&search=${filters?.search}`);
+      const allOrders = response?.orders || filteredOrders;
+
+      const rows = allOrders.map((order) => {
+        const itemsSummary = order.items
+          ?.map(item => `${item.color || item.name} x${item.quantity} sets (${item.pcsInSet} pcs/set @ ₹${item.singlePicPrice})`)
+          .join(' | ');
+
+        const paymentsSummary = order.payments
+          ?.filter(p => parseFloat(p.amount) > 0)
+          .map(p => `${p.method}: ₹${parseFloat(p.amount).toLocaleString()}`)
+          .join(' | ');
+
+        return {
+          'Order Number': order.orderNumber || '',
+          'Order Date': order.orderDate || '',
+          'Order Type': order.orderType || '',
+          'Status': order.status || '',
+          'Payment Type': order.paymentType || '',
+          'Customer Name': order.customer?.name || '',
+          'Customer Email': order.customer?.email || '',
+          'Customer Phone': order.customer?.phone || '',
+          'Customer Type': order.customer?.type || '',
+          'Delivery Address': order.customer?.deliveryAddress || '',
+          'Items': itemsSummary || '',
+          'Total Sets': order.items?.reduce((s, i) => s + (i.quantity || 0), 0) || 0,
+          'Total Pieces': order.items?.reduce((s, i) => s + ((i.quantity || 0) * (i.pcsInSet || 0)), 0) || 0,
+          'Subtotal (₹)': order.subtotal || order.total || 0,
+          'Points Redeemed': order.pointsRedeemed || 0,
+          'Points Discount (₹)': order.pointsRedemptionValue || 0,
+          'Total Amount (₹)': order.total || 0,
+          'Paid Amount (₹)': order.paidAmount || 0,
+          'Balance Amount (₹)': order.balanceAmount || 0,
+          'Payment Methods': paymentsSummary || '',
+          'Points Earned': order.pointsEarned || 0,
+          'Tracking ID': order.trackingId || '',
+          'Delivery Vendor': order.deliveryVendor || '',
+          'Order Note': order.orderNote || '',
+          'Transport Name': order.transportName || '',
+          'Created By': order.createdBy?.name || '',
+          'Created By Email': order.createdBy?.email || '',
+        };
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+
+      // Column widths
+      const colWidths = [
+        { wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 18 },
+        { wch: 22 }, { wch: 28 }, { wch: 16 }, { wch: 14 }, { wch: 35 },
+        { wch: 55 }, { wch: 12 }, { wch: 13 }, { wch: 14 }, { wch: 14 },
+        { wch: 16 }, { wch: 18 }, { wch: 16 }, { wch: 15 }, { wch: 16 },
+        { wch: 28 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 20 },
+        { wch: 16 }, { wch: 18 }, { wch: 22 },
+      ];
+      worksheet['!cols'] = colWidths;
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Orders');
+
+      // Summary sheet
+      const totalRevenue = allOrders.reduce((s, o) => s + (o.total || 0), 0);
+      const totalPaid = allOrders.reduce((s, o) => s + (o.paidAmount || 0), 0);
+      const totalBalance = allOrders.reduce((s, o) => s + (o.balanceAmount || 0), 0);
+      const statusCounts = allOrders.reduce((acc, o) => {
+        acc[o.status] = (acc[o.status] || 0) + 1;
+        return acc;
+      }, {});
+
+      const summaryData = [
+        ['Orders Export Summary'],
+        ['Generated On', new Date().toLocaleString()],
+        ['Total Orders', allOrders.length],
+        [],
+        ['Revenue Summary'],
+        ['Total Revenue (₹)', totalRevenue],
+        ['Total Paid (₹)', totalPaid],
+        ['Total Balance (₹)', totalBalance],
+        [],
+        ['Status Breakdown'],
+        ...Object.entries(statusCounts).map(([status, count]) => [status, count]),
+      ];
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      summarySheet['!cols'] = [{ wch: 25 }, { wch: 20 }];
+      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+
+      const fileName = `Orders_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success(`Exported ${allOrders.length} orders to ${fileName}`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export orders. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
   console.log("selectedOrder=>>>", selectedOrder,)
 
   return (
@@ -771,13 +1290,47 @@ export default function OrdersManagement() {
             <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
             <p className="text-gray-600 mt-1">Manage online and offline orders with payment tracking</p>
           </div>
-          {permiton?.write && <Button
+          <div className="flex items-center space-x-3">
+            {/* Export to Excel Button */}
+            <Button
+              onClick={exportToExcel}
+              disabled={isExporting}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center space-x-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isExporting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  <span>Exporting...</span>
+                </>
+              ) : (
+                <>
+                  <i className="ri-file-excel-line"></i>
+                  <span>Export Excel</span>
+                </>
+              )}
+            </Button>
+
+            {/* Create Order Button */}
+            {permiton?.write && (
+              <Button
+                onClick={() => setShowCreateOrderModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
+              >
+                <i className="ri-add-line"></i>
+                <span>Create Order</span>
+              </Button>
+            )}
+          </div>
+          {/* {permiton?.write && <Button
             onClick={() => setShowCreateOrderModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-2"
           >
             <i className="ri-add-line"></i>
             <span>Create Order</span>
-          </Button>}
+          </Button>} */}
         </div>
 
         {/* Filters */}
@@ -1218,6 +1771,11 @@ export default function OrdersManagement() {
                             <span className="text-gray-500">Paid Amount:</span>
                             <div className="font-medium text-green-600">₹{selectedOrder?.paidAmount.toLocaleString()}</div>
                           </div>
+                          <div>
+                            <span className="text-gray-500">Additional Discount:</span>
+                            <div className="font-medium text-green-600">₹{selectedOrder?.additionalDiscount.toLocaleString()}</div>
+                          </div>
+                          
                           <div>
                             <span className="text-gray-500">Balance Amount:</span>
                             <div className={`font-medium ${selectedOrder?.balanceAmount || selectedOrder?.total - selectedOrder?.paidAmount > 0 ? 'text-red-600' : 'text-gray-600'}`}>

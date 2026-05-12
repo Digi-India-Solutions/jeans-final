@@ -144,6 +144,17 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
           )}
         </div>
 
+        <div className="relative profile-dropdown">
+          <button
+            onClick={() => navigate("/main-category")}
+            className="flex items-center space-x-2 p-2 rounded-lg transition-colors hover:bg-gray-100"
+          >
+            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+              <i className={`ri-links-line ${isDarkMode ? 'text-gray-600' : 'text-gray-600'}`}></i>
+            </div>
+            <span className="hidden md:block text-sm font-medium">catalogue Link</span>
+          </button>
+        </div>
         {/* Profile */}
         <div className="relative profile-dropdown">
           <button
