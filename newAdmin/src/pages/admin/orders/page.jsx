@@ -1189,9 +1189,17 @@ export default function OrdersManagement() {
 
       const rows = allOrders.map((order) => {
         const itemsSummary = order.items
-          ?.map(item => `${item.color || item.name} x${item.quantity} sets (${item.pcsInSet} pcs/set @ ₹${item.singlePicPrice})`)
-          .join(' | ');
+          ?.map(item => {
+            const lot = item?.productId?.lotNumber ? `${item.productId.lotNumber}` : '';
+            const colorOrName = item?.color || item?.name || '';
+            const quantity = item?.quantity ?? 0;
+            const pcsInSet = item?.pcsInSet ?? 0;
+            const price = item?.singlePicPrice ?? 0;
 
+            return `${lot}(${colorOrName} x${quantity}) sets (${pcsInSet} pcs/set @ ₹${price})`;
+          })
+          ?.join(' | ') || '';
+        console.log("order===>", order)
         const paymentsSummary = order.payments
           ?.filter(p => parseFloat(p.amount) > 0)
           .map(p => `${p.method}: ₹${parseFloat(p.amount).toLocaleString()}`)
@@ -1775,7 +1783,7 @@ export default function OrdersManagement() {
                             <span className="text-gray-500">Additional Discount:</span>
                             <div className="font-medium text-green-600">₹{selectedOrder?.additionalDiscount.toLocaleString()}</div>
                           </div>
-                          
+
                           <div>
                             <span className="text-gray-500">Balance Amount:</span>
                             <div className={`font-medium ${selectedOrder?.balanceAmount || selectedOrder?.total - selectedOrder?.paidAmount > 0 ? 'text-red-600' : 'text-gray-600'}`}>

@@ -11,16 +11,16 @@ const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg:        #0a0908;
-    --surface:   #131110;
-    --surface2:  #1c1916;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.12);
-    --gold:      #c9a84c;
-    --gold-dim:  #8a6e2f;
-    --gold-glow: rgba(201,168,76,0.18);
-    --text:      #f0ece4;
-    --muted:     #7d7568;
+    --bg:        #ffffff;
+    --surface:   #ffffff;
+    --surface2:  #2196F3;
+    --border:    rgb(0, 0, 0);
+    --border2:   rgb(0, 0, 0);
+    --gold:      #2196F3;
+    --gold-dim:  #2196F3;
+    --gold-glow: rgb(0, 0, 0);
+    --text:      #000000;
+    --muted:     #000000;
     --green:     #4caf7d;
     --red:       #e05c5c;
     --radius:    14px;
@@ -69,8 +69,8 @@ const styles = `
   align-items: center;
 }
 
-.c-logo-a { color: #f0ece4; }
-.c-logo-c { color: #2196f3; }
+.c-logo-a { color: #000000; }
+.c-logo-c { color: #2196F3; }
 
 .c-logo-divider {
   width: 1px;
@@ -94,8 +94,8 @@ const styles = `
   text-transform: uppercase;
 }
 
-.c-logo-n1 { color: #f0ece4; }
-.c-logo-n2 { color: #2196f3; }
+.c-logo-n1 { color: #000000; }
+.c-logo-n2 { color: #2196F3; }
 
 .c-logo-tagline {
   font-size: 0.6rem;
@@ -203,13 +203,13 @@ const styles = `
     align-items: center;
     justify-content: center;
     font-size: 2.8rem;
-    background: radial-gradient(ellipse at center, #1e1a14, var(--surface2));
+    background: radial-gradient(ellipse at center, #2196F3, var(--surface2));
   }
 
   .c-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(10,9,8,0.75) 0%, transparent 55%);
+    background: linear-gradient(to top, rgb(104, 104, 104) 0%, transparent 55%);
     pointer-events: none;
   }
 
@@ -290,7 +290,7 @@ const styles = `
     transition: gap 0.2s, color 0.2s;
   }
 
-  .c-card:hover .c-card-btn { gap: 9px; color: #e8c96a; }
+  .c-card:hover .c-card-btn { gap: 9px; color: #000000; }
 
   /* ── Skeleton ── */
   .c-skeleton {

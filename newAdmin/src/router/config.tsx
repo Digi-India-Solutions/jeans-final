@@ -36,6 +36,7 @@ import SubCategorys from "../pages/website/subCategorys/page.jsx"
 import Products from "../pages/website/product/page.jsx"
 import SubProducts from "../pages/website/subProduct/page.jsx"
 import ProductDeatils from "../pages/website/productDetails/page.jsx"
+import BlankPage from "../pages/admin/blanckPage/page.jsx"
 
 const CatalogueUpload = lazy(() => import('../pages/admin/catalogue/page'));
 
@@ -67,6 +68,8 @@ const routes: RouteObject[] = [
       { path: "users", element: <UsersManagement /> },
       { path: "catalogue", element: <CatalogueUpload /> },
       { path: "term-and-condition", element: <TermAndCondition /> },
+      { path: "blank_page", element: <BlankPage /> },
+
 
 
       {

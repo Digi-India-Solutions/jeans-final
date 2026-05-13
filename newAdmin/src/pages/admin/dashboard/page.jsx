@@ -10,13 +10,19 @@ import { getData, postData } from '../../../services/FetchNodeServices';
 
 export default function Dashboard() {
   const [dateRange, setDateRange] = useState('Monthly');
-  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem("JeansUser")));
   const [data, setData] = useState([]);
   const [categoryComparisons, setCategoryComparison] = useState([]);
   const [salesData, setSalesData] = useState([]);
   const [orderSales, setOrderSales] = useState([]);
   const [recentSales, setRecentSales] = useState([]);
+  const [permiton, setPermiton] = useState({});
   // Updated stats with piece counts
+
+  const [user] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem("JeansUser")); }
+    catch { return null; }
+  });
+
   const stats = [
     { title: 'Total Sales', value: '₹4.34L | 2,230 Pcs', change: '+12.5%', changeType: 'positive', icon: 'ri-money-dollar-circle-line', color: 'blue' },
     { title: 'Jeans Sales', value: '₹2.45L | 980 Pcs', change: '+15.2%', changeType: 'positive', icon: 'ri-shirt-line', color: 'blue' },
@@ -59,14 +65,24 @@ export default function Dashboard() {
   //   }
   // };
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
+    if (!user?.role) return;
     try {
-      const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
-      // console.log("response.data:==>response.data:==>", response)
+      const response = await postData("api/adminRole/get-single-role-by-role", {
+        role: user.role,
+      });
+      console.log("RESPOpermiton?.write=>", response)
+      setPermiton(response?.data?.[0]?.permissions?.dashboard || {});
     } catch (error) {
-      console.log(error)
+      console.error("fetchRoles:", error);
     }
-  }
+  }, [user?.role]);
+
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
   const fetchDashboardData = async () => {
     const response = await getData('api/dashboard/get-dashboard-data');
     console.log("response:==>", response)
@@ -74,7 +90,7 @@ export default function Dashboard() {
       setData(response?.stats)
     }
   }
-  
+
   const fetchCategoryComparisons = async () => {
     const response = await getData('api/dashboard/get-category-comparisons');
     // console.log("response:==>SSS=>", response.categoryComparison)
@@ -117,10 +133,6 @@ export default function Dashboard() {
     fetchRecentSales()
   }, [dateRange])
 
-  useEffect(() => {
-    fetchRoles()
-  }, [user?.role])
-
   const formatLakh = (num = 0) => {
     if (num >= 100000) {
       // 1 lakh or more
@@ -140,7 +152,7 @@ export default function Dashboard() {
 
   return (
     <AdminLayout>
-      <div className="p-6">
+      {permiton?.read ? <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -312,7 +324,22 @@ export default function Dashboard() {
             </table>
           </div>
         </Card>
-      </div>
+      </div> : <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-md p-10 flex flex-col items-center gap-4 max-w-md w-full text-center border border-gray-100">
+          <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center">
+            <i className="ri-shield-keyhole-line text-orange-500 text-4xl"></i>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Access Denied</h2>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            You don't have permission to view the Dashboard. <br />
+            Please navigate to another section from the sidebar or contact your administrator to request access.
+          </p>
+          <div className="flex items-center gap-2 mt-2 bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 w-full">
+            <i className="ri-information-line text-orange-400 text-lg"></i>
+            <p className="text-xs text-orange-600 text-left">Your current role: <span className="font-semibold">{user?.role || 'Unknown'}</span></p>
+          </div>
+        </div>
+      </div>}
     </AdminLayout>
   );
 }

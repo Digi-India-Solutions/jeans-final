@@ -11,19 +11,18 @@ const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg:        #0a0908;
-    --surface:   #131110;
-    --surface2:  #1c1916;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.12);
-    --gold:      #c9a84c;
-    --gold-dim:  #8a6e2f;
-    --gold-glow: rgba(201,168,76,0.18);
-    --text:      #f0ece4;
-    --muted:     #7d7568;
+    --bg:        #ffffff;
+    --surface:   #ffffff;
+    --surface2:  #2196F3;
+    --border:    rgb(0, 0, 0);
+    --border2:   rgb(0, 0, 0);
+    --gold:      #2196F3;
+    --gold-dim:  #2196F3;
+    --gold-glow: rgb(0, 0, 0);
+    --text:      #000000;
+    --muted:     #000000;
     --green:     #4caf7d;
     --red:       #e05c5c;
-    --blue:      #2196f3;
     --radius:    14px;
   }
 
@@ -54,12 +53,12 @@ const styles = `
 
   .p-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
   .p-logo-mark { font-family: 'Arial Black', Arial, sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
-  .p-logo-a { color: #f0ece4; }
-  .p-logo-c { color: #2196f3; }
+  .p-logo-a { color: #000000; }
+  .p-logo-c { color: #2196F3; }
   .p-logo-divider { width: 1px; height: 34px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
   .p-logo-text { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
   .p-logo-name { font-family: 'Arial Black', Arial, sans-serif; font-size: 0.88rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
-  .p-logo-n1 { color: #f0ece4; }
+  .p-logo-n1 { color: #000000; }
   .p-logo-n2 { color: #2196f3; }
   .p-logo-tagline { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
 
@@ -77,7 +76,7 @@ const styles = `
     border: 1px solid var(--border2); padding: 6px 14px; border-radius: 20px;
     cursor: pointer; transition: color 0.2s, border-color 0.2s;
   }
-  .p-back-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+  .p-back-btn:hover { color: black; border-color: var(--gold-dim); }
 
   /* ── Breadcrumb ── */
   .p-breadcrumb { display: flex; align-items: center; gap: 8px; padding: 18px 40px 0; font-size: 0.76rem; color: var(--muted); flex-wrap: wrap; }
@@ -153,13 +152,13 @@ const styles = `
   .p-img-wrap { height: 220px; position: relative; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
   .p-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block; }
   .p-img-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: radial-gradient(ellipse at center, #1e1a14, var(--surface2)); }
-  .p-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,9,8,0.8) 0%, transparent 50%); pointer-events: none; }
+  .p-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(32, 29, 26, 0.8) 0%, transparent 50%); pointer-events: none; }
 
   /* Image count chip */
   .p-img-count {
     position: absolute; bottom: 10px; right: 10px;
     font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em;
-    background: rgba(10,9,8,0.75); color: var(--muted);
+    background: rgb(255, 255, 255); color: var(--muted);
     border: 1px solid var(--border2); padding: 3px 8px; border-radius: 10px;
   }
 
@@ -169,9 +168,9 @@ const styles = `
     font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
     padding: 4px 10px; border-radius: 20px;
   }
-  .p-type-badge.best-seller { background: rgba(201,168,76,0.2); color: var(--gold); border: 1px solid rgba(201,168,76,0.4); }
-  .p-type-badge.new-arrival { background: rgba(33,150,243,0.2); color: var(--blue); border: 1px solid rgba(33,150,243,0.4); }
-  .p-type-badge.default     { background: rgba(255,255,255,0.08); color: var(--muted); border: 1px solid var(--border2); }
+  .p-type-badge.best-seller { background: rgb(0, 0, 0); color: var(--gold); border: 1px solid rgba(0, 0, 0, 0.4); }
+  .p-type-badge.new-arrival { background: #2196f3; color: var(--blue); border: 1px solid #2196f3; }
+  .p-type-badge.default     { background: rgb(0, 0, 0); color: var(--muted); border: 1px solid var(--border2); }
 
   /* Status dot */
   .p-status-dot {
@@ -206,7 +205,7 @@ const styles = `
     color: var(--gold); background: none; border: none; cursor: pointer;
     display: flex; align-items: center; gap: 5px; padding: 0; transition: gap 0.2s, color 0.2s;
   }
-  .p-card:hover .p-card-btn { gap: 9px; color: #e8c96a; }
+  .p-card:hover .p-card-btn { gap: 9px; color: #000000; }
 
   /* ── Skeleton ── */
   .p-skeleton { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }

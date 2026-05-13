@@ -10,17 +10,17 @@ const PAGE_SIZE = 12;
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
-  :root {
-    --bg:        #0a0908;
-    --surface:   #131110;
-    --surface2:  #1c1916;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.12);
-    --gold:      #c9a84c;
-    --gold-dim:  #8a6e2f;
-    --gold-glow: rgba(201,168,76,0.18);
-    --text:      #f0ece4;
-    --muted:     #7d7568;
+ :root {
+    --bg:        #ffffff;
+    --surface:   #ffffff;
+    --surface2:  #2196F3;
+    --border:    rgb(0, 0, 0);
+    --border2:   rgb(0, 0, 0);
+    --gold:      #2196F3;
+    --gold-dim:  #2196F3;
+    --gold-glow: rgb(0, 0, 0);
+    --text:      #000000;
+    --muted:     #000000;
     --green:     #4caf7d;
     --red:       #e05c5c;
     --radius:    14px;
@@ -69,8 +69,8 @@ const styles = `
   align-items: center;
 }
 
-.c-logo-a { color: #f0ece4; }
-.c-logo-c { color: #2196f3; }
+.c-logo-a { color: #000000; }
+.c-logo-c { color: #2196F3; }
 
 .c-logo-divider {
   width: 1px;
@@ -94,8 +94,8 @@ const styles = `
   text-transform: uppercase;
 }
 
-.c-logo-n1 { color: #f0ece4; }
-.c-logo-n2 { color: #2196f3; }
+.c-logo-n1 { color: #000000; }
+.c-logo-n2 { color: #2196F3; }
 
 .c-logo-tagline {
   font-size: 0.6rem;
@@ -282,13 +282,13 @@ const styles = `
     align-items: center;
     justify-content: center;
     font-size: 2.8rem;
-    background: radial-gradient(ellipse at center, #1e1a14, var(--surface2));
+    background: radial-gradient(ellipse at center, #2196F3, var(--surface2));
   }
 
   .c-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(10,9,8,0.75) 0%, transparent 55%);
+    background: linear-gradient(to top, rgb(104, 104, 104) 0%, transparent 55%);
     pointer-events: none;
   }
 
@@ -387,7 +387,7 @@ const styles = `
     transition: gap 0.2s, color 0.2s;
   }
 
-  .c-card:hover .c-card-btn { gap: 9px; color: #e8c96a; }
+  .c-card:hover .c-card-btn { gap: 9px; color: #000000; }
 
   /* ── Skeleton ── */
   .c-skeleton {
@@ -478,7 +478,7 @@ const styles = `
 
   .c-pg-btn.active {
     background: var(--gold);
-    color: #0a0908;
+    color: #000000;
     border-color: var(--gold);
     font-weight: 700;
     box-shadow: 0 0 14px var(--gold-glow);
@@ -504,278 +504,278 @@ const styles = `
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function formatDate(dateVal) {
-    const raw = dateVal?.$date || dateVal;
-    if (!raw) return "—";
-    return new Date(raw).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+  const raw = dateVal?.$date || dateVal;
+  if (!raw) return "—";
+  return new Date(raw).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function paginationRange(current, total) {
-    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-    if (current <= 4) return [1, 2, 3, 4, 5, "…", total];
-    if (current >= total - 3) return [1, "…", total - 4, total - 3, total - 2, total - 1, total];
-    return [1, "…", current - 1, current, current + 1, "…", total];
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, "…", total];
+  if (current >= total - 3) return [1, "…", total - 4, total - 3, total - 2, total - 1, total];
+  return [1, "…", current - 1, current, current + 1, "…", total];
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 function Logo() {
-    const navigate = useNavigate();
-    return (
-        <div className="c-logo" onClick={() => navigate("/main-category")}>
-            <div className="c-logo-mark">
-                <span className="c-logo-a">A</span>
-                <span className="c-logo-c">C</span>
-            </div>
-            <div className="c-logo-divider" />
-            <div className="c-logo-text">
-                <div className="c-logo-name">
-                    <span className="c-logo-n1">ANIBHAVI</span>
-                    <span className="c-logo-n2"> CREATIONS</span>
-                </div>
-                <span className="c-logo-tagline">Fashion Studio</span>
-            </div>
+  const navigate = useNavigate();
+  return (
+    <div className="c-logo" onClick={() => navigate("/main-category")}>
+      <div className="c-logo-mark">
+        <span className="c-logo-a">A</span>
+        <span className="c-logo-c">C</span>
+      </div>
+      <div className="c-logo-divider" />
+      <div className="c-logo-text">
+        <div className="c-logo-name">
+          <span className="c-logo-n1">ANIBHAVI</span>
+          <span className="c-logo-n2"> CREATIONS</span>
         </div>
-    );
+        <span className="c-logo-tagline">Fashion Studio</span>
+      </div>
+    </div>
+  );
 }
 
 function SkeletonCard() {
-    return (
-        <div className="c-skeleton">
-            <div className="c-skel-img" />
-            <div className="c-skel-body">
-                <div className="c-skel-line" style={{ height: 10, width: "35%" }} />
-                <div className="c-skel-line" style={{ height: 22, width: "60%" }} />
-                <div className="c-skel-line" style={{ height: 10, width: "90%" }} />
-                <div className="c-skel-line" style={{ height: 10, width: "75%" }} />
-            </div>
-        </div>
-    );
+  return (
+    <div className="c-skeleton">
+      <div className="c-skel-img" />
+      <div className="c-skel-body">
+        <div className="c-skel-line" style={{ height: 10, width: "35%" }} />
+        <div className="c-skel-line" style={{ height: 22, width: "60%" }} />
+        <div className="c-skel-line" style={{ height: 10, width: "90%" }} />
+        <div className="c-skel-line" style={{ height: 10, width: "75%" }} />
+      </div>
+    </div>
+  );
 }
 
 function SubCategoryCard({ item }) {
-    const [imgError, setImgError] = useState(false);
-    const [bannerError, setBannerError] = useState(false);
-    const navigate = useNavigate();
+  const [imgError, setImgError] = useState(false);
+  const [bannerError, setBannerError] = useState(false);
+  const navigate = useNavigate();
 
-    const image = item.images?.[0];
-    const banner = item.categoryBanner?.[0];
+  const image = item.images?.[0];
+  const banner = item.categoryBanner?.[0];
 
-    const handleClick = () => {
-        navigate(`/products/${item.slug}`, {
-            state: { subCategoryId: item._id, subCategoryName: item.name },
-        });
-    };
-    console.log("item=====>category", item)
-    return (
-        <div className="c-card" onClick={handleClick}>
+  const handleClick = () => {
+    navigate(`/products/${item.slug}`, {
+      state: { subCategoryId: item._id, subCategoryName: item.name },
+    });
+  };
+  console.log("item=====>category", item)
+  return (
+    <div className="c-card" onClick={handleClick}>
 
-            {/* Main image */}
-            <div className="c-img-wrap">
-                {image && !imgError ? (
-                    <img
-                        className="c-card-img"
-                        src={image}
-                        alt={item?.name}
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="c-img-fallback">🧵</div>
-                )}
-                <div className="c-img-overlay" />
-                <span className={`c-badge ${item.status ? "active" : "inactive"}`}>
-                    <span className="c-badge-dot" />
-                    {item.status ? "Active" : "Inactive"}
-                </span>
-            </div>
+      {/* Main image */}
+      <div className="c-img-wrap">
+        {image && !imgError ? (
+          <img
+            className="c-card-img"
+            src={image}
+            alt={item?.name}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="c-img-fallback">🧵</div>
+        )}
+        <div className="c-img-overlay" />
+        <span className={`c-badge ${item.status ? "active" : "inactive"}`}>
+          <span className="c-badge-dot" />
+          {item.status ? "Active" : "Inactive"}
+        </span>
+      </div>
 
-            {/* Body */}
-            <div className="c-card-body">
-                <div className="c-card-slug">/{item.slug}</div>
-                <h2 className="c-card-name">{item.name}</h2>
-                <div className="c-card-footer">
-                    <div className="c-card-meta">
+      {/* Body */}
+      <div className="c-card-body">
+        <div className="c-card-slug">/{item.slug}</div>
+        <h2 className="c-card-name">{item.name}</h2>
+        <div className="c-card-footer">
+          <div className="c-card-meta">
 
-                    </div>
-                    <button className="c-card-btn">
-                        View <span>→</span>
-                    </button>
-                </div>
-            </div>
+          </div>
+          <button className="c-card-btn">
+            View <span>→</span>
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
-    const pages = paginationRange(currentPage, totalPages);
+  const pages = paginationRange(currentPage, totalPages);
 
-    return (
-        <div className="c-pagination">
-            <button
-                className="c-pg-btn"
-                disabled={currentPage === 1}
-                onClick={() => onPageChange(currentPage - 1)}
-            >
-                ← Prev
-            </button>
+  return (
+    <div className="c-pagination">
+      <button
+        className="c-pg-btn"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        ← Prev
+      </button>
 
-            {pages.map((p, i) =>
-                p === "…" ? (
-                    <span key={`e-${i}`} className="c-pg-ellipsis">…</span>
-                ) : (
-                    <button
-                        key={p}
-                        className={`c-pg-btn${currentPage === p ? " active" : ""}`}
-                        onClick={() => onPageChange(p)}
-                    >
-                        {p}
-                    </button>
-                )
-            )}
+      {pages.map((p, i) =>
+        p === "…" ? (
+          <span key={`e-${i}`} className="c-pg-ellipsis">…</span>
+        ) : (
+          <button
+            key={p}
+            className={`c-pg-btn${currentPage === p ? " active" : ""}`}
+            onClick={() => onPageChange(p)}
+          >
+            {p}
+          </button>
+        )
+      )}
 
-            <button
-                className="c-pg-btn"
-                disabled={currentPage === totalPages}
-                onClick={() => onPageChange(currentPage + 1)}
-            >
-                Next →
-            </button>
-        </div>
-    );
+      <button
+        className="c-pg-btn"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Next →
+      </button>
+    </div>
+  );
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function SubCategory() {
-    const [subCategories, setSubCategories] = useState([]);   // ✅ fixed: was [setSubCategories, setSubCategories]
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+  const [subCategories, setSubCategories] = useState([]);   // ✅ fixed: was [setSubCategories, setSubCategories]
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
-    const location = useLocation();
-    const navigate = useNavigate();
-    const categoryId = location.state?.categoryId;
-    const categoryName = location.state?.categoryName || "Category";
+  const location = useLocation();
+  const navigate = useNavigate();
+  const categoryId = location.state?.categoryId;
+  const categoryName = location.state?.categoryName || "Category";
 
-    // ✅ Fixed: was calling fetchCategories (undefined); now correctly calls fetchSubCategories
-    const fetchSubCategories = useCallback(async () => {
-        if (!categoryId) {
-            setSubCategories([]);
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        try {
-            const response = await getData(
-                `api/category/get_category_by_main_category/${categoryId}`
-            );
-            if (response?.success) {
-                setSubCategories(response?.data || []);
-            } else {
-                toast.error(response?.message || "Failed to fetch subcategories");
-            }
-        } catch (error) {
-            console.error("fetchSubCategories:", error);
-            toast.error("Failed to fetch subcategories");
-        } finally {
-            setLoading(false);
-        }
-    }, [categoryId]);
+  // ✅ Fixed: was calling fetchCategories (undefined); now correctly calls fetchSubCategories
+  const fetchSubCategories = useCallback(async () => {
+    if (!categoryId) {
+      setSubCategories([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await getData(
+        `api/category/get_category_by_main_category/${categoryId}`
+      );
+      if (response?.success) {
+        setSubCategories(response?.data || []);
+      } else {
+        toast.error(response?.message || "Failed to fetch subcategories");
+      }
+    } catch (error) {
+      console.error("fetchSubCategories:", error);
+      toast.error("Failed to fetch subcategories");
+    } finally {
+      setLoading(false);
+    }
+  }, [categoryId]);
 
-    useEffect(() => {
-        fetchSubCategories();
-    }, [fetchSubCategories]);
+  useEffect(() => {
+    fetchSubCategories();
+  }, [fetchSubCategories]);
 
-    // Reset to page 1 whenever data changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [subCategories]);
+  // Reset to page 1 whenever data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [subCategories]);
 
-    const totalPages = Math.max(1, Math.ceil(subCategories.length / PAGE_SIZE));
-    const paginatedData = subCategories.slice(
-        (currentPage - 1) * PAGE_SIZE,
-        currentPage * PAGE_SIZE
-    );
-    const startItem = subCategories.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-    const endItem = Math.min(currentPage * PAGE_SIZE, subCategories.length);
+  const totalPages = Math.max(1, Math.ceil(subCategories.length / PAGE_SIZE));
+  const paginatedData = subCategories.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+  const startItem = subCategories.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, subCategories.length);
 
-    return (
-        <>
-            <style>{styles}</style>
-            <div className="c-root">
+  return (
+    <>
+      <style>{styles}</style>
+      <div className="c-root">
 
-                {/* Navbar */}
-                <nav className="c-nav">
-                    <Logo />
-                    <div className="c-nav-right">
-                        <span className="c-nav-pill">{subCategories.length} Sub-categories</span>
-                        <button className="c-back-btn" onClick={() => navigate(-1)}>
-                            ← Back
-                        </button>
-                    </div>
-                </nav>
+        {/* Navbar */}
+        <nav className="c-nav">
+          <Logo />
+          <div className="c-nav-right">
+            <span className="c-nav-pill">{subCategories.length} Sub-categories</span>
+            <button className="c-back-btn" onClick={() => navigate(-1)}>
+              ← Back
+            </button>
+          </div>
+        </nav>
 
-                {/* Breadcrumb */}
-                <div className="c-breadcrumb">
-                    <span className="c-breadcrumb-link" onClick={() => navigate("/main-category")}>Home</span>
-                    <span className="c-breadcrumb-sep">/</span>
-                    <span className="c-breadcrumb-link" onClick={() => navigate(-1)}>Categories</span>
-                    <span className="c-breadcrumb-sep">/</span>
-                    <span className="c-breadcrumb-current">Sub Category</span>
-                </div>
+        {/* Breadcrumb */}
+        <div className="c-breadcrumb">
+          <span className="c-breadcrumb-link" onClick={() => navigate("/main-category")}>Home</span>
+          <span className="c-breadcrumb-sep">/</span>
+          <span className="c-breadcrumb-link" onClick={() => navigate(-1)}>Categories</span>
+          <span className="c-breadcrumb-sep">/</span>
+          <span className="c-breadcrumb-current">Sub Category</span>
+        </div>
 
-                {/* Page Header */}
-                <div className="c-page-header">
-                    <div>
-                        <h1 className="c-page-title">Sub <span>Categories</span></h1>
-                        <p className="c-page-sub">
-                            Exploring subcategories under <strong style={{ color: "var(--gold-dim)" }}>{categoryName}</strong>
-                        </p>
-                    </div>
-                </div>
+        {/* Page Header */}
+        <div className="c-page-header">
+          <div>
+            <h1 className="c-page-title">Sub <span>Categories</span></h1>
+            <p className="c-page-sub">
+              Exploring subcategories under <strong style={{ color: "var(--gold-dim)" }}>{categoryName}</strong>
+            </p>
+          </div>
+        </div>
 
-                <div className="c-divider" />
+        <div className="c-divider" />
 
-                {/* Content */}
-                {loading ? (
-                    <div className="c-grid">
-                        {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                            <SkeletonCard key={i} />
-                        ))}
-                    </div>
-                ) : subCategories.length === 0 ? (
-                    <div className="c-empty">
-                        <div className="c-empty-icon">📂</div>
-                        <h2>No subcategories yet</h2>
-                        <p>Add subcategories under this category to get started.</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="c-grid">
-                            {paginatedData.map((item) => (
-                                <SubCategoryCard
-                                    key={item._id?.$oid || item._id || item.slug}
-                                    item={item}
-                                />
-                            ))}
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className="c-pag-wrap">
-                                <Pagination
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    onPageChange={setCurrentPage}
-                                />
-                                <p className="c-page-info">
-                                    Showing {startItem}–{endItem} of {subCategories.length} subcategories
-                                </p>
-                            </div>
-                        )}
-                    </>
-                )}
-
+        {/* Content */}
+        {loading ? (
+          <div className="c-grid">
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : subCategories.length === 0 ? (
+          <div className="c-empty">
+            <div className="c-empty-icon">📂</div>
+            <h2>No subcategories yet</h2>
+            <p>Add subcategories under this category to get started.</p>
+          </div>
+        ) : (
+          <>
+            <div className="c-grid">
+              {paginatedData.map((item) => (
+                <SubCategoryCard
+                  key={item._id?.$oid || item._id || item.slug}
+                  item={item}
+                />
+              ))}
             </div>
-        </>
-    );
+
+            {totalPages > 1 && (
+              <div className="c-pag-wrap">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+                <p className="c-page-info">
+                  Showing {startItem}–{endItem} of {subCategories.length} subcategories
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
+    </>
+  );
 }

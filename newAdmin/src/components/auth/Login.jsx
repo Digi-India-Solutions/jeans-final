@@ -14,74 +14,102 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [step, setStep] = useState(1); // 1: login, 2: forgot password
     const [loading, setLoading] = useState(false);
+
     // const handleLogin = async (e) => {
     //     e.preventDefault();
-    //     const response = await postData('api/admin/admin-login', { email, password });
 
-    //     if (response?.status === true) {
-    //         const token = response?.data?.token;
-    //          const decoded = await jwtDecode(token);
-    //          console.log("DecodedHHH Token:==>", decoded);
-    //         toast.success(response?.message);
-    //         sessionStorage.setItem('login', true);
-    //         sessionStorage.setItem('JeansAdmin', response?.data?.token);
-    //          try {
-    //             const decoded = jwtDecode(token);
-    //             console.log("Decoded Token:==>", decoded);
-    //             sessionStorage.setItem('JeansUser', JSON.stringify(decoded));
-    //         } catch (err) {
-    //             console.warn("Invalid token decode:", err);
+    //     if (!email || !password) {
+    //         toast.error("Please fill in both fields");
+    //         return;
+    //     }
+
+    //     setLoading(true);
+
+    //     try {
+    //         const response = await postData("api/admin/admin-login", { email, password });
+    //         console.log("SSSSSSS:=>", response)
+    //         if (response?.status === true) {
+    //             const token = response?.data?.token;
+    //             let decodedToken;
+    //             try {
+    //                 decodedToken = jwtDecode(token);
+    //                 console.log("Decoded Token:", decodedToken);
+    //                 sessionStorage.setItem("JeansUser", JSON.stringify(decodedToken));
+    //             } catch (err) {
+    //                 console.warn("Invalid token decode:", err);
+    //             }
+
+    //             sessionStorage.setItem("login", true);
+    //             sessionStorage.setItem("JeansAdmin", token);
+    //             toast.success(response?.message || "Login successful!");
+    //             const response = await postData('api/adminRole/get-single-role-by-role', { role: response?.data?.user?.role });
+    //             const perms = response?.data?.[0]?.permissions || {};
+
+    //             {...(perms?.dashboard?.read || user?.role === 'Super Admin' ? setTimeout(() => navigate("/admin/dashboard"), 800) : setTimeout(() => navigate("/blank_page"), 800))}
+    
+               
+    //         } else {
+    //             toast.error(response?.message || "Invalid email or password");
     //         }
-    //         // window.location.href = '/admin/dashboard';
-    //     } else {
-    //         toast.error(response?.message);
+
+    //     } catch (error) {
+    //         console.error("Login error:", error);
+    //         toast.error("Something went wrong during login.");
+    //     } finally {
+    //         setLoading(false);
     //     }
     // };
 
-
     const handleLogin = async (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        if (!email || !password) {
-            toast.error("Please fill in both fields");
-            return;
-        }
+    if (!email || !password) {
+        toast.error("Please fill in both fields");
+        return;
+    }
 
-        setLoading(true);
+    setLoading(true);
 
-        try {
-            const response = await postData("api/admin/admin-login", { email, password });
-            console.log("SSSSSSS:=>", response)
-            if (response?.status === true) {
-                const token = response?.data?.token;
-                let decodedToken;
+    try {
+        const loginResponse = await postData("api/admin/admin-login", { email, password });
+        console.log("SSSSSSS:=>", loginResponse);
 
-                try {
-                    decodedToken = jwtDecode(token);
-                    console.log("Decoded Token:", decodedToken);
-                    sessionStorage.setItem("JeansUser", JSON.stringify(decodedToken));
-                } catch (err) {
-                    console.warn("Invalid token decode:", err);
-                }
+        if (loginResponse?.status === true) {
+            const token = loginResponse?.data?.token;
+            let decodedToken;
 
-                sessionStorage.setItem("login", true);
-                sessionStorage.setItem("JeansAdmin", token);
-                toast.success(response?.message || "Login successful!");
-
-                // Small delay for smooth UX
-                setTimeout(() => navigate("/admin/dashboard"), 800);
-            } else {
-                toast.error(response?.message || "Invalid email or password");
+            try {
+                decodedToken = jwtDecode(token);
+                console.log("Decoded Token:", decodedToken);
+                sessionStorage.setItem("JeansUser", JSON.stringify(decodedToken));
+            } catch (err) {
+                console.warn("Invalid token decode:", err);
             }
 
-        } catch (error) {
-            console.error("Login error:", error);
-            toast.error("Something went wrong during login.");
-        } finally {
-            setLoading(false);
-        }
-    };
+            sessionStorage.setItem("login", true);
+            sessionStorage.setItem("JeansAdmin", token);
+            toast.success(loginResponse?.message || "Login successful!");
 
+            const roleResponse = await postData('api/adminRole/get-single-role-by-role', {
+                role: loginResponse?.data?.user?.role
+            });
+            const perms = roleResponse?.data?.[0]?.permissions || {};
+
+            const canReadDashboard = perms?.dashboard?.read || loginResponse?.data?.user?.role === 'Super Admin';
+            // setTimeout(() => navigate(canReadDashboard ? "/admin/dashboard" : "/admin/blank_page"), 800);
+            setTimeout(() => navigate("/admin/dashboard"), 800);
+
+        } else {
+            toast.error(loginResponse?.message || "Invalid email or password");
+        }
+
+    } catch (error) {
+        console.error("Login error:", error);
+        toast.error("Something went wrong during login.");
+    } finally {
+        setLoading(false);
+    }
+};
     const handleForgotPassword = async (e) => {
         e.preventDefault();
         if (!email) {
@@ -99,6 +127,22 @@ const Login = () => {
             toast.error(response?.message || 'Failed to send reset link');
         }
     };
+
+    // Fetch permissions
+    //   const fetchRoles = async () => {
+    //     try {
+    //       const response = await postData('api/adminRole/get-single-role-by-role', { role: user?.role });
+    //       const perms = response?.data?.[0]?.permissions || {};
+    //       setPermissions(perms);
+    //       console.log("Loaded permissions:", perms);
+    //     } catch (error) {
+    //       console.error("Failed to fetch role permissions:", error);
+    //     }
+    //   };
+
+    //   useEffect(() => {
+    //     if (user?.role) fetchRoles();
+    //   }, [user?.role]);
 
     return (
         <div className="main-login">

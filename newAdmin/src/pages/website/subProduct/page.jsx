@@ -11,19 +11,18 @@ const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg:        #0a0908;
-    --surface:   #131110;
-    --surface2:  #1c1916;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.12);
-    --gold:      #c9a84c;
-    --gold-dim:  #8a6e2f;
-    --gold-glow: rgba(201,168,76,0.18);
-    --text:      #f0ece4;
-    --muted:     #7d7568;
+    --bg:        #ffffff;
+    --surface:   #ffffff;
+    --surface2:  #2196F3;
+    --border:    rgb(0, 0, 0);
+    --border2:   rgb(0, 0, 0);
+    --gold:      #2196F3;
+    --gold-dim:  #2196F3;
+    --gold-glow: rgb(0, 0, 0);
+    --text:      #000000;
+    --muted:     #000000;
     --green:     #4caf7d;
     --red:       #e05c5c;
-    --blue:      #2196f3;
     --radius:    14px;
   }
 
@@ -45,12 +44,12 @@ const styles = `
   }
   .sp-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
   .sp-logo-mark { font-family: 'Arial Black', Arial, sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
-  .sp-logo-a { color: #f0ece4; }
+  .sp-logo-a { color: #000000; }
   .sp-logo-c { color: #2196f3; }
   .sp-logo-divider { width: 1px; height: 34px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
   .sp-logo-text { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
   .sp-logo-name { font-family: 'Arial Black', Arial, sans-serif; font-size: 0.88rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
-  .sp-logo-n1 { color: #f0ece4; }
+  .sp-logo-n1 { color: #000000; }
   .sp-logo-n2 { color: #2196f3; }
   .sp-logo-tagline { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
 
@@ -120,7 +119,7 @@ const styles = `
   .sp-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,9,8,0.8) 0%, transparent 50%); pointer-events: none; }
 
   /* Thumbnail row */
-  .sp-thumb-row { display: flex; gap: 5px; padding: 8px 10px; background: var(--surface2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .sp-thumb-row { display: flex; gap: 5px; padding: 8px 10px; background:#ffff; border-bottom: 1px solid var(--border); overflow-x: auto; }
   .sp-thumb { width: 38px; height: 38px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; cursor: pointer; transition: border-color 0.2s; }
   .sp-thumb.active { border-color: var(--gold); }
   .sp-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -140,7 +139,7 @@ const styles = `
     position: absolute; top: 10px; left: 10px;
     width: 22px; height: 22px; border-radius: 50%;
     border: 2px solid rgba(255,255,255,0.3);
-    font-size: 0.55rem; font-weight: 700; color: rgba(255,255,255,0.8);
+    font-size: 0.55rem; font-weight: 700; color: rgba(0, 0, 0, 0.8);
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
   }
@@ -152,13 +151,13 @@ const styles = `
 
   /* Info grid */
   .sp-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .sp-info-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .sp-info-cell { background: #ffff; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
   .sp-info-cell-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2px; }
   .sp-info-cell-val { font-size: 0.88rem; font-weight: 600; color: var(--text); }
 
   /* Sizes */
   .sp-sizes { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
-  .sp-size-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; padding: 3px 9px; border-radius: 8px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+  .sp-size-pill { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; padding: 3px 9px; border-radius: 8px; background: #ffff; color: var(--muted); border: 1px solid var(--border2); }
 
   /* Description */
   .sp-desc { font-size: 0.78rem; line-height: 1.6; color: var(--muted); margin-bottom: 12px; white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -173,7 +172,7 @@ const styles = `
   .sp-lot-price { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
 
   .sp-card-btn { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; transition: gap 0.2s, color 0.2s; }
-  .sp-card:hover .sp-card-btn { gap: 9px; color: #e8c96a; }
+  .sp-card:hover .sp-card-btn { gap: 9px; color: #000000; }
 
   /* ── Skeleton ── */
   .sp-skeleton { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }

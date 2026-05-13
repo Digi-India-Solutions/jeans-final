@@ -7,20 +7,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
-  :root {
-    --bg:        #0a0908;
-    --surface:   #131110;
-    --surface2:  #1c1916;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.12);
-    --gold:      #c9a84c;
-    --gold-dim:  #8a6e2f;
-    --gold-glow: rgba(201,168,76,0.18);
-    --text:      #f0ece4;
-    --muted:     #7d7568;
+   :root {
+    --bg:        #ffffff;
+    --surface:   #ffffff;
+    --surface2:  #2196F3;
+    --border:    rgb(0, 0, 0);
+    --border2:   rgb(0, 0, 0);
+    --gold:      #2196F3;
+    --gold-dim:  #2196F3;
+    --gold-glow: rgb(0, 0, 0);
+    --text:      #000000;
+    --muted:     #000000;
     --green:     #4caf7d;
     --red:       #e05c5c;
-    --blue:      #2196f3;
+    --blue:      #2196F3;
     --radius:    14px;
   }
 
@@ -43,12 +43,12 @@ const styles = `
   }
   .pd-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
   .pd-logo-mark { font-family: 'Arial Black', Arial, sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
-  .pd-logo-a { color: #f0ece4; }
+  .pd-logo-a { color: #000000; }
   .pd-logo-c { color: #2196f3; }
   .pd-logo-divider { width: 1px; height: 34px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
   .pd-logo-text { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
   .pd-logo-name { font-family: 'Arial Black', Arial, sans-serif; font-size: 0.88rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
-  .pd-logo-n1 { color: #f0ece4; }
+  .pd-logo-n1 { color: #000000; }
   .pd-logo-n2 { color: #2196f3; }
   .pd-logo-tagline { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
   .pd-nav-right { display: flex; align-items: center; gap: 12px; }
@@ -131,14 +131,14 @@ const styles = `
   .pd-size-chip {
     font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em;
     padding: 6px 14px; border-radius: 8px;
-    background: var(--surface2); color: var(--text);
+    background:#ffff; color: var(--text);
     border: 1px solid var(--border2);
     transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
-  .pd-size-chip:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+  .pd-size-chip:hover { border-color: #000000; color:#ffff--gold); background: #ffff; }
 
   /* Barcode */
-  .pd-barcode-wrap { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+  .pd-barcode-wrap { display: flex; align-items: center; gap: 10px; background: #ffff; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
   .pd-barcode-icon { font-size: 1.2rem; }
   .pd-barcode-val { font-family: monospace; font-size: 0.85rem; color: var(--muted); letter-spacing: 0.14em; }
   .pd-barcode-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
@@ -342,7 +342,7 @@ export default function ProductDetails() {
                     <div className="pd-nav-right">
                         {item && (
                             <span className={`pd-stock-nav-badge ${Number(item?.lotStock) ? 'in' : 'out'}`}>
-                                {Number(item?.lotStock) > 0 ? "In Stock" : "Out Stock"||item.stock || 'Unknown'}
+                                {Number(item?.lotStock) > 0 ? "In Stock" : "Out Stock" || item.stock || 'Unknown'}
                             </span>
                         )}
                         <button className="pd-back-btn" onClick={() => navigate(-1)}>← Back</button>
@@ -436,7 +436,7 @@ export default function ProductDetails() {
                                 <div className="pd-status-row">
                                     <span className={`pd-badge ${Number(item?.lotStock) > 0 ? 'green' : 'red'}`}>{Number(item?.lotStock) > 0 ? "in-stock" : "out-stock" || 'Unknown'}</span>
                                     {item.isActive && <span className="pd-badge blue">Active</span>}
-                                    <span className="pd-badge gold">Lot #{item.lotNumber}</span>
+                                    <span className="pd-badge gold" style={{color:'#fff'}}>Lot #{item.lotNumber}</span>
                                 </div>
 
                                 {/* Price block */}

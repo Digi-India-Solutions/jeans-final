@@ -265,7 +265,7 @@ export default function SubCategoriesManagement() {
                       {subCategory.name}
                     </h3>
                     <span className="text-sm text-gray-500">
-                      {subCategory?.productsCount} products
+                      {/* {subCategory?.productsCount} products */}
                     </span>
                   </div>
 

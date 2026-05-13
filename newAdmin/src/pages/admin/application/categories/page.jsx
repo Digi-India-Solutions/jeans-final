@@ -774,7 +774,7 @@ export default function CategoriesManagement() {
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-semibold text-gray-900">{category.mainCategoryName}</h3>
                     <span className="text-sm text-gray-500">
-                      {category.productsCount || 0} products
+                      {/* {category.productsCount || 0} products */}
                     </span>
                   </div>
 
