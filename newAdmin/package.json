@@ -13,6 +13,8 @@
     "firebase": "12.0.0",
     "i18next": "^25.3.2",
     "i18next-browser-languagedetector": "^8.2.0",
+    "jodit": "^4.12.2",
+    "jodit-react": "^5.3.21",
     "jwt-decode": "^2.2.0",
     "lucide-react": "^0.544.0",
     "react": "^19.1.0",

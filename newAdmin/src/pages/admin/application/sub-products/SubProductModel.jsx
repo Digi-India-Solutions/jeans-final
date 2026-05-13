@@ -4,21 +4,23 @@ import Button from '../../../../components/base/Button';
 import { toast } from 'react-toastify';
 import { postData } from '../../../../services/FetchNodeServices';
 import Select from 'react-select';
+import JoditEditor from 'jodit-react';
+import 'jodit/es2021/jodit.min.css';   // ✅ CSS from core jodit package, not jodit-react // ✅ import the CSS too
 
 // ─── EAN-13 Helpers (outside component) ──────────────────────────────────────
 
 const LEFT_L = [
-  '0001101','0011001','0010011','0111101','0100011',
-  '0110001','0101111','0111011','0110111','0001011'
+  '0001101', '0011001', '0010011', '0111101', '0100011',
+  '0110001', '0101111', '0111011', '0110111', '0001011'
 ];
-const LEFT_G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
-const RIGHT  = [
-  '1110010','1100110','1101100','1000010','1011100',
-  '1001110','1010000','1000100','1001000','1110100'
+const LEFT_G = ['0100111', '0110011', '0011011', '0100001', '0011101', '0111001', '0000101', '0010001', '0001001', '0010111'];
+const RIGHT = [
+  '1110010', '1100110', '1101100', '1000010', '1011100',
+  '1001110', '1010000', '1000100', '1001000', '1110100'
 ];
 const FIRST_DIGIT_PATTERN = [
-  'LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG',
-  'LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'
+  'LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG',
+  'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'
 ];
 
 // ✅ FIXED: odd-index × 3 (EAN-13 standard)
@@ -37,13 +39,13 @@ const validateEAN13 = (code) => {
 // ✅ FIXED: raw SVG string — no btoa crash
 const generateEAN13SVG = (barcode) => {
   if (!barcode || barcode.length !== 13) return null;
-  const fd  = parseInt(barcode[0]);
+  const fd = parseInt(barcode[0]);
   const lft = barcode.slice(1, 7);
   const rgt = barcode.slice(7, 13);
   const ptn = FIRST_DIGIT_PATTERN[fd];
 
   let bits = '101';
-  for (let i = 0; i < 6; i++) bits += (ptn[i]==='L' ? LEFT_L : LEFT_G)[parseInt(lft[i])];
+  for (let i = 0; i < 6; i++) bits += (ptn[i] === 'L' ? LEFT_L : LEFT_G)[parseInt(lft[i])];
   bits += '01010';
   for (let i = 0; i < 6; i++) bits += RIGHT[parseInt(rgt[i])];
   bits += '101';
@@ -55,14 +57,14 @@ const generateEAN13SVG = (barcode) => {
   let rects = '';
   for (let i = 0; i < bits.length; i++) {
     if (bits[i] === '1')
-      rects += `<rect x="${pad + i*bw}" y="2" width="${bw}" height="${bh}" fill="black"/>`;
+      rects += `<rect x="${pad + i * bw}" y="2" width="${bw}" height="${bh}" fill="black"/>`;
   }
 
-  const display = `${barcode[0]}  ${barcode.slice(1,7)}  ${barcode.slice(7)}`;
+  const display = `${barcode[0]}  ${barcode.slice(1, 7)}  ${barcode.slice(7)}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
     <rect width="${W}" height="${H}" fill="white"/>
     ${rects}
-    <text x="${W/2}" y="${H-4}" text-anchor="middle"
+    <text x="${W / 2}" y="${H - 4}" text-anchor="middle"
       font-family="monospace" font-size="11" fill="black" letter-spacing="1">${display}</text>
   </svg>`;
 };
@@ -88,9 +90,9 @@ const Field = ({ label, required, error, children }) => (
 );
 
 const inputClass = (hasError) =>
-  `w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-    hasError ? 'border-red-500' : 'border-gray-300'
+  `w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${hasError ? 'border-red-500' : 'border-gray-300'
   }`;
+
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -109,9 +111,35 @@ function SubProductModel({
   setEditingItem,
   fetchProductsWithPagination,
 }) {
-  const [isLoading, setIsLoading]   = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const objectUrlsRef = useRef([]); // ✅ track created object URLs for cleanup
+
+
+  const editorRef = useRef(null);
+
+  const joditConfig = useMemo(() => ({
+    readonly: false,
+    placeholder: 'Product description...',
+    height: 300,
+    // ✅ Clean, minimal toolbar — remove what you don't need
+    buttons: [
+      'bold', 'italic', 'underline', 'strikethrough', '|',
+      'ul', 'ol', '|',
+      'fontsize', 'paragraph', '|',
+      'align', '|',
+      'link', '|',
+      'undo', 'redo', '|',
+      'fullsize',
+    ],
+    toolbarAdaptive: false,   // keeps toolbar stable
+    showCharsCounter: true,   // ✅ replaces your 500-char counter
+    showWordsCounter: false,
+    showXPathInStatusbar: false,
+    askBeforePasteHTML: false,
+    askBeforePasteFromWord: false,
+    defaultActionOnPaste: 'insert_clear_html',
+  }), []);
 
   // ✅ Revoke stale object URLs on unmount to prevent memory leaks
   useEffect(() => {
@@ -125,7 +153,7 @@ function SubProductModel({
   // ✅ useMemo — only recalculates when price/qty changes
   const finalPrice = useMemo(() => {
     const price = parseFloat(formData?.singlePicPrice);
-    const qty   = parseInt(formData?.pcsInSet);
+    const qty = parseInt(formData?.pcsInSet);
     if (!price || !qty || isNaN(price) || isNaN(qty)) return '0';
     return (price * qty).toLocaleString('en-IN');
   }, [formData?.singlePicPrice, formData?.pcsInSet]);
@@ -133,7 +161,7 @@ function SubProductModel({
   // ✅ Sync finalLotPrice into formData without causing infinite loop
   useEffect(() => {
     const price = parseFloat(formData?.singlePicPrice);
-    const qty   = parseInt(formData?.pcsInSet);
+    const qty = parseInt(formData?.pcsInSet);
     if (!price || !qty || isNaN(price) || isNaN(qty)) return;
     const calculated = price * qty;
     if (calculated !== formData?.finalLotPrice) {
@@ -174,7 +202,7 @@ function SubProductModel({
 
     if (!validateEAN13(formData.barcode))
       errors.barcode = `Invalid EAN-13 barcode${formData.barcode?.length === 13
-        ? ` — expected check digit: ${calculateEAN13CheckDigit(formData.barcode.slice(0,12))}`
+        ? ` — expected check digit: ${calculateEAN13CheckDigit(formData.barcode.slice(0, 12))}`
         : ' — must be 13 digits'}`;
 
     if (uploadedFiles.length < 3 || uploadedFiles.length > 8)
@@ -200,9 +228,9 @@ function SubProductModel({
     const parent = productList.find(p => p._id === option.value);
     setFormData(prev => ({
       ...prev,
-      productId:      option.value,
+      productId: option.value,
       singlePicPrice: parent?.price || '',
-      lotNumber:      parent?.productName || '',
+      lotNumber: parent?.productName || '',
     }));
   }, [productList, setFormData]);
 
@@ -419,7 +447,7 @@ function SubProductModel({
                 />
               </Field>
 
-              <Field label="Description">
+              {/* <Field label="Description">
                 <textarea
                   value={formData.description || ''}
                   onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -431,7 +459,8 @@ function SubProductModel({
                 <p className="text-xs text-gray-400 text-right mt-1">
                   {formData.description?.length || 0}/500
                 </p>
-              </Field>
+              </Field> */}
+
 
               <Field label="Stock Status">
                 <div className="relative">
@@ -513,11 +542,10 @@ function SubProductModel({
                           key={size._id}
                           type="button"
                           onClick={() => handleSizeToggle(size)}
-                          className={`px-2 py-2 text-xs border rounded-lg transition-all font-medium ${
-                            selected
-                              ? 'bg-blue-600 border-blue-600 text-white'
-                              : 'border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-50'
-                          }`}
+                          className={`px-2 py-2 text-xs border rounded-lg transition-all font-medium ${selected
+                            ? 'bg-blue-600 border-blue-600 text-white'
+                            : 'border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-50'
+                            }`}
                         >
                           {size.size}
                         </button>
@@ -619,10 +647,9 @@ function SubProductModel({
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-gray-200 rounded-full h-1.5">
                         <div
-                          className={`h-1.5 rounded-full transition-all ${
-                            uploadedFiles.length < 3 ? 'bg-red-400' :
+                          className={`h-1.5 rounded-full transition-all ${uploadedFiles.length < 3 ? 'bg-red-400' :
                             uploadedFiles.length <= 8 ? 'bg-green-500' : 'bg-red-400'
-                          }`}
+                            }`}
                           style={{ width: `${Math.min((uploadedFiles.length / 8) * 100, 100)}%` }}
                         />
                       </div>
@@ -633,7 +660,18 @@ function SubProductModel({
               </Field>
             </div>
           </div>
-
+          <div>
+            <Field label="Description">
+              <JoditEditor
+                ref={editorRef}
+                value={formData.description || ''}
+                config={joditConfig}
+                onBlur={(newContent) =>               // ✅ onBlur — not onChange — avoids re-render on every keystroke
+                  setFormData(prev => ({ ...prev, description: newContent }))
+                }
+              />
+            </Field>
+          </div>
           {/* ── Footer Buttons ──────────────────────────────────────── */}
           <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
             <Button

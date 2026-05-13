@@ -48,7 +48,7 @@ const routes: RouteObject[] = [
   { path: "/main-category", element: <Categorys /> },
   { path: "/sub-category/:name", element: <SubCategorys /> },
   { path: "/products/:name", element: <Products /> },
-  { path: "/sub-products/:name", element: <SubProducts /> },
+  { path: "/sub-products", element: <SubProducts /> },
   { path: "/product-details/:name", element: <ProductDeatils /> },
 
   // ✅ Protected admin routes — auth checked inside ProtectedRoute

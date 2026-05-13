@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { getData } from "../../../services/FetchNodeServices";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import logo from "../../images/logowithText.png"; // ← adjust path to your actual logo file
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const PAGE_SIZE = 12;
@@ -13,14 +14,14 @@ const styles = `
   :root {
     --bg:        #ffffff;
     --surface:   #ffffff;
-    --surface2:  #2196F3;
-    --border:    rgb(0, 0, 0);
-    --border2:   rgb(0, 0, 0);
-    --gold:      #2196F3;
-    --gold-dim:  #2196F3;
-    --gold-glow: rgb(0, 0, 0);
+    --surface2:  #e8f3fd;
+    --blue:      #2196F3;
+    --blue-dark: #1565C0;
+    --blue-light:#bbdefb;
+    --border:    #000000;
+    --border2:   #2196F3;
     --text:      #000000;
-    --muted:     #000000;
+    --muted:     #444444;
     --green:     #4caf7d;
     --red:       #e05c5c;
     --radius:    14px;
@@ -44,75 +45,80 @@ const styles = `
     padding: 0 40px;
     height: 68px;
     background: var(--surface);
-    border-bottom: 1px solid var(--border2);
+    border-bottom: 2px solid var(--blue);
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(12px);
   }
-.c-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  text-decoration: none;
-  user-select: none;
-}
 
-.c-logo-mark {
-  font-family: 'Arial Black', Arial, sans-serif;
-  font-size: 2rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: center;
-}
+  .c-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+  }
 
-.c-logo-a { color: #000000; }
-.c-logo-c { color: #2196F3; }
+  .c-logo-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-.c-logo-divider {
-  width: 1px;
-  height: 34px;
-  background: rgba(255,255,255,0.1);
-  flex-shrink: 0;
-}
+  .c-logo-img {
+    width: 106px;
+    height: 106px;
+    object-fit: contain;
+    display: block;
+    border-radius: 8px;
+  }
 
-.c-logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-  gap: 3px;
-}
+  .c-logo-a { color: #000000; }
+  .c-logo-c { color: #2196F3; }
 
-.c-logo-name {
-  font-family: 'Arial Black', Arial, sans-serif;
-  font-size: 0.88rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
+  .c-logo-divider {
+    width: 1px;
+    height: 34px;
+    background: var(--blue-light);
+    flex-shrink: 0;
+  }
 
-.c-logo-n1 { color: #000000; }
-.c-logo-n2 { color: #2196F3; }
+  .c-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 3px;
+  }
 
-.c-logo-tagline {
-  font-size: 0.6rem;
-  color: var(--muted);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
+  .c-logo-name {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .c-logo-n1 { color: #000000; }
+  .c-logo-n2 { color: #2196F3; }
+
+  .c-logo-tagline {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
 
   .c-nav-pill {
     font-size: 0.72rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    padding: 6px 14px;
+    color: #ffffff;
+    background: var(--blue);
+    border: 1px solid var(--blue-dark);
+    padding: 6px 16px;
     border-radius: 20px;
   }
 
@@ -122,7 +128,7 @@ const styles = `
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #000000;
   }
 
   .c-page-title {
@@ -131,9 +137,10 @@ const styles = `
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.01em;
+    color: #000000;
   }
 
-  .c-page-title span { color: var(--gold); }
+  .c-page-title span { color: var(--blue); }
 
   .c-page-sub {
     font-size: 0.82rem;
@@ -153,11 +160,11 @@ const styles = `
   /* ── Card ── */
   .c-card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid #000000;
     border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    transition: border-color 0.25s, transform 0.25s;
     animation: fadeUp 0.45s ease both;
   }
 
@@ -174,8 +181,7 @@ const styles = `
   .c-card:nth-child(6) { animation-delay: 0.24s; }
 
   .c-card:hover {
-    border-color: var(--gold-dim);
-    box-shadow: 0 0 28px var(--gold-glow), 0 12px 40px rgba(0,0,0,0.5);
+    border-color: var(--blue);
     transform: translateY(-4px);
   }
 
@@ -203,13 +209,13 @@ const styles = `
     align-items: center;
     justify-content: center;
     font-size: 2.8rem;
-    background: radial-gradient(ellipse at center, #2196F3, var(--surface2));
+    background: var(--surface2);
   }
 
   .c-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgb(104, 104, 104) 0%, transparent 55%);
+    background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%);
     pointer-events: none;
   }
 
@@ -228,8 +234,8 @@ const styles = `
     gap: 5px;
   }
 
-  .c-badge.active  { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.35); }
-  .c-badge.inactive{ background: rgba(224,92,92,0.15);  color: var(--red);   border: 1px solid rgba(224,92,92,0.35); }
+  .c-badge.active   { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.4); }
+  .c-badge.inactive { background: rgba(224,92,92,0.15);  color: var(--red);   border: 1px solid rgba(224,92,92,0.4); }
 
   .c-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
@@ -240,7 +246,7 @@ const styles = `
     font-weight: 500;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--gold-dim);
+    color: var(--blue);
     margin-bottom: 5px;
   }
 
@@ -248,7 +254,7 @@ const styles = `
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text);
+    color: #000000;
     margin-bottom: 8px;
     line-height: 1.15;
   }
@@ -269,7 +275,7 @@ const styles = `
     align-items: center;
     justify-content: space-between;
     padding-top: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #000000;
   }
 
   .c-card-date { font-size: 0.72rem; color: var(--muted); }
@@ -279,7 +285,7 @@ const styles = `
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--blue);
     background: none;
     border: none;
     cursor: pointer;
@@ -290,19 +296,19 @@ const styles = `
     transition: gap 0.2s, color 0.2s;
   }
 
-  .c-card:hover .c-card-btn { gap: 9px; color: #000000; }
+  .c-card:hover .c-card-btn { gap: 9px; color: var(--blue-dark); }
 
   /* ── Skeleton ── */
   .c-skeleton {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid #000000;
     border-radius: var(--radius);
     overflow: hidden;
   }
 
   .c-skel-img {
     height: 210px;
-    background: linear-gradient(90deg, var(--surface2) 25%, #201d19 50%, var(--surface2) 75%);
+    background: linear-gradient(90deg, var(--surface2) 25%, #bbdefb 50%, var(--surface2) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
   }
@@ -316,7 +322,7 @@ const styles = `
 
   .c-skel-line {
     border-radius: 6px;
-    background: linear-gradient(90deg, var(--surface2) 25%, #201d19 50%, var(--surface2) 75%);
+    background: linear-gradient(90deg, var(--surface2) 25%, #bbdefb 50%, var(--surface2) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
   }
@@ -328,7 +334,7 @@ const styles = `
   .c-empty h2 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.5rem;
-    color: var(--text);
+    color: #000000;
     margin-bottom: 8px;
   }
 
@@ -359,9 +365,9 @@ const styles = `
     min-width: 38px;
     padding: 0 12px;
     border-radius: 8px;
-    border: 1px solid var(--border2);
-    background: var(--surface);
-    color: var(--muted);
+    border: 1.5px solid #000000;
+    background: #ffffff;
+    color: #000000;
     font-family: 'Outfit', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
@@ -370,28 +376,27 @@ const styles = `
     align-items: center;
     justify-content: center;
     gap: 4px;
-    transition: all 0.2s;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
 
   .c-pg-btn:hover:not(:disabled) {
-    border-color: var(--gold-dim);
-    color: var(--gold);
-    background: var(--gold-glow);
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--surface2);
   }
 
   .c-pg-btn.active {
-    background: var(--gold);
-    color: #0a0908;
-    border-color: var(--gold);
+    background: var(--blue);
+    color: #ffffff;
+    border-color: var(--blue);
     font-weight: 700;
-    box-shadow: 0 0 14px var(--gold-glow);
   }
 
   .c-pg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .c-pg-ellipsis { font-size: 0.9rem; color: var(--muted); width: 24px; text-align: center; }
 
-  .c-divider { height: 1px; background: var(--border); margin: 0 40px; }
+  .c-divider { height: 1px; background: #000000; margin: 0 40px; }
 
   @media (max-width: 600px) {
     .c-nav { padding: 0 18px; }
@@ -427,16 +432,13 @@ function Logo() {
   return (
     <div className="c-logo" onClick={() => navigate("/main-category")}>
       <div className="c-logo-mark">
-        <span className="c-logo-a">A</span>
-        <span className="c-logo-c">C</span>
-      </div>
-      <div className="c-logo-divider" />
-      <div className="c-logo-text">
-        <div className="c-logo-name">
-          <span className="c-logo-n1">ANIBHAVI</span>
-          <span className="c-logo-n2"> CREATIONS</span>
-        </div>
-        <span className="c-logo-tagline">Fashion Studio</span>
+        <img
+          src={logo}
+          width={56}
+          height={56}
+          alt="Anibhavi Creations Logo"
+          className="c-logo-img"
+        />
       </div>
     </div>
   );
@@ -459,11 +461,11 @@ function SkeletonCard() {
 function CategoryCard({ item }) {
     const [imgError, setImgError] = useState(false);
     const image = item.images?.[0];
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     return (
-        <div className="c-card" onClick={() => navigate(`/sub-category/${item?.mainCategoryName}`, { state: { categoryId: item._id } })}>
-            <div className="c-img-wrap" >
+        <div className="c-card" onClick={() => navigate(`/products/${item?.mainCategoryName}`, { state: { categoryId: item._id ,categoryName:item?.mainCategoryName} })}>
+            <div className="c-img-wrap">
                 {image && !imgError ? (
                     <img
                         className="c-card-img"
@@ -565,7 +567,6 @@ export default function Category() {
         fetchCategories();
     }, [fetchCategories]);
 
-    // Reset to page 1 whenever data changes
     useEffect(() => {
         setCurrentPage(1);
     }, [categories]);

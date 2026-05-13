@@ -10,19 +10,19 @@ const PAGE_SIZE = 12;
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
- :root {
+  :root {
     --bg:        #ffffff;
     --surface:   #ffffff;
-    --surface2:  #2196F3;
-    --border:    rgb(0, 0, 0);
-    --border2:   rgb(0, 0, 0);
-    --gold:      #2196F3;
-    --gold-dim:  #2196F3;
-    --gold-glow: rgb(0, 0, 0);
+    --surface2:  #e8f1fd;
+    --border:    #000000;
+    --border2:   #2196F3;
+    --blue:      #2196F3;
+    --blue-dark: #1565C0;
+    --blue-light:#bbdefb;
     --text:      #000000;
-    --muted:     #000000;
-    --green:     #4caf7d;
-    --red:       #e05c5c;
+    --muted:     #424242;
+    --green:     #1976D2;
+    --red:       #000000;
     --radius:    14px;
   }
 
@@ -43,66 +43,67 @@ const styles = `
     justify-content: space-between;
     padding: 0 40px;
     height: 68px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border2);
+    background: #000000;
+    border-bottom: 2px solid var(--blue);
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(12px);
   }
-.c-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  text-decoration: none;
-  user-select: none;
-}
 
-.c-logo-mark {
-  font-family: 'Arial Black', Arial, sans-serif;
-  font-size: 2rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  display: flex;
-  align-items: center;
-}
+  .c-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+  }
 
-.c-logo-a { color: #000000; }
-.c-logo-c { color: #2196F3; }
+  .c-logo-mark {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+  }
 
-.c-logo-divider {
-  width: 1px;
-  height: 34px;
-  background: rgba(255,255,255,0.1);
-  flex-shrink: 0;
-}
+  .c-logo-a { color: #ffffff; }
+  .c-logo-c { color: var(--blue); }
 
-.c-logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-  gap: 3px;
-}
+  .c-logo-divider {
+    width: 1px;
+    height: 34px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
 
-.c-logo-name {
-  font-family: 'Arial Black', Arial, sans-serif;
-  font-size: 0.88rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
+  .c-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 3px;
+  }
 
-.c-logo-n1 { color: #000000; }
-.c-logo-n2 { color: #2196F3; }
+  .c-logo-name {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 
-.c-logo-tagline {
-  font-size: 0.6rem;
-  color: var(--muted);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
+  .c-logo-n1 { color: #ffffff; }
+  .c-logo-n2 { color: var(--blue); }
+
+  .c-logo-tagline {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
   .c-nav-right {
     display: flex;
     align-items: center;
@@ -111,12 +112,12 @@ const styles = `
 
   .c-nav-pill {
     font-size: 0.72rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
-    background: var(--surface2);
-    border: 1px solid var(--border2);
+    color: #ffffff;
+    background: var(--blue);
+    border: none;
     padding: 6px 14px;
     border-radius: 20px;
   }
@@ -128,18 +129,18 @@ const styles = `
     font-size: 0.78rem;
     font-weight: 500;
     letter-spacing: 0.06em;
-    color: var(--muted);
-    background: var(--surface2);
-    border: 1px solid var(--border2);
+    color: #ffffff;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
     padding: 6px 14px;
     border-radius: 20px;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
+    transition: border-color 0.2s, background 0.2s;
   }
 
   .c-back-btn:hover {
-    color: var(--gold);
-    border-color: var(--gold-dim);
+    border-color: var(--blue);
+    background: var(--blue);
   }
 
   /* ── Breadcrumb ── */
@@ -147,30 +148,35 @@ const styles = `
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 18px 40px 0;
+    padding: 14px 40px 0;
     font-size: 0.76rem;
     color: var(--muted);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--blue-light);
+    padding-bottom: 14px;
   }
 
   .c-breadcrumb-link {
-    color: var(--gold-dim);
+    color: var(--blue);
     cursor: pointer;
+    font-weight: 500;
     transition: color 0.2s;
   }
 
-  .c-breadcrumb-link:hover { color: var(--gold); }
+  .c-breadcrumb-link:hover { color: var(--blue-dark); }
 
-  .c-breadcrumb-sep { color: var(--border2); }
+  .c-breadcrumb-sep { color: var(--blue-light); }
 
   .c-breadcrumb-current { color: var(--muted); }
 
   /* ── Page header ── */
   .c-page-header {
-    padding: 24px 40px 32px;
+    padding: 28px 40px 28px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+    background: #000000;
+    border-bottom: 2px solid var(--blue);
   }
 
   .c-page-title {
@@ -179,13 +185,14 @@ const styles = `
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.01em;
+    color: #ffffff;
   }
 
-  .c-page-title span { color: var(--gold); }
+  .c-page-title span { color: var(--blue); }
 
   .c-page-sub {
     font-size: 0.82rem;
-    color: var(--muted);
+    color: rgba(255,255,255,0.55);
     margin-top: 6px;
     letter-spacing: 0.04em;
   }
@@ -201,11 +208,11 @@ const styles = `
   /* ── Card ── */
   .c-card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid #000000;
     border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    transition: border-color 0.25s, transform 0.25s;
     animation: fadeUp 0.45s ease both;
   }
 
@@ -222,49 +229,17 @@ const styles = `
   .c-card:nth-child(6) { animation-delay: 0.24s; }
 
   .c-card:hover {
-    border-color: var(--gold-dim);
-    box-shadow: 0 0 28px var(--gold-glow), 0 12px 40px rgba(0,0,0,0.5);
-    transform: translateY(-4px);
+    border-color: var(--blue);
+    transform: translateY(-3px);
   }
 
-  .c-card:hover .c-card-img { transform: scale(1.06); }
+  .c-card:hover .c-card-img { transform: scale(1.05); }
 
   .c-img-wrap {
     height: 210px;
     position: relative;
     overflow: hidden;
     background: var(--surface2);
-  }
-
-  /* Banner strip at top of card */
-  .c-banner-strip {
-    height: 56px;
-    overflow: hidden;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-
-  .c-banner-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    opacity: 0.6;
-  }
-
-  .c-banner-label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    padding: 0 14px;
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: linear-gradient(90deg, rgba(10,9,8,0.7) 0%, transparent 80%);
   }
 
   .c-card-img {
@@ -282,13 +257,13 @@ const styles = `
     align-items: center;
     justify-content: center;
     font-size: 2.8rem;
-    background: radial-gradient(ellipse at center, #2196F3, var(--surface2));
+    background: linear-gradient(135deg, var(--blue-light), var(--surface2));
   }
 
   .c-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgb(104, 104, 104) 0%, transparent 55%);
+    background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%);
     pointer-events: none;
   }
 
@@ -307,8 +282,17 @@ const styles = `
     gap: 5px;
   }
 
-  .c-badge.active  { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.35); }
-  .c-badge.inactive{ background: rgba(224,92,92,0.15);  color: var(--red);   border: 1px solid rgba(224,92,92,0.35); }
+  .c-badge.active {
+    background: rgba(33,150,243,0.15);
+    color: var(--blue);
+    border: 1px solid rgba(33,150,243,0.4);
+  }
+
+  .c-badge.inactive {
+    background: rgba(0,0,0,0.08);
+    color: #000000;
+    border: 1px solid rgba(0,0,0,0.25);
+  }
 
   .c-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
@@ -319,7 +303,7 @@ const styles = `
     font-weight: 500;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--gold-dim);
+    color: var(--blue);
     margin-bottom: 5px;
   }
 
@@ -332,28 +316,12 @@ const styles = `
     line-height: 1.15;
   }
 
-  .c-card-desc {
-    font-size: 0.82rem;
-    line-height: 1.65;
-    color: var(--muted);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .c-card-desc.empty {
-    font-style: italic;
-    opacity: 0.5;
-  }
-
   .c-card-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding-top: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #000000;
   }
 
   .c-card-meta {
@@ -366,7 +334,7 @@ const styles = `
 
   .c-card-products {
     font-size: 0.68rem;
-    color: var(--gold-dim);
+    color: var(--blue);
     font-weight: 500;
     letter-spacing: 0.06em;
   }
@@ -376,7 +344,7 @@ const styles = `
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--blue);
     background: none;
     border: none;
     cursor: pointer;
@@ -387,19 +355,19 @@ const styles = `
     transition: gap 0.2s, color 0.2s;
   }
 
-  .c-card:hover .c-card-btn { gap: 9px; color: #000000; }
+  .c-card:hover .c-card-btn { gap: 9px; color: var(--blue-dark); }
 
   /* ── Skeleton ── */
   .c-skeleton {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid #000000;
     border-radius: var(--radius);
     overflow: hidden;
   }
 
   .c-skel-img {
     height: 210px;
-    background: linear-gradient(90deg, var(--surface2) 25%, #201d19 50%, var(--surface2) 75%);
+    background: linear-gradient(90deg, var(--surface2) 25%, #bbdefb 50%, var(--surface2) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
   }
@@ -413,7 +381,7 @@ const styles = `
 
   .c-skel-line {
     border-radius: 6px;
-    background: linear-gradient(90deg, var(--surface2) 25%, #201d19 50%, var(--surface2) 75%);
+    background: linear-gradient(90deg, var(--surface2) 25%, #bbdefb 50%, var(--surface2) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
   }
@@ -456,9 +424,9 @@ const styles = `
     min-width: 38px;
     padding: 0 12px;
     border-radius: 8px;
-    border: 1px solid var(--border2);
+    border: 1.5px solid #000000;
     background: var(--surface);
-    color: var(--muted);
+    color: #000000;
     font-family: 'Outfit', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
@@ -471,33 +439,31 @@ const styles = `
   }
 
   .c-pg-btn:hover:not(:disabled) {
-    border-color: var(--gold-dim);
-    color: var(--gold);
-    background: var(--gold-glow);
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--surface2);
   }
 
   .c-pg-btn.active {
-    background: var(--gold);
-    color: #000000;
-    border-color: var(--gold);
+    background: var(--blue);
+    color: #ffffff;
+    border-color: var(--blue);
     font-weight: 700;
-    box-shadow: 0 0 14px var(--gold-glow);
   }
 
   .c-pg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .c-pg-ellipsis { font-size: 0.9rem; color: var(--muted); width: 24px; text-align: center; }
 
-  .c-divider { height: 1px; background: var(--border); margin: 0 40px; }
+  .c-divider { height: 2px; background: var(--blue-light); margin: 0; }
 
   @media (max-width: 600px) {
     .c-nav { padding: 0 18px; }
-    .c-breadcrumb { padding: 14px 18px 0; }
+    .c-breadcrumb { padding: 12px 18px; }
     .c-page-header { padding: 20px 18px 24px; flex-direction: column; align-items: flex-start; gap: 10px; }
     .c-grid { padding: 20px 18px; gap: 16px; }
     .c-pag-wrap { padding: 0 18px; }
     .c-page-title { font-size: 2rem; }
-    .c-divider { margin: 0 18px; }
     .c-nav-right { gap: 8px; }
   }
 `;
@@ -557,21 +523,18 @@ function SkeletonCard() {
 
 function SubCategoryCard({ item }) {
   const [imgError, setImgError] = useState(false);
-  const [bannerError, setBannerError] = useState(false);
   const navigate = useNavigate();
 
   const image = item.images?.[0];
-  const banner = item.categoryBanner?.[0];
 
   const handleClick = () => {
     navigate(`/products/${item.slug}`, {
       state: { subCategoryId: item._id, subCategoryName: item.name },
     });
   };
-  console.log("item=====>category", item)
+
   return (
     <div className="c-card" onClick={handleClick}>
-
       {/* Main image */}
       <div className="c-img-wrap">
         {image && !imgError ? (
@@ -596,9 +559,7 @@ function SubCategoryCard({ item }) {
         <div className="c-card-slug">/{item.slug}</div>
         <h2 className="c-card-name">{item.name}</h2>
         <div className="c-card-footer">
-          <div className="c-card-meta">
-
-          </div>
+          <div className="c-card-meta" />
           <button className="c-card-btn">
             View <span>→</span>
           </button>
@@ -648,7 +609,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function SubCategory() {
-  const [subCategories, setSubCategories] = useState([]);   // ✅ fixed: was [setSubCategories, setSubCategories]
+  const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -657,7 +618,6 @@ export default function SubCategory() {
   const categoryId = location.state?.categoryId;
   const categoryName = location.state?.categoryName || "Category";
 
-  // ✅ Fixed: was calling fetchCategories (undefined); now correctly calls fetchSubCategories
   const fetchSubCategories = useCallback(async () => {
     if (!categoryId) {
       setSubCategories([]);
@@ -686,7 +646,6 @@ export default function SubCategory() {
     fetchSubCategories();
   }, [fetchSubCategories]);
 
-  // Reset to page 1 whenever data changes
   useEffect(() => {
     setCurrentPage(1);
   }, [subCategories]);
@@ -729,7 +688,7 @@ export default function SubCategory() {
           <div>
             <h1 className="c-page-title">Sub <span>Categories</span></h1>
             <p className="c-page-sub">
-              Exploring subcategories under <strong style={{ color: "var(--gold-dim)" }}>{categoryName}</strong>
+              Exploring subcategories under <strong style={{ color: "#2196F3" }}>{categoryName}</strong>
             </p>
           </div>
         </div>

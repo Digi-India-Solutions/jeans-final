@@ -673,8 +673,8 @@ export default function SubProductsManagement() {
                         e.currentTarget.src = 'https://via.placeholder.com/300x200?text=No+Image';
                       }}
                     />
-                    <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item?.stock)}`}>
-                      {item?.stock}
+                    <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item?.lotStock>0?item?.lotStock>5?"In Stock":"Low Stock":"Out of Stock")}`}>
+                      {item?.lotStock>0?item?.lotStock>5?"In Stock":"Low Stock":"Out of Stock"}
                     </div>
                     <div className="absolute top-3 left-3 px-2 py-1 bg-blue-600 text-white rounded-full text-xs font-medium flex items-center">
                       <i className="ri-stack-line mr-1"></i>Set
