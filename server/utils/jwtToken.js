@@ -16,7 +16,7 @@ const sendToken = (user, statusCode, res, message = "") => {
     };
     return res
         .status(statusCode)
-        .cookie("token", token, options).cookie("Role", token, options)
+        .cookie("token", token, options)
         .json({
             data: { user, token },
             status: true,

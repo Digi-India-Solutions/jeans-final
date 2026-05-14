@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { getData } from "../../../services/FetchNodeServices";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
+import logo from '../../images/logowithText.png'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const PAGE_SIZE = 12;
@@ -13,23 +14,23 @@ const styles = `
   :root {
     --bg:        #ffffff;
     --surface:   #ffffff;
-    --surface2:  #e8f1fd;
-    --border:    #000000;
-    --border2:   #2196F3;
+    --surface2:  #e8f3fd;
     --blue:      #2196F3;
     --blue-dark: #1565C0;
     --blue-light:#bbdefb;
+    --border:    #000000;
+    --border2:   #2196F3;
     --text:      #000000;
-    --muted:     #424242;
-    --green:     #1976D2;
-    --red:       #000000;
+    --muted:     #444444;
+    --green:     #4caf7d;
+    --red:       #e05c5c;
     --radius:    14px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .c-root {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: var(--bg);
     min-height: 100vh;
     color: var(--text);
@@ -43,7 +44,7 @@ const styles = `
     justify-content: space-between;
     padding: 0 40px;
     height: 68px;
-    background: #000000;
+    background: var(--surface);
     border-bottom: 2px solid var(--blue);
     position: sticky;
     top: 0;
@@ -60,22 +61,27 @@ const styles = `
   }
 
   .c-logo-mark {
-    font-family: 'Arial Black', Arial, sans-serif;
-    font-size: 2rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.02em;
     display: flex;
     align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
-  .c-logo-a { color: #ffffff; }
-  .c-logo-c { color: var(--blue); }
+  .c-logo-img {
+    width: 106px;
+    height: 106px;
+    object-fit: contain;
+    display: block;
+    border-radius: 8px;
+  }
+
+  .c-logo-a { color: #000000; }
+  .c-logo-c { color: #2196F3; }
 
   .c-logo-divider {
     width: 1px;
     height: 34px;
-    background: rgba(255,255,255,0.2);
+    background: var(--blue-light);
     flex-shrink: 0;
   }
 
@@ -87,27 +93,21 @@ const styles = `
   }
 
   .c-logo-name {
-    font-family: 'Arial Black', Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.88rem;
     font-weight: 900;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
-  .c-logo-n1 { color: #ffffff; }
-  .c-logo-n2 { color: var(--blue); }
+  .c-logo-n1 { color: #000000; }
+  .c-logo-n2 { color: #2196F3; }
 
   .c-logo-tagline {
     font-size: 0.6rem;
-    color: rgba(255,255,255,0.5);
+    color: var(--muted);
     letter-spacing: 0.2em;
     text-transform: uppercase;
-  }
-
-  .c-nav-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
   }
 
   .c-nav-pill {
@@ -117,82 +117,34 @@ const styles = `
     text-transform: uppercase;
     color: #ffffff;
     background: var(--blue);
-    border: none;
-    padding: 6px 14px;
+    border: 1px solid var(--blue-dark);
+    padding: 6px 16px;
     border-radius: 20px;
   }
-
-  .c-back-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    color: #ffffff;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 6px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-
-  .c-back-btn:hover {
-    border-color: var(--blue);
-    background: var(--blue);
-  }
-
-  /* ── Breadcrumb ── */
-  .c-breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 40px 0;
-    font-size: 0.76rem;
-    color: var(--muted);
-    background: var(--surface2);
-    border-bottom: 1px solid var(--blue-light);
-    padding-bottom: 14px;
-  }
-
-  .c-breadcrumb-link {
-    color: var(--blue);
-    cursor: pointer;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
-
-  .c-breadcrumb-link:hover { color: var(--blue-dark); }
-
-  .c-breadcrumb-sep { color: var(--blue-light); }
-
-  .c-breadcrumb-current { color: var(--muted); }
 
   /* ── Page header ── */
   .c-page-header {
-    padding: 28px 40px 28px;
+    padding: 18px 40px 18px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    background: #000000;
-    border-bottom: 2px solid var(--blue);
+    border-bottom: 1px solid #000000;
   }
 
   .c-page-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 2.8rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.01em;
-    color: #ffffff;
+    color: #000000;
   }
 
   .c-page-title span { color: var(--blue); }
 
   .c-page-sub {
     font-size: 0.82rem;
-    color: rgba(255,255,255,0.55);
+    color: var(--muted);
     margin-top: 6px;
     letter-spacing: 0.04em;
   }
@@ -204,6 +156,21 @@ const styles = `
     gap: 22px;
     padding: 36px 40px;
   }
+
+  /* ── Breadcrumb ── */
+  .c-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 40px 0;
+    font-size: 0.74rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .c-breadcrumb-link { color: var(--blue); cursor: pointer; font-weight: 500; transition: color 0.2s; }
+  .c-breadcrumb-link:hover { color: var(--blue-dark); }
+  .c-breadcrumb-sep { color: var(--border2); }
+  .c-breadcrumb-current { color: var(--text2); font-weight: 500; }
 
   /* ── Card ── */
   .c-card {
@@ -230,10 +197,10 @@ const styles = `
 
   .c-card:hover {
     border-color: var(--blue);
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
 
-  .c-card:hover .c-card-img { transform: scale(1.05); }
+  .c-card:hover .c-card-img { transform: scale(1.06); }
 
   .c-img-wrap {
     height: 210px;
@@ -243,11 +210,12 @@ const styles = `
   }
 
   .c-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-    display: block;
+     width: 100%;
+  height: 100%;
+  object-fit: contain;  /* was: cover */
+  background: #f8f8f8;
+  display: block;
+  transition: transform 0.45s ease;
   }
 
   .c-img-fallback {
@@ -257,13 +225,13 @@ const styles = `
     align-items: center;
     justify-content: center;
     font-size: 2.8rem;
-    background: linear-gradient(135deg, var(--blue-light), var(--surface2));
+    background: var(--surface2);
   }
 
   .c-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%);
+    background: linear-gradient(to top, transparent 55%);
     pointer-events: none;
   }
 
@@ -282,17 +250,8 @@ const styles = `
     gap: 5px;
   }
 
-  .c-badge.active {
-    background: rgba(33,150,243,0.15);
-    color: var(--blue);
-    border: 1px solid rgba(33,150,243,0.4);
-  }
-
-  .c-badge.inactive {
-    background: rgba(0,0,0,0.08);
-    color: #000000;
-    border: 1px solid rgba(0,0,0,0.25);
-  }
+  .c-badge.active   { background: rgba(76,175,125,0.15); color: var(--green); border: 1px solid rgba(76,175,125,0.4); }
+  .c-badge.inactive { background: rgba(224,92,92,0.15);  color: var(--red);   border: 1px solid rgba(224,92,92,0.4); }
 
   .c-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
@@ -308,12 +267,23 @@ const styles = `
   }
 
   .c-card-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.45rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text);
+    color: #000000;
     margin-bottom: 8px;
     line-height: 1.15;
+  }
+
+  .c-card-desc {
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: var(--muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 16px;
   }
 
   .c-card-footer {
@@ -324,20 +294,7 @@ const styles = `
     border-top: 1px solid #000000;
   }
 
-  .c-card-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
   .c-card-date { font-size: 0.72rem; color: var(--muted); }
-
-  .c-card-products {
-    font-size: 0.68rem;
-    color: var(--blue);
-    font-weight: 500;
-    letter-spacing: 0.06em;
-  }
 
   .c-card-btn {
     font-size: 0.72rem;
@@ -391,9 +348,9 @@ const styles = `
   .c-empty-icon { font-size: 3.5rem; margin-bottom: 18px; }
 
   .c-empty h2 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
-    color: var(--text);
+    color: #000000;
     margin-bottom: 8px;
   }
 
@@ -425,9 +382,9 @@ const styles = `
     padding: 0 12px;
     border-radius: 8px;
     border: 1.5px solid #000000;
-    background: var(--surface);
+    background: #ffffff;
     color: #000000;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
@@ -435,7 +392,7 @@ const styles = `
     align-items: center;
     justify-content: center;
     gap: 4px;
-    transition: all 0.2s;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
   }
 
   .c-pg-btn:hover:not(:disabled) {
@@ -443,6 +400,34 @@ const styles = `
     color: var(--blue);
     background: var(--surface2);
   }
+    .c-nav-pill {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    background: var(--blue-light);
+    border: 1px solid #90caf9;
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+  .c-nav-right { display: flex; align-items: center; gap: 10px; }
+
+ .c-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--blue);
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .c-back-btn:hover { background: var(--blue-dark); }
 
   .c-pg-btn.active {
     background: var(--blue);
@@ -455,17 +440,48 @@ const styles = `
 
   .c-pg-ellipsis { font-size: 0.9rem; color: var(--muted); width: 24px; text-align: center; }
 
-  .c-divider { height: 2px; background: var(--blue-light); margin: 0; }
+  .c-divider { height: 1px; background: #000000; margin: 0 40px; }
 
   @media (max-width: 600px) {
     .c-nav { padding: 0 18px; }
-    .c-breadcrumb { padding: 12px 18px; }
-    .c-page-header { padding: 20px 18px 24px; flex-direction: column; align-items: flex-start; gap: 10px; }
+    .c-page-header { padding: 30px 18px 20px; flex-direction: column; align-items: flex-start; gap: 10px; }
     .c-grid { padding: 20px 18px; gap: 16px; }
+    .c-breadcrumb { padding: 12px 16px 0; }
     .c-pag-wrap { padding: 0 18px; }
     .c-page-title { font-size: 2rem; }
-    .c-nav-right { gap: 8px; }
+    .c-divider { margin: 0 18px; }
   }
+    /* ── Banner ── */
+ /* ── Banner ── */
+.mc-banner-wrap {
+  width: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+  height: 460px !important;
+  background: #000 !important;
+}
+
+.mc-banner-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.mc-banner-blur {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+
+  z-index: 0 !important;
+  display: block !important;
+}
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -492,20 +508,18 @@ function Logo() {
   return (
     <div className="c-logo" onClick={() => navigate("/main-category")}>
       <div className="c-logo-mark">
-        <span className="c-logo-a">A</span>
-        <span className="c-logo-c">C</span>
-      </div>
-      <div className="c-logo-divider" />
-      <div className="c-logo-text">
-        <div className="c-logo-name">
-          <span className="c-logo-n1">ANIBHAVI</span>
-          <span className="c-logo-n2"> CREATIONS</span>
-        </div>
-        <span className="c-logo-tagline">Fashion Studio</span>
+        <img
+          src={logo}
+          width={56}
+          height={56}
+          alt="Anibhavi Creations Logo"
+          className="c-logo-img"
+        />
       </div>
     </div>
   );
 }
+
 
 function SkeletonCard() {
   return (

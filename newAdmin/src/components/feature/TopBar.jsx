@@ -33,6 +33,7 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
 
   const handleLogout = () => {
     sessionStorage.removeItem("login");
+    sessionStorage.removeItem("JeansAdmin")
     navigate("/");
   };
 

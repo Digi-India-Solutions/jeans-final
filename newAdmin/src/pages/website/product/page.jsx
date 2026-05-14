@@ -486,7 +486,7 @@ function paginationRange(current, total) {
 function typeBadgeClass(type = "") {
   const t = type.toLowerCase().replace(/\s+/g, "-");
   if (t.includes("best")) return "best-seller";
-  if (t.includes("new"))  return "new-arrival";
+  if (t.includes("new")) return "new-arrival";
   return "default";
 }
 
@@ -523,13 +523,13 @@ function SkeletonCard() {
 }
 
 function ProductCard({ item }) {
-  const [imgIdx, setImgIdx]   = useState(0);
+  const [imgIdx, setImgIdx] = useState(0);
   const [imgError, setImgError] = useState(false);
   const navigate = useNavigate();
 
-  const images     = item.images || [];
+  const images = item.images || [];
   const currentImg = images[imgIdx];
-  const categories = item.categoryId || [];
+  const categories = item.subCategoryId || [];
 
   const handleClick = () => {
     navigate(`/sub-products`, {
@@ -594,7 +594,7 @@ function ProductCard({ item }) {
             className="p-card-btn"
             onClick={(e) => { e.stopPropagation(); handleClick(); }}
           >
-            Lots <span>→</span>
+            View Colors <span>→</span>
           </button>
         </div>
       </div>
@@ -641,21 +641,22 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Product() {
-  const [products, setProducts]     = useState([]);
-  const [filtered, setFiltered]     = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [products, setProducts] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeType, setActiveType] = useState("All");
+  const [priceSort, setPriceSort] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const categoryId   = location.state?.categoryId;
+  const subCategoryId = location.state?.subCategoryId;
   const subCategoryName = location.state?.subCategoryName || "Products";
-  const categoryName    = location.state?.categoryName    || "Category";
+  const categoryName = location.state?.categoryName || "Category";
 
   const fetchProducts = useCallback(async () => {
-    if (!categoryId) {
+    if (!subCategoryId) {
       setProducts([]);
       setLoading(false);
       return;
@@ -663,7 +664,7 @@ export default function Product() {
     setLoading(true);
     try {
       const response = await getData(
-        `api/product/get-product-by-sub-category/${categoryId}`
+        `api/product/get-product-by-sub-category/${subCategoryId}`
       );
       if (response?.success) {
         setProducts(response?.data || []);
@@ -676,7 +677,7 @@ export default function Product() {
     } finally {
       setLoading(false);
     }
-  }, [categoryId]);
+  }, [subCategoryId]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -695,13 +696,16 @@ export default function Product() {
     );
   }, [products, activeType]);
 
-  const totalPages    = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginatedData = filtered.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
-  const startItem = filtered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endItem   = Math.min(currentPage * PAGE_SIZE, filtered.length);
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    if (priceSort === "asc") return Number(a.price) - Number(b.price);
+    if (priceSort === "desc") return Number(b.price) - Number(a.price);
+    return 0;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / PAGE_SIZE));
+  const paginatedData = sortedFiltered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const startItem = sortedFiltered.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, sortedFiltered.length);
 
   return (
     <>
@@ -723,8 +727,8 @@ export default function Product() {
           <span className="p-breadcrumb-sep">/</span>
           <span className="p-breadcrumb-link" onClick={() => navigate(-2)}>Categories</span>
           <span className="p-breadcrumb-sep">/</span>
-          {/* <span className="p-breadcrumb-link" onClick={() => navigate(-1)}>Sub Categories</span>
-          <span className="p-breadcrumb-sep">/</span> */}
+          <span className="p-breadcrumb-link" onClick={() => navigate(-1)}>Sub Categories</span>
+          <span className="p-breadcrumb-sep">/</span>
           <span className="p-breadcrumb-current">Products</span>
         </div>
 
@@ -737,6 +741,32 @@ export default function Product() {
               <strong style={{ color: "var(--blue-dark)" }}>{subCategoryName}</strong>
             </p>
           </div>
+
+          {/* ✅ Price sort — only addition */}
+          <select
+            value={priceSort}
+            onChange={(e) => { setPriceSort(e.target.value); setCurrentPage(1); }}
+            style={{
+              padding: "7px 32px 7px 14px",
+              borderRadius: "8px",
+              border: "1px solid var(--border2)",
+              background: "var(--surface)",
+              color: "var(--text2)",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              fontFamily: "Poppins, sans-serif",
+              cursor: "pointer",
+              outline: "none",
+              appearance: "none",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23607080' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 10px center",
+            }}
+          >
+            <option value="">Sort by Price</option>
+            <option value="asc">Price: Low to High</option>
+            <option value="desc">Price: High to Low</option>
+          </select>
         </div>
 
         <div className="p-divider" />

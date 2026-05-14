@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const path = require("path");
 const app = express();
+const cookieParser = require('cookie-parser');
 const connectDatabase = require("./db/database");
 
 // built-in middlewares
@@ -45,6 +46,7 @@ const cataloguesRoutes = require("./src/catalogues/catalogues-routes");
 const dashboardRoutes = require("./src/dashboard/dashboard-routes")
 const termAndConditionRoutes = require("./src/termAndCondition/termAndCondition-routes")
 
+app.use(cookieParser());
 
 app.use("/api/admin", superAdminRoutes);
 app.use("/api/adminRole", adminRoleRoutes);

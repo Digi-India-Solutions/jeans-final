@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { getData } from "../../../services/FetchNodeServices";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import logo from "../../images/logowithText.png"; // ← adjust path to your actual logo file
+import logo from "../../images/logowithText.png";
+import banner from "../../images/TOPCATEGORYBANNER2.jpeg" // ← adjust path to your actual logo file
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 const PAGE_SIZE = 12;
@@ -196,10 +197,11 @@ const styles = `
 
   .c-card-img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-    display: block;
+  height: 100%;
+  object-fit: contain;  /* was: cover */
+  background: #f8f8f8;
+  display: block;
+  transition: transform 0.45s ease;
   }
 
   .c-img-fallback {
@@ -406,24 +408,53 @@ const styles = `
     .c-page-title { font-size: 2rem; }
     .c-divider { margin: 0 18px; }
   }
+/* ── Banner ── */
+.mc-banner-wrap {
+  width: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+  height: 460px !important;
+  background: #000 !important;
+}
+
+.mc-banner-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.mc-banner-blur {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  z-index: 0 !important;
+  display: block !important;
+}
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function formatDate(dateVal) {
-    const raw = dateVal?.$date || dateVal;
-    if (!raw) return "—";
-    return new Date(raw).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+  const raw = dateVal?.$date || dateVal;
+  if (!raw) return "—";
+  return new Date(raw).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function paginationRange(current, total) {
-    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-    if (current <= 4) return [1, 2, 3, 4, 5, "…", total];
-    if (current >= total - 3) return [1, "…", total - 4, total - 3, total - 2, total - 1, total];
-    return [1, "…", current - 1, current, current + 1, "…", total];
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, "…", total];
+  if (current >= total - 3) return [1, "…", total - 4, total - 3, total - 2, total - 1, total];
+  return [1, "…", current - 1, current, current + 1, "…", total];
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -445,201 +476,210 @@ function Logo() {
 }
 
 function SkeletonCard() {
-    return (
-        <div className="c-skeleton">
-            <div className="c-skel-img" />
-            <div className="c-skel-body">
-                <div className="c-skel-line" style={{ height: 10, width: "35%" }} />
-                <div className="c-skel-line" style={{ height: 22, width: "60%" }} />
-                <div className="c-skel-line" style={{ height: 10, width: "90%" }} />
-                <div className="c-skel-line" style={{ height: 10, width: "75%" }} />
-            </div>
-        </div>
-    );
+  return (
+    <div className="c-skeleton">
+      <div className="c-skel-img" />
+      <div className="c-skel-body">
+        <div className="c-skel-line" style={{ height: 10, width: "35%" }} />
+        <div className="c-skel-line" style={{ height: 22, width: "60%" }} />
+        <div className="c-skel-line" style={{ height: 10, width: "90%" }} />
+        <div className="c-skel-line" style={{ height: 10, width: "75%" }} />
+      </div>
+    </div>
+  );
 }
 
 function CategoryCard({ item }) {
-    const [imgError, setImgError] = useState(false);
-    const image = item.images?.[0];
-    const navigate = useNavigate();
+  const [imgError, setImgError] = useState(false);
+  const image = item.images?.[0];
+  const navigate = useNavigate();
 
-    return (
-        <div className="c-card" onClick={() => navigate(`/products/${item?.mainCategoryName}`, { state: { categoryId: item._id ,categoryName:item?.mainCategoryName} })}>
-            <div className="c-img-wrap">
-                {image && !imgError ? (
-                    <img
-                        className="c-card-img"
-                        src={image}
-                        alt={item.mainCategoryName}
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="c-img-fallback">🛍️</div>
-                )}
-                <div className="c-img-overlay" />
-                <span className={`c-badge ${item.status ? "active" : "inactive"}`}>
-                    <span className="c-badge-dot" />
-                    {item.status ? "Active" : "Inactive"}
-                </span>
-            </div>
+  return (
+    <div className="c-card" onClick={() => navigate(`/sub-category/${item?.mainCategoryName}`, { state: { categoryId: item._id, categoryName: item?.mainCategoryName } })}>
+      <div className="c-img-wrap">
+        {image && !imgError ? (
+          <img
+            className="c-card-img"
+            src={image}
+            alt={item.mainCategoryName}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="c-img-fallback">🛍️</div>
+        )}
+        <div className="c-img-overlay" />
+        <span className={`c-badge ${item.status ? "active" : "inactive"}`}>
+          <span className="c-badge-dot" />
+          {item.status ? "Active" : "Inactive"}
+        </span>
+      </div>
 
-            <div className="c-card-body">
-                <div className="c-card-slug">/{item.slug}</div>
-                <h2 className="c-card-name">{item.mainCategoryName}</h2>
-                {item.description && (
-                    <p className="c-card-desc">{item.description}</p>
-                )}
-                <div className="c-card-footer">
-                    <span className="c-card-date">Added {formatDate(item.createdAt)}</span>
-                    <button className="c-card-btn">
-                        Explore <span>→</span>
-                    </button>
-                </div>
-            </div>
+      <div className="c-card-body">
+        <div className="c-card-slug">/{item.slug}</div>
+        <h2 className="c-card-name">{item.mainCategoryName}</h2>
+        {item.description && (
+          <p className="c-card-desc">{item.description}</p>
+        )}
+        <div className="c-card-footer">
+          <span className="c-card-date">Added {formatDate(item.createdAt)}</span>
+          <button className="c-card-btn">
+            Explore <span>→</span>
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
-    const pages = paginationRange(currentPage, totalPages);
+  const pages = paginationRange(currentPage, totalPages);
 
-    return (
-        <div className="c-pagination">
-            <button
-                className="c-pg-btn"
-                disabled={currentPage === 1}
-                onClick={() => onPageChange(currentPage - 1)}
-            >
-                ← Prev
-            </button>
+  return (
+    <div className="c-pagination">
+      <button
+        className="c-pg-btn"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        ← Prev
+      </button>
 
-            {pages.map((p, i) =>
-                p === "…" ? (
-                    <span key={`e-${i}`} className="c-pg-ellipsis">…</span>
-                ) : (
-                    <button
-                        key={p}
-                        className={`c-pg-btn${currentPage === p ? " active" : ""}`}
-                        onClick={() => onPageChange(p)}
-                    >
-                        {p}
-                    </button>
-                )
-            )}
+      {pages.map((p, i) =>
+        p === "…" ? (
+          <span key={`e-${i}`} className="c-pg-ellipsis">…</span>
+        ) : (
+          <button
+            key={p}
+            className={`c-pg-btn${currentPage === p ? " active" : ""}`}
+            onClick={() => onPageChange(p)}
+          >
+            {p}
+          </button>
+        )
+      )}
 
-            <button
-                className="c-pg-btn"
-                disabled={currentPage === totalPages}
-                onClick={() => onPageChange(currentPage + 1)}
-            >
-                Next →
-            </button>
-        </div>
-    );
+      <button
+        className="c-pg-btn"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Next →
+      </button>
+    </div>
+  );
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Category() {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchCategories = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await getData(
-                "api/mainCategory/get-all-main-categorys-with-pagination"
-            );
-            if (response?.success) {
-                setCategories(response?.data || []);
-            } else {
-                toast.error(response?.message || "Failed to fetch categories");
-            }
-        } catch (error) {
-            console.error("fetchCategories:", error);
-            toast.error("Error fetching categories");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+  const fetchCategories = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getData(
+        "api/mainCategory/get-all-main-categorys-with-pagination"
+      );
+      if (response?.success) {
+        setCategories(response?.data || []);
+      } else {
+        toast.error(response?.message || "Failed to fetch categories");
+      }
+    } catch (error) {
+      console.error("fetchCategories:", error);
+      toast.error("Error fetching categories");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    useEffect(() => {
-        fetchCategories();
-    }, [fetchCategories]);
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [categories]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categories]);
 
-    const totalPages = Math.max(1, Math.ceil(categories.length / PAGE_SIZE));
-    const paginatedData = categories.slice(
-        (currentPage - 1) * PAGE_SIZE,
-        currentPage * PAGE_SIZE
-    );
-    const startItem = categories.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-    const endItem = Math.min(currentPage * PAGE_SIZE, categories.length);
+  const totalPages = Math.max(1, Math.ceil(categories.length / PAGE_SIZE));
+  const paginatedData = categories.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+  const startItem = categories.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, categories.length);
 
-    return (
-        <>
-            <style>{styles}</style>
-            <div className="c-root">
+  return (
+    <>
+      <style>{styles}</style>
+      <div className="c-root">
 
-                {/* Navbar */}
-                <nav className="c-nav">
-                    <Logo />
-                    <span className="c-nav-pill">{categories.length} Categories</span>
-                </nav>
+        {/* Navbar */}
+        <nav className="c-nav">
+          <Logo />
+          <span className="c-nav-pill">{categories.length} Categories</span>
+        </nav>
 
-                {/* Page Header */}
-                <div className="c-page-header">
-                    <div>
-                        <h1 className="c-page-title">All <span>Categories</span></h1>
-                        <p className="c-page-sub">Browse and manage your product catalogue</p>
-                    </div>
-                </div>
+        {/* Page Header */}
+        {/* <div className="c-page-header">
+          <div>
+            <h1 className="c-page-title">All <span>Categories</span></h1>
+            <p className="c-page-sub">Browse and manage your product catalogue</p>
+          </div>
+        </div> */}
 
-                <div className="c-divider" />
+        <div className="c-divider" />
+        {/* Banner */}
+        <div className="mc-banner-wrap">
+  {/* blurred background fills empty sides */}
+  <img src={banner} alt="" className="mc-banner-blur" />
+  {/* full image on top */}
+  {/* <img src={banner} alt="Top Category Banner" className="mc-banner-img" /> */}
+</div>
 
-                {/* Content */}
-                {loading ? (
-                    <div className="c-grid">
-                        {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                            <SkeletonCard key={i} />
-                        ))}
-                    </div>
-                ) : categories.length === 0 ? (
-                    <div className="c-empty">
-                        <div className="c-empty-icon">📂</div>
-                        <h2>No categories yet</h2>
-                        <p>Add your first category to get started.</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="c-grid">
-                            {paginatedData.map((item) => (
-                                <CategoryCard
-                                    key={item._id?.$oid || item._id || item.slug}
-                                    item={item}
-                                />
-                            ))}
-                        </div>
+        <div className="c-divider" />
 
-                        {totalPages > 1 && (
-                            <div className="c-pag-wrap">
-                                <Pagination
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    onPageChange={setCurrentPage}
-                                />
-                                <p className="c-page-info">
-                                    Showing {startItem}–{endItem} of {categories.length} categories
-                                </p>
-                            </div>
-                        )}
-                    </>
-                )}
-
+        {/* Content */}
+        {loading ? (
+          <div className="c-grid">
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="c-empty">
+            <div className="c-empty-icon">📂</div>
+            <h2>No categories yet</h2>
+            <p>Add your first category to get started.</p>
+          </div>
+        ) : (
+          <>
+            <div className="c-grid">
+              {paginatedData.map((item) => (
+                <CategoryCard
+                  key={item._id?.$oid || item._id || item.slug}
+                  item={item}
+                />
+              ))}
             </div>
-        </>
-    );
+
+            {totalPages > 1 && (
+              <div className="c-pag-wrap">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+                <p className="c-page-info">
+                  Showing {startItem}–{endItem} of {categories.length} categories
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
+    </>
+  );
 }

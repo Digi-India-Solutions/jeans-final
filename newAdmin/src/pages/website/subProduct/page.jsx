@@ -908,6 +908,7 @@ export default function SubProduct() {
   const [subProducts, setSubProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [priceSort, setPriceSort] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -944,10 +945,16 @@ export default function SubProduct() {
   useEffect(() => { fetchSubProducts(); }, [fetchSubProducts]);
   useEffect(() => { setCurrentPage(1); }, [subProducts]);
 
-  const totalPages = Math.max(1, Math.ceil(subProducts.length / PAGE_SIZE));
-  const paginatedData = subProducts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  const startItem = subProducts.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endItem = Math.min(currentPage * PAGE_SIZE, subProducts.length);
+  const sortedProducts = [...subProducts].sort((a, b) => {
+    if (priceSort === "asc") return Number(a.singlePicPrice) - Number(b.singlePicPrice);
+    if (priceSort === "desc") return Number(b.singlePicPrice) - Number(a.singlePicPrice);
+    return 0; // no sort
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedProducts.length / PAGE_SIZE));
+  const paginatedData = sortedProducts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const startItem = sortedProducts.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, sortedProducts.length);
 
   return (
     <>
@@ -972,7 +979,7 @@ export default function SubProduct() {
           <span className="sp-breadcrumb-sep">/</span>
           <span className="sp-breadcrumb-link" onClick={() => navigate(-3)}>Categories</span>
           <span className="sp-breadcrumb-sep">/</span>
-          <span className="sp-breadcrumb-link" onClick={() => navigate(-2)}>{subCategoryName}</span>
+          <span className="sp-breadcrumb-link" onClick={() => navigate(-2)}>Sub Category</span>
           <span className="sp-breadcrumb-sep">/</span>
           <span className="sp-breadcrumb-link" onClick={() => navigate(-1)}>{productName}</span>
           <span className="sp-breadcrumb-sep">/</span>
@@ -980,20 +987,44 @@ export default function SubProduct() {
         </div>
 
         {/* Page Header */}
+        <div className="sp-divider" />
         <div className="sp-page-header">
           <div>
-            {/* <h1 className="sp-page-title">Product <span>Lots</span></h1> */}
             <h1 className="sp-page-title">All Availble Colors <span>{productName}</span></h1>
             <p className="sp-page-sub">
               All colour &amp; size variants for{" "}
-              {/* All Availble Color of Parent for{" "} */}
               <strong style={{ color: "#1565C0" }}>{productName}</strong>
             </p>
           </div>
+
+          {/* ✅ Price filter — added here, no other UI changes */}
+          <select
+            value={priceSort}
+            onChange={(e) => { setPriceSort(e.target.value); setCurrentPage(1); }}
+            style={{
+              padding: "7px 14px",
+              borderRadius: "8px",
+              border: "1px solid var(--border2)",
+              background: "var(--surface)",
+              color: "var(--text2)",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              fontFamily: "Poppins, sans-serif",
+              cursor: "pointer",
+              outline: "none",
+              appearance: "none",
+              paddingRight: "32px",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23607080' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 10px center",
+            }}
+          >
+            <option value="">Sort by Price</option>
+            <option value="asc">Price: Low to High</option>
+            <option value="desc">Price: High to Low</option>
+          </select>
         </div>
-
         <div className="sp-divider" />
-
         {/* Content */}
         {loading ? (
           <div className="sp-grid">

@@ -272,8 +272,8 @@ exports.getProductsBySubCategory = catchAsyncErrors(
       }
 
       const products = await Product.find({
-        // categoryId: { $in: [id] },
-        mainCategoryId:id,
+        categoryId: { $in: [id] },
+        // mainCategoryId:id,
         isActive: true,
       })
         .populate("categoryId")

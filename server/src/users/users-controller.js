@@ -17,6 +17,7 @@ const pLimit = require('p-limit'); // npm i p-limit@3
 
 const { sendOrderNotificationByAdminOnWhatsapp, sendWhatsAppByUserForRequastActiveAccount, sendWhatsAppByUserForRequastDeactiveAccount, sendWhatsAppByAdminForRequastActiveAccount } = require("../../utils/whatsAppCampaigns");
 
+
 exports.sendOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
     try {
         const { email } = req.body;
@@ -107,7 +108,7 @@ exports.verifyOtpToUserSignup = catchAsyncErrors(async (req, res, next) => {
 exports.userLogin = catchAsyncErrors(async (req, res, next) => {
     try {
         const { email, password } = req.body;
-
+console.log("SSSSSSSSS:==>",req.body)
         const user = await User.findOne({ email: email?.toLowerCase() });
         if (!user) {
             return res.status(200).json({ status: false, message: "User Not Found" });
@@ -125,6 +126,7 @@ exports.userLogin = catchAsyncErrors(async (req, res, next) => {
             process.env.JWT_SECRET_KEY,
             { expiresIn: process.env.JWT_EXPIRES }
         );
+      
 
         res.status(200).json({ status: true, message: "User Logged In Successfully", token, user });
     } catch (error) {
@@ -207,6 +209,7 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
         return res.status(500).json({ status: false, message: "Internal server error", error: error.message });
     }
 })
+
 exports.getAllUser = catchAsyncErrors(async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1
@@ -249,6 +252,7 @@ exports.getAllUser = catchAsyncErrors(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500))
     }
 })
+
 exports.getUserById = catchAsyncErrors(async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id).sort({ createdAt: -1 });
@@ -445,7 +449,6 @@ exports.toggleStatusUserId = catchAsyncErrors(async (req, res, next) => {
     }
 })
 
-
 exports.bulkOrderNotification = catchAsyncErrors(async (req, res, next) => {
     try {
         const { minDays = 60, maxDays = 80 } = req.body;
@@ -635,8 +638,6 @@ exports.bulkNotification = catchAsyncErrors(async (req, res, next) => {
     }
 });
 
-
-
 exports.bulkCreateUsers = catchAsyncErrors(async (req, res, next) => {
     const { users } = req.body;
 
@@ -774,3 +775,4 @@ exports.bulkCreateUsers = catchAsyncErrors(async (req, res, next) => {
         errors: allErrors,
     });
 });
+

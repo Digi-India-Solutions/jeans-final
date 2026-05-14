@@ -3,7 +3,10 @@ const router = express.Router();
 
 const { createSuperAdmin, updateSuperAdminByID, superAdminLogin, changePassword, sendOtpForChangeEmail, verifyOtpForChangeEmail,
     sendResetPasswordEmail, resetPassword, sendOtpForChangePhone, verifyOtpForChangePhone, createAdminByAdmin,
-    getAdminUsersByAdminwithPagination, updateAdminByAdmin, deleteAdminUserByAdmin } = require("./super-admin-controller.js");
+    getAdminUsersByAdminwithPagination, updateAdminByAdmin, deleteAdminUserByAdmin, 
+    verifyAdminLoggedIn,
+    LogOut} = require("./super-admin-controller.js");
+const verifyToken = require('../../middleware/verifyToken.js');
 
 router.post("/create-admin", createSuperAdmin);
 
@@ -33,6 +36,11 @@ router.get("/delete-admin-user-by-admin/:id", deleteAdminUserByAdmin);
 // router.post("/send-otp-for-change-phone", sendOtpForChangePhone);
 
 // router.post("/verify-otp-for-change-phone", verifyOtpForChangePhone);
+
+
+router.get("/verify-admin",verifyToken,verifyAdminLoggedIn)
+
+router.get("/logout",verifyToken,LogOut)
 
 
 module.exports = router;

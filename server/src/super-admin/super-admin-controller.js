@@ -8,6 +8,15 @@ const ShortUniqueId = require("short-unique-id");
 const { sendEmailUpdateOtp, sendResetPasswordSuperAdmin } = require("../../utils/mail");
 const jwt = require("jsonwebtoken");
 
+// NODE_ENV="DEVELOPMENT"
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    domain:
+        process.env.NODE_ENV === "production" ? process.env.DOMAIN : undefined,
+    maxAge: 2592000000,
+};
 
 exports.createSuperAdmin = catchAsyncErrors(async (req, res, next) => {
     console.log('req.body::', req.body)
@@ -39,7 +48,7 @@ exports.superAdminLogin = catchAsyncErrors(async (req, res, next) => {
             return res.status(200).json({ status: false, message: "Super Admin does not exist" })
         }
         const passwordMatch = await bcrypt.compare(password, superAdmin.password)
-console.log('passwordMatch::=>', passwordMatch)
+        console.log('passwordMatch::=>', passwordMatch)
         if (passwordMatch) {
             sendToken(superAdmin, 200, res, "Super Admin Login successfully");
         }
@@ -194,6 +203,53 @@ exports.deleteAdminUserByAdmin = catchAsyncErrors(async (req, res, next) => {
     if (!user) return next(new ErrorHandler('Admin user not found', 404));
     sendResponse(res, 200, 'Admin user deleted successfully', user);
 });
+
+exports.LogOut = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const id = req?.user?._id;
+
+    if (!id) {
+      return res.status(401).json({ status: false, message: "Unauthorized. No session found." });
+    }
+
+    const admin = await SuperAdmin.findById(id);
+    if (!admin) {
+      return res.status(404).json({ status: false, message: "Admin account not found." });
+    }
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure:   process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      domain:   process.env.NODE_ENV === "production" ? process.env.DOMAIN : undefined,
+    });
+
+    return res.status(200).json({ status: true, message: "Logged out successfully" });
+
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
+
+exports.verifyAdminLoggedIn = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const user = req?.user;
+
+    if (!user) {
+      return res.status(401).json({ status: false, message: "Unauthorized. Please log in." });
+    }
+
+    if (user.role !== "admin" && user.role !== "superadmin") {
+      return res.status(403).json({ status: false, message: "Access denied. Admins only." });
+    }
+
+    return res.status(200).json({ status: true, message: "Admin verified", user });
+
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

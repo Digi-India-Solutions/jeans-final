@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../../middleware/multer")
+const verifyToken = require("../../middleware/verifyToken")
 
 const { sendOtpToUserSignup, verifyOtpToUserSignup, userLogin, sendResetPasswordEmail, resetPassword,
     getAllUser, getUserById, deleteUser, updateUserWithPhoto, changePassword, updateUser,
     sendMessageWhatsapp, toggleStatusUserId, bulkOrderNotification,getUsersWithoutOrders, 
-    bulkCreateUsers} = require("./users-controller");
+    bulkCreateUsers,
+   } = require("./users-controller");
 
 router.post("/send-otp-for-user-signup", sendOtpToUserSignup);
 
@@ -38,5 +40,7 @@ router.post("/bulk-order-notification", bulkOrderNotification);
 router.get("/get-users-without-orders/:days", getUsersWithoutOrders);
 
 router.post("/bulk-create-users", bulkCreateUsers);
+
+
 
 module.exports = router;
