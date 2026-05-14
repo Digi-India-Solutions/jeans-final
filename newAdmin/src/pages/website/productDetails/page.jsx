@@ -53,12 +53,12 @@ const styles = `
 
   /* ── Logo ── */
   .pd-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
-  .pd-logo-mark { font-family: 'Arial Black', Arial, sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
+  .pd-logo-mark { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
   .pd-logo-a { color: #0d1117; }
   .pd-logo-c { color: #2196F3; }
   .pd-logo-divider { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
   .pd-logo-text { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
-  .pd-logo-name { font-family: 'Arial Black', Arial, sans-serif; font-size: 0.86rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+  .pd-logo-name { font-family: 'Poppins', sans-serif; sans-serif; font-size: 0.86rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
   .pd-logo-n1 { color: #0d1117; }
   .pd-logo-n2 { color: #2196F3; }
   .pd-logo-tagline { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
@@ -208,7 +208,7 @@ const styles = `
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
   .pd-lot-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); }
-  .pd-lot-number { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 700; color: var(--text); line-height: 1; margin-top: 4px; }
+  .pd-lot-number { font-family: 'Poppins', sans-serif; font-size: 3rem; font-weight: 700; color: var(--text); line-height: 1; margin-top: 4px; }
 
   /* Status badges */
   .pd-status-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -241,8 +241,8 @@ const styles = `
 
   .pd-price-item { display: flex; flex-direction: column; gap: 3px; }
   .pd-price-item-label { font-size: 0.58rem; color: var(--blue-dark); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
-  .pd-price-main { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 700; color: var(--blue-dark); line-height: 1; }
-  .pd-price-sub  { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: var(--text); line-height: 1; }
+  .pd-price-main { font-family: 'Poppins', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--blue-dark); line-height: 1; }
+  .pd-price-sub  { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600; color: var(--text); line-height: 1; }
   .pd-price-divider { width: 1px; height: 44px; background: #90caf9; }
 
   /* Info grid */
@@ -291,7 +291,7 @@ const styles = `
   }
   .pd-barcode-icon { font-size: 1.4rem; color: var(--blue); letter-spacing: -2px; }
   .pd-barcode-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2px; }
-  .pd-barcode-val { font-family: monospace; font-size: 0.88rem; color: var(--text); letter-spacing: 0.14em; font-weight: 600; }
+  .pd-barcode-val { font-family: 'Poppins', sans-serif; font-size: 0.88rem; color: var(--text); letter-spacing: 0.14em; font-weight: 600; }
 
   /* Divider */
   .pd-divider { height: 1px; background: var(--border); }
@@ -301,7 +301,7 @@ const styles = `
   @media (max-width: 900px) { .pd-desc-section { padding: 0 18px; } }
 
   .pd-desc-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-  .pd-desc-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+  .pd-desc-title { font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--text); white-space: nowrap; }
   .pd-desc-line { flex: 1; height: 1px; background: var(--border); }
 
   .pd-desc-body {
@@ -410,7 +410,7 @@ const styles = `
   /* ── Empty ── */
   .pd-empty { text-align: center; padding: 80px 20px; color: var(--muted); }
   .pd-empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
-  .pd-empty h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; }
+  .pd-empty h2 { font-family: 'Poppins', sans-serif; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; }
   .pd-empty p { font-size: 0.88rem; }
 
   @media (max-width: 600px) {

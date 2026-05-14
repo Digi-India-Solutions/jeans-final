@@ -93,7 +93,7 @@ const styles = `
   }
 
   .c-logo-name {
-    font-family: 'Arial Black', Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.88rem;
     font-weight: 900;
     letter-spacing: 0.1em;
@@ -132,7 +132,7 @@ const styles = `
   }
 
   .c-page-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 2.8rem;
     font-weight: 700;
     line-height: 1;
@@ -251,7 +251,7 @@ const styles = `
   }
 
   .c-card-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
     color: #000000;
@@ -332,7 +332,7 @@ const styles = `
   .c-empty-icon { font-size: 3.5rem; margin-bottom: 18px; }
 
   .c-empty h2 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
     color: #000000;
     margin-bottom: 8px;
@@ -368,7 +368,7 @@ const styles = `
     border: 1.5px solid #000000;
     background: #ffffff;
     color: #000000;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;

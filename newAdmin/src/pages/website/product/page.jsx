@@ -56,12 +56,12 @@ const styles = `
 
   /* ── Logo ── */
   .p-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
-  .p-logo-mark { font-family: 'Arial Black', Arial, sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
+  .p-logo-mark { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: center; }
   .p-logo-a { color: #0d1117; }
   .p-logo-c { color: #2196F3; }
   .p-logo-divider { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
   .p-logo-text { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
-  .p-logo-name { font-family: 'Arial Black', Arial, sans-serif; font-size: 0.86rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+  .p-logo-name { font-family: 'Poppins', sans-serif; font-size: 0.86rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
   .p-logo-n1 { color: #0d1117; }
   .p-logo-n2 { color: #2196F3; }
   .p-logo-tagline { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
@@ -122,7 +122,7 @@ const styles = `
     gap: 16px;
     flex-wrap: wrap;
   }
-  .p-page-title { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 700; line-height: 1; letter-spacing: -0.01em; color: var(--text); }
+  .p-page-title { font-family: 'Poppins', sans-serif; font-size: 2.8rem; font-weight: 700; line-height: 1; letter-spacing: -0.01em; color: var(--text); }
   .p-page-title span { color: var(--blue); }
   .p-page-sub { font-size: 0.82rem; color: var(--muted); margin-top: 6px; letter-spacing: 0.03em; }
 
@@ -316,7 +316,7 @@ const styles = `
   }
 
   .p-card-name {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--text);
@@ -350,7 +350,7 @@ const styles = `
   }
 
   .p-price-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; display: block; }
-  .p-price { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 700; color: var(--blue-dark); }
+  .p-price { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--blue-dark); }
 
   .p-card-btn {
     font-size: 0.72rem;
@@ -399,7 +399,7 @@ const styles = `
   /* ── Empty ── */
   .p-empty { text-align: center; padding: 100px 20px; color: var(--muted); }
   .p-empty-icon { font-size: 3.5rem; margin-bottom: 18px; }
-  .p-empty h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; }
+  .p-empty h2 { font-family: 'Poppins', sans-serif; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; }
   .p-empty p { font-size: 0.88rem; }
 
   /* ── Pagination ── */
@@ -430,7 +430,7 @@ const styles = `
     border: 1px solid var(--border2);
     background: var(--surface);
     color: var(--muted);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;

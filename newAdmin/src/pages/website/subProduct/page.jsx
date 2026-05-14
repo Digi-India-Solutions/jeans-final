@@ -59,7 +59,7 @@ const styles = `
   .sp-logo { display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
 
   .sp-logo-mark {
-    font-family: 'Arial Black', Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 2rem;
     font-weight: 900;
     line-height: 1;
@@ -81,7 +81,7 @@ const styles = `
   .sp-logo-text { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
 
   .sp-logo-name {
-    font-family: 'Arial Black', Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.86rem;
     font-weight: 900;
     letter-spacing: 0.1em;
@@ -171,7 +171,7 @@ const styles = `
 
   .sp-hero-info { flex: 1; min-width: 200px; }
   .sp-hero-tag { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-  .sp-hero-name { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.1; margin-bottom: 6px; }
+  .sp-hero-name { font-family: 'Poppins', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.1; margin-bottom: 6px; }
 
   .sp-hero-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .sp-hero-sku { font-size: 0.76rem; color: var(--muted); }
@@ -230,7 +230,7 @@ const styles = `
   }
 
   .sp-page-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 2.4rem;
     font-weight: 700;
     line-height: 1;
@@ -415,7 +415,7 @@ const styles = `
   }
 
   .sp-lot-num {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.3rem;
     font-weight: 700;
     color: var(--text);
@@ -479,7 +479,7 @@ const styles = `
     font-size: 0.6rem;
     color: var(--muted);
     letter-spacing: 0.16em;
-    font-family: monospace;
+    font-family: 'Poppins', sans-serif;
     margin-bottom: 12px;
     background: var(--bg);
     padding: 5px 8px;
@@ -498,7 +498,7 @@ const styles = `
 
   .sp-price-wrap { display: flex; flex-direction: column; gap: 1px; }
   .sp-price-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-  .sp-price { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 700; color: var(--blue-dark); }
+  .sp-price { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--blue-dark); }
   .sp-lot-price { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
 
   .sp-card-btn {
@@ -554,7 +554,7 @@ const styles = `
   .sp-empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
 
   .sp-empty h2 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
     color: var(--text);
     margin-bottom: 8px;
@@ -590,7 +590,7 @@ const styles = `
     border: 1px solid var(--border2);
     background: var(--surface);
     color: var(--muted);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
