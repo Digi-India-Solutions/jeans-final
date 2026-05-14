@@ -473,6 +473,58 @@ const styles = `
   @media (max-width: 400px) {
     .p-grid { grid-template-columns: 1fr; }
   }
+     /* ── WhatsApp Float Button ── */
+.wa-float {
+  position: fixed;
+  right: 24px;
+  bottom: 32px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: waBounce 2s ease-in-out infinite;
+}
+
+@keyframes waBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.wa-float a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25D366;
+  box-shadow: 0 4px 16px rgba(37,211,102,0.45);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wa-float a:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 22px rgba(37,211,102,0.6);
+}
+
+.wa-float-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #25D366;
+  text-transform: uppercase;
+  background: #fff;
+  border: 1px solid #25D366;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .wa-float { right: 16px; bottom: 80px; } /* above mobile bottom tab bar */
+}
 `;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -720,6 +772,21 @@ export default function Product() {
             <button className="p-back-btn" onClick={() => navigate(-1)}>← Back</button>
           </div>
         </nav>
+        {/* ── WhatsApp Float ── */}
+        <div className="wa-float">
+          <a href="https://wa.me/918506854624"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat on WhatsApp"
+          >
+            {/* WhatsApp SVG icon — no extra package needed */}
+            <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 3C8.82 3 3 8.82 3 16c0 2.3.61 4.47 1.67 6.35L3 29l6.84-1.64A13 13 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3z" fill="#ffffff" />
+              <path d="M21.75 18.92c-.31-.16-1.84-.91-2.13-1.01-.28-.1-.49-.16-.69.16-.2.31-.78.99-.96 1.2-.18.2-.35.22-.66.07-.31-.16-1.3-.48-2.48-1.53-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.47.13-.63.14-.14.31-.35.47-.53.16-.18.21-.31.31-.52.1-.2.05-.38-.03-.53-.08-.16-.69-1.67-.95-2.28-.25-.6-.5-.52-.69-.53h-.59c-.2 0-.52.07-.79.38-.27.31-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.88.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.29.17-1.42-.07-.12-.28-.2-.59-.35z" fill="#25D366" />
+            </svg>
+          </a>
+          <span className="wa-float-label">WhatsApp</span>
+        </div>
 
         {/* Breadcrumb */}
         <div className="p-breadcrumb">
