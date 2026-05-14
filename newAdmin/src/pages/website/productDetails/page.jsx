@@ -30,7 +30,7 @@ const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .pd-root {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: var(--bg);
     min-height: 100vh;
     color: var(--text);

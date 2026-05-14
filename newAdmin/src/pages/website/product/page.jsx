@@ -33,7 +33,7 @@ const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .p-root {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: var(--bg);
     min-height: 100vh;
     color: var(--text);
@@ -207,21 +207,24 @@ const styles = `
   .p-card:hover .p-card-img { transform: scale(1.05); }
 
   /* ── Card image ── */
-  .p-img-wrap {
-    height: 220px;
-    position: relative;
-    overflow: hidden;
-    background: var(--surface2);
-    flex-shrink: 0;
-  }
+ .p-img-wrap {
+  height: auto;
+  min-height: 220px;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  overflow: hidden;
+  background: #f8f8f8;
+  flex-shrink: 0;
+}
 
   .p-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.45s ease;
-    display: block;
-  }
+  width: 100%;
+  height: 100%;
+  object-fit: contain;  /* was: cover */
+  background: #f8f8f8;
+  display: block;
+  transition: transform 0.45s ease;
+}
 
   .p-img-fallback {
     width: 100%;

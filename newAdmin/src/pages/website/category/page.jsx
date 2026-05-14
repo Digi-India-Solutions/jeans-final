@@ -30,7 +30,7 @@ const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .c-root {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: var(--bg);
     min-height: 100vh;
     color: var(--text);
@@ -215,7 +215,7 @@ const styles = `
   .c-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%);
+    background: linear-gradient(to top, transparent 55%);
     pointer-events: none;
   }
 

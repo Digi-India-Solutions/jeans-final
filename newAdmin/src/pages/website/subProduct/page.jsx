@@ -34,7 +34,7 @@ const styles = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .sp-root {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background: var(--bg);
     min-height: 100vh;
     color: var(--text);
@@ -285,21 +285,20 @@ const styles = `
 
   .sp-card:hover .sp-card-img { transform: scale(1.05); }
 
-  /* ── Card Image ── */
+
   .sp-img-wrap {
-    height: 200px;
-    position: relative;
-    overflow: hidden;
-    background: var(--surface2);
-  }
+  height: auto;        /* remove fixed height */
+  min-height: 220px;   /* optional minimum */
+  aspect-ratio: 1 / 1; /* keeps square shape without cutting */
+}
 
   .sp-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.45s ease;
-    display: block;
-  }
+  width: 100%;
+  height: 100%;
+  object-fit: contain;  /* was: cover */
+  background: #f8f8f8;  /* optional: fills empty space around image */
+  display: block;
+}
 
   .sp-img-fallback {
     width: 100%;
@@ -315,7 +314,7 @@ const styles = `
   .sp-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 40%);
+    background: linear-gradient(to top, transparent 40%);
     pointer-events: none;
   }
 
@@ -983,9 +982,11 @@ export default function SubProduct() {
         {/* Page Header */}
         <div className="sp-page-header">
           <div>
-            <h1 className="sp-page-title">Product <span>Lots</span></h1>
+            {/* <h1 className="sp-page-title">Product <span>Lots</span></h1> */}
+            <h1 className="sp-page-title">All Availble Colors <span>{productName}</span></h1>
             <p className="sp-page-sub">
               All colour &amp; size variants for{" "}
+              {/* All Availble Color of Parent for{" "} */}
               <strong style={{ color: "#1565C0" }}>{productName}</strong>
             </p>
           </div>
