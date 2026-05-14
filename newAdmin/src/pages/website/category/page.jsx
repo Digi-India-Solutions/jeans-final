@@ -15,7 +15,7 @@ const styles = `
   :root {
     --bg:        #ffffff;
     --surface:   #ffffff;
-    --surface2:  #e8f3fd;
+    --surface2:  #ffffff;
     --blue:      #2196F3;
     --blue-dark: #1565C0;
     --blue-light:#bbdefb;
@@ -199,7 +199,7 @@ const styles = `
     width: 100%;
   height: 100%;
   object-fit: contain;  /* was: cover */
-  background: #f8f8f8;
+  background: #ffffff;
   display: block;
   transition: transform 0.45s ease;
   }
@@ -410,32 +410,51 @@ const styles = `
   }
 /* ── Banner ── */
 .mc-banner-wrap {
-  width: 100% !important;
-  overflow: hidden !important;
-  position: relative !important;
-  height: 460px !important;
-  background: #000 !important;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  height: 460px;
+  background: #000;
 }
 
 .mc-banner-img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  object-position: center !important;
-  display: block !important;
-  position: relative !important;
-  z-index: 1 !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  position: relative;
+  z-index: 1;
 }
 
 .mc-banner-blur {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center !important;
-  z-index: 0 !important;
-  display: block !important;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  display: block;
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 768px) {
+  .mc-banner-wrap {
+    height: 220px;     /* ✅ shorter on tablet */
+  }
+}
+
+@media (max-width: 480px) {
+  .mc-banner-wrap {
+    height: 160px;     /* ✅ even shorter on phone */
+  }
+
+  .mc-banner-img {
+    object-fit: cover; /* ✅ fill the small frame on mobile — no empty sides */
+  }
+
+  
 }
   /* ── WhatsApp Float Button ── */
 .wa-float {

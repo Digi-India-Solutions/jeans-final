@@ -14,7 +14,7 @@ const styles = `
   :root {
     --bg:        #ffffff;
     --surface:   #ffffff;
-    --surface2:  #e8f3fd;
+    --surface2:  #ffffff;
     --blue:      #2196F3;
     --blue-dark: #1565C0;
     --blue-light:#bbdefb;
@@ -213,7 +213,7 @@ const styles = `
      width: 100%;
   height: 100%;
   object-fit: contain;  /* was: cover */
-  background: #f8f8f8;
+  background: #ffffff;
   display: block;
   transition: transform 0.45s ease;
   }

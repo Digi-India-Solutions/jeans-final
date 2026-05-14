@@ -14,7 +14,7 @@ const styles = `
   :root {
     --bg:          #f4f6fb;
     --surface:     #ffffff;
-    --surface2:    #e8f0fc;
+    --surface2:    #ffffff;
     --blue:        #2196F3;
     --blue-dark:   #1565C0;
     --blue-light:  #e3f2fd;
