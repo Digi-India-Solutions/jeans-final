@@ -210,6 +210,9 @@ const styles = `
  .p-img-wrap {
   height: auto;
   min-height: 220px;
+  width:auto;
+
+  min-width:220px;
   aspect-ratio: 1 / 1;
   position: relative;
   overflow: hidden;

@@ -1065,7 +1065,7 @@ export default function SubProduct() {
           </div>
 
           {/* ✅ Price filter — added here, no other UI changes */}
-          <select
+          {/* <select
             value={priceSort}
             onChange={(e) => { setPriceSort(e.target.value); setCurrentPage(1); }}
             style={{
@@ -1089,7 +1089,7 @@ export default function SubProduct() {
             <option value="">Sort by Price</option>
             <option value="asc">Price: Low to High</option>
             <option value="desc">Price: High to Low</option>
-          </select>
+          </select> */}
         </div>
         <div className="sp-divider" />
         {/* Content */}
