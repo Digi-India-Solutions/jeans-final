@@ -208,26 +208,18 @@ const styles = `
 
   /* ── Card image ── */
  .p-img-wrap {
-  height: auto;
-  min-height: 220px;
-  width:auto;
-
-  min-width:220px;
-  aspect-ratio: 1 / 1;
-  position: relative;
-  overflow: hidden;
-  background: #f8f8f8;
-  flex-shrink: 0;
-}
+    aspect-ratio: 1/1;
+    background: #f8f8f8;
+    overflow: hidden;
+  
+  }
 
   .p-card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;  /* was: cover */
-  background: #f8f8f8;
-  display: block;
-  transition: transform 0.45s ease;
-}
+    width: 100%;
+    height: 100%;
+    object-fit: object-fit;
+    transition: 0.3s;
+  }
 
   .p-img-fallback {
     width: 100%;
