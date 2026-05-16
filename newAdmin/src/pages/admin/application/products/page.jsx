@@ -103,22 +103,43 @@ export default function ProductsManagement() {
   // };
 
   // Handle file upload for product images
-  const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const validFiles = files.filter(file => file.type.startsWith('image/'));
+  // const handleFileUpload = (e) => {
+  //   const files = Array.from(e.target.files);
+  //   const validFiles = files.filter(file => file.type.startsWith('image/'));
 
-    if (validFiles.length > 0) {
-      setUploadedFiles([...uploadedFiles, ...validFiles]);
+  //   if (validFiles.length > 0) {
+  //     setUploadedFiles([...uploadedFiles, ...validFiles]);
 
-      const newPreviews = validFiles.map(file => URL.createObjectURL(file));
-      setFormData({
-        ...formData,
-        images: [...formData.images, ...newPreviews]
-      });
-    }
-  };
+  //     const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+  //     setFormData({
+  //       ...formData,
+  //       images: [...formData.images, ...newPreviews]
+  //     });
+  //   }
+  // };
 
   // Remove image from product
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    // Revoke previous preview URL to avoid memory leaks
+    if (uploadedFiles.length > 0) {
+      URL.revokeObjectURL(formData.images[0]);
+    }
+
+    setUploadedFiles([file]);
+
+    setFormData({
+      ...formData,
+      images: [URL.createObjectURL(file)]
+    });
+
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
   const removeImage = (index) => {
     // If it's a newly uploaded file, remove from uploadedFiles
     if (index >= formData.images.length - uploadedFiles.length) {
@@ -138,8 +159,8 @@ export default function ProductsManagement() {
     setIsLoading(true);
 
     const totalImages = formData.images.length;
-    if (totalImages < 3 || totalImages > 8) {
-      toast.error("Please select between 3 to 8 images");
+    if (totalImages < 0 || totalImages > 1) {
+      toast.error("Please select between 0 to 1 images");
       setIsLoading(false);
       return;
     }
@@ -435,13 +456,13 @@ export default function ProductsManagement() {
                         <i className="ri-edit-line mr-1"></i>
                         Edit
                       </Button>}
-                     {permiton.update && <Button
+                      {permiton.update && <Button
                         onClick={() => toggleStatus(product)}
                         className={`flex-1 text-sm ${product?.status ? 'bg-red-500 text-red-900 hover:bg-red-900' : 'bg-green-500 text-green-600 hover:bg-green-900'}`}
                       >
                         <i className={`ri-${product.status ? 'close' : 'check'}-line mr-1`}></i>
                         {product.status ? 'Deactivate' : 'Activate'}
-                      </Button>} 
+                      </Button>}
                       {permiton.delete && <Button
                         onClick={() => handleDelete(product?._id)}
                         className="bg-red-500 text-red-600 hover:bg-red-900 px-3"
@@ -761,9 +782,9 @@ export default function ProductsManagement() {
                   </div>
 
                   {/* Image Upload Section */}
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Product Images (3-8 images required)
+                      Product Images (1 images required only)
                     </label>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2">
@@ -787,6 +808,54 @@ export default function ProductsManagement() {
                               </button>
                             </div>
                           ))}
+                        </div>
+                      )}
+                    </div>
+                  </div> */}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Product Image (1 image required)
+                    </label>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileUpload}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-blue-600 text-white hover:bg-blue-700 flex items-center space-x-2"
+                        >
+                          <i className="ri-upload-2-line"></i>
+                          <span>{formData.images.length > 0 ? 'Change Image' : 'Upload Image'}</span>
+                        </Button>
+                        <span className="text-sm text-gray-500">
+                          {formData.images.length > 0 ? '1 image selected' : 'No image selected'}
+                        </span>
+                      </div>
+
+                      {formData.images.length > 0 && (
+                        <div className="flex items-start gap-3">
+                          <div className="relative">
+                            <img
+                              src={formData.images[0]}
+                              alt="Product"
+                              className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(0)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                            >
+                              <i className="ri-close-line"></i>
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">{uploadedFiles[0]?.name}</p>
                         </div>
                       )}
                     </div>

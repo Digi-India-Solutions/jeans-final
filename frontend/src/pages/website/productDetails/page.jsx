@@ -533,7 +533,7 @@ function formatDate(str) {
 function Logo() {
   const navigate = useNavigate();
   return (
-    <div className="c-logo" onClick={() => navigate("/main-category")}>
+    <div className="c-logo" onClick={() => navigate("/")}>
       <div className="c-logo-mark">
         <img
           src={logo}
@@ -666,7 +666,7 @@ export default function ProductDetails() {
 
         {/* ── WhatsApp Float ── */}
         <div className="wa-float">
-          <a href="https://wa.me/918506854624"
+          <a href="https://wa.me/918383850709"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Chat on WhatsApp"
@@ -682,7 +682,7 @@ export default function ProductDetails() {
 
         {/* Breadcrumb */}
         <div className="pd-breadcrumb">
-          <span className="pd-bc-link" onClick={() => navigate("/main-category")}>Home</span>
+          <span className="pd-bc-link" onClick={() => navigate("/")}>Home</span>
           <span className="pd-bc-sep">/</span>
           <span className="pd-bc-link" onClick={() => navigate(-3)}>Categories</span>
           <span className="pd-bc-sep">/</span>

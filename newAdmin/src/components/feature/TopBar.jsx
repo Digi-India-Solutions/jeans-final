@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -146,15 +146,23 @@ export default function TopBar({ onMenuClick, isDarkMode, onThemeToggle }) {
         </div>
 
         <div className="relative profile-dropdown">
-          <button
-            onClick={() => navigate("/main-category")}
+          <a
+            href="https://catalogue.anibhavicreations.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center space-x-2 p-2 rounded-lg transition-colors hover:bg-gray-100"
           >
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <i className={`ri-links-line ${isDarkMode ? 'text-gray-600' : 'text-gray-600'}`}></i>
+              <i
+                className={`ri-links-line ${isDarkMode ? "text-gray-600" : "text-gray-600"
+                  }`}
+              ></i>
             </div>
-            <span className="hidden md:block text-sm font-medium">catalogue Link</span>
-          </button>
+
+            <span className="hidden md:block text-sm font-medium">
+              Catalogue Link
+            </span>
+          </a>
         </div>
         {/* Profile */}
         <div className="relative profile-dropdown">

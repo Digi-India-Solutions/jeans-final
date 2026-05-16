@@ -541,7 +541,7 @@ function typeBadgeClass(type = "") {
 function Logo() {
   const navigate = useNavigate();
   return (
-    <div className="c-logo" onClick={() => navigate("/main-category")}>
+    <div className="c-logo" onClick={() => navigate("/")}>
       <div className="c-logo-mark">
         <img
           src={logo}
@@ -769,7 +769,7 @@ export default function Product() {
         </nav>
         {/* ── WhatsApp Float ── */}
         <div className="wa-float">
-          <a href="https://wa.me/918506854624"
+          <a href="https://wa.me/918383850709"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Chat on WhatsApp"
@@ -785,7 +785,7 @@ export default function Product() {
 
         {/* Breadcrumb */}
         <div className="p-breadcrumb">
-          <span className="p-breadcrumb-link" onClick={() => navigate("/main-category")}>Home</span>
+          <span className="p-breadcrumb-link" onClick={() => navigate("/")}>Home</span>
           <span className="p-breadcrumb-sep">/</span>
           <span className="p-breadcrumb-link" onClick={() => navigate(-2)}>Categories</span>
           <span className="p-breadcrumb-sep">/</span>

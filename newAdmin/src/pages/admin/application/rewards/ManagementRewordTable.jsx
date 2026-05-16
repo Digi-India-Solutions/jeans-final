@@ -281,12 +281,12 @@ function ManagementRewordTable({
 
         filteredCustomers.forEach((customer) => {
             const { netEarned, totalRedeemed } = getHistoryTotals(customer.history);
-            earned += netEarned;
-            redeemed += totalRedeemed;
+            earned += Number(netEarned);
+            redeemed += Number(totalRedeemed);
         });
 
-        setTotalPoints(earned - redeemed);
-        setPointsRedeemed(redeemed);
+        setTotalPoints(Number(earned) - Number(redeemed));
+        setPointsRedeemed(Number(redeemed));
     }, [filteredCustomers, setTotalPoints, setPointsRedeemed]);
 
     return (

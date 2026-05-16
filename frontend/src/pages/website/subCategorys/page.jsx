@@ -558,7 +558,7 @@ function paginationRange(current, total) {
 function Logo() {
   const navigate = useNavigate();
   return (
-    <div className="c-logo" onClick={() => navigate("/main-category")}>
+    <div className="c-logo" onClick={() => navigate("/")}>
       <div className="c-logo-mark">
         <img
           src={logo}
@@ -742,7 +742,7 @@ export default function SubCategory() {
 
          {/* ── WhatsApp Float ── */}
         <div className="wa-float">
-         <a href="https://wa.me/918506854624"   
+         <a href="https://wa.me/918383850709"   
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat on WhatsApp"
@@ -758,7 +758,7 @@ export default function SubCategory() {
 
         {/* Breadcrumb */}
         <div className="c-breadcrumb">
-          <span className="c-breadcrumb-link" onClick={() => navigate("/main-category")}>Home</span>
+          <span className="c-breadcrumb-link" onClick={() => navigate("/")}>Home</span>
           <span className="c-breadcrumb-sep">/</span>
           <span className="c-breadcrumb-link" onClick={() => navigate(-1)}>Categories</span>
           <span className="c-breadcrumb-sep">/</span>

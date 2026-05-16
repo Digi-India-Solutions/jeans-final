@@ -413,48 +413,23 @@ const styles = `
   width: 100%;
   overflow: hidden;
   position: relative;
-  height: 460px;
   background: #000;
-}
-
-.mc-banner-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  position: relative;
-  z-index: 1;
+  /* height driven by image aspect ratio */
 }
 
 .mc-banner-blur {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: 0;
   display: block;
+  width: 100%;
+  height: auto;        /* ✅ natural height — no cropping */
+  object-fit: contain;
 }
 
 /* ── Mobile responsive ── */
 @media (max-width: 768px) {
-  .mc-banner-wrap {
-    height: 220px;     /* ✅ shorter on tablet */
+  .mc-banner-blur {
+    width: 100%;
+    height: auto;
   }
-}
-
-@media (max-width: 480px) {
-  .mc-banner-wrap {
-    height: 160px;     /* ✅ even shorter on phone */
-  }
-
-  .mc-banner-img {
-    object-fit: cover; /* ✅ fill the small frame on mobile — no empty sides */
-  }
-
-  
 }
   /* ── WhatsApp Float Button ── */
 .wa-float {
@@ -532,7 +507,7 @@ function paginationRange(current, total) {
 function Logo() {
   const navigate = useNavigate();
   return (
-    <div className="c-logo" onClick={() => navigate("/main-category")}>
+    <div className="c-logo" onClick={() => navigate("/")}>
       <div className="c-logo-mark">
         <img
           src={logo}
@@ -694,7 +669,7 @@ export default function Category() {
 
         {/* ── WhatsApp Float ── */}
         <div className="wa-float">
-         <a href="https://wa.me/918506854624"   
+         <a href="https://wa.me/918383850709"   
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Chat on WhatsApp"
@@ -718,10 +693,7 @@ export default function Category() {
       <div className="c-divider" />
       {/* Banner */}
       <div className="mc-banner-wrap">
-        {/* blurred background fills empty sides */}
         <img src={banner} alt="" className="mc-banner-blur" />
-        {/* full image on top */}
-        {/* <img src={banner} alt="Top Category Banner" className="mc-banner-img" /> */}
       </div>
 
       <div className="c-divider" />
