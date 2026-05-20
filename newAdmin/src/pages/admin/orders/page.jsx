@@ -151,7 +151,7 @@ export default function OrdersManagement() {
   };
 
   const canUpdateStatus = (status) => {
-    return ['Pending', 'Packed', 'Shipped'].includes(status);
+    return ['Pending', 'Packed', 'Shipped', 'Conform'].includes(status);
   };
 
   const updateOrderStatus = async (orderId, newStatus, trackingId = '', deliveryVendor = '') => {
@@ -317,10 +317,11 @@ export default function OrdersManagement() {
   const getStatusColor = (status) => {
     const colors = {
       'Pending': 'bg-yellow-100 text-yellow-800',
-      'Packed': 'bg-blue-100 text-blue-800',
+      'Conform': 'bg-sky-100    text-sky-800',
+      'Packed': 'bg-blue-100   text-blue-800',
       'Shipped': 'bg-purple-100 text-purple-800',
-      'Delivered': 'bg-green-100 text-green-800',
-      'Cancelled': 'bg-red-100 text-red-800'
+      'Delivered': 'bg-green-100  text-green-800',
+      'Cancelled': 'bg-red-100    text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -1610,7 +1611,8 @@ export default function OrdersManagement() {
                         className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                       >
                         <option value="">Select Status</option>
-                        {selectedOrder.status === 'Pending' && <option value="Packed">Packed</option>}
+                        {selectedOrder.status === 'Pending' || selectedOrder.status === 'Conform' && <option value="Packed">Packed</option>}
+                        {selectedOrder.status === 'Pending' && <option value="Conform">Conform</option>}
                         {selectedOrder.status === 'Packed' && <option value="Shipped">Shipped</option>}
                         {selectedOrder.status === 'Shipped' && <option value="Delivered">Delivered</option>}
                         <option value="Cancelled">Cancelled</option>
